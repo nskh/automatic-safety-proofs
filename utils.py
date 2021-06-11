@@ -43,12 +43,12 @@ def compute_polygon_angles(poly: sympy.Polygon) -> list:
     return positive_angles, vertex_pairs
 
 
-def eval_slope(traj, point):
+def eval_slope(traj, point, x, y):
     # Compute the slope of a trajectory *expression* and plug in an (x,y) point
-    return slope_sym(traj).subs(x, point[0]).subs(y, point[1])
+    return slope_sym(traj, x, y).subs(x, point[0]).subs(y, point[1])
 
 
-def slope_sym(traj):
+def slope_sym(traj, x, y):
     # TODO: figure out sign issue
     # f(x,y) = 0
     # y = sin(x)
@@ -65,12 +65,12 @@ def slope_sym(traj):
     return slope
 
 
-def find_transitions(trajectory, angles) -> dict:
+def find_transitions(trajectory, angles, x, y) -> dict:
     # NOTE: trajectory is an *expression*, not equation
     transitions = {}
     for angle in angles:
         # Compute slope symbolically
-        slope = slope_sym(trajectory)
+        slope = slope_sym(trajectory, x, y)
         # TODO(nishant): should this be atan2 here?
         # solve(Eq(atan2(dfdy, dfdx), angle))??
         soln = solve(Eq(slope, tan(angle)))
