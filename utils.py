@@ -75,7 +75,7 @@ def find_transitions(trajectory, angles, x, y) -> dict:
         slope = df_dy/df_dx
         # TODO(nishant): should this be atan2 here?
         # solve(Eq(atan2(dfdy, dfdx), angle))??
-        soln = solve(Eq(slope, tan(angle)))
+        soln = solve(Eq(atan2(df_dy, df_dx), angle))
         for elem in soln:
             # Only add if solution exists (real or dict types)
             if type(elem) == dict or elem.is_real:
@@ -134,7 +134,7 @@ def get_angle(theta, angles):
 
 def active_corners(poly: sympy.Polygon, trajectory, p0: sympy.Point, x, y):
   angles, vertex_pairs = compute_polygon_angles(poly)
-  angle_range = get_angle(atan2(*eval_slope(trajectory, p0, x, y)), angles)  #atan2 vs atan, why multiply by -1 for slope
+  angle_range = get_angle(atan2(*eval_slope(trajectory, p0, x, y)), angles)
   if type(angle_range) == tuple: #use active corners
     angles_to_vertices: dict = dict(zip(angles, vertex_pairs))
     assert(angles_to_vertices[angle_range[0]][1] == angles_to_vertices[angle_range[1]][0])
@@ -157,7 +157,7 @@ def outside_active_corners(poly: sympy.Polygon, trajectory, p0: sympy.Point, int
   return (traj1.subs(x, intruder[0]).subs(y, intruder[1]))*(traj2.subs(x, intruder[0]).subs(y, intruder[1])) > 0
 
 
-def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, resolution = 0.25):
+def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, resolution = 0.25):
     fig = plt.figure()
     ax = fig.gca()
     xs, ys = np.meshgrid(np.arange(xbounds[0], xbounds[1], resolution), np.arange(ybounds[0], ybounds[1], resolution))
@@ -186,7 +186,8 @@ def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, resolution
                 ax.plot(x0, y0, 'ro')
 
     # ax.axis("equal")
-
+    ax.set_title(title)
+    plt.savefig(title)
     plt.show()
 # traj -> [x(t); y(t)] -> at some T, what is the angle of the tangent to trajectory
 # x,y points, may or may not be on the trajectory,
