@@ -20,8 +20,10 @@ if __name__ == '__main__':
     circle_traj = x ** 2 + y ** 2 - traj_r ** 2  # radius 4
     sin_traj = sin(x) - y
 
-    # plot_safe_grid(hexagon, circle_traj, (-5, 5), (-5, 5))
-    # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3))
-    print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,6), x, y), True)
-    print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,4), x, y), False)
-    print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,5), x, y), False)
+    plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle trajectory with diamond")
+    # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square")
+    # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle")
+    # plot_safe_grid(hexagon, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with hexagon")
+    # print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,6), x, y), True)
+    # print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,4), x, y), False)
+    # print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,5), x, y), False)
