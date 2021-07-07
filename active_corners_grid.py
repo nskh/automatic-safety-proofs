@@ -20,7 +20,15 @@ if __name__ == '__main__':
     circle_traj = x ** 2 + y ** 2 - traj_r ** 2  # radius 4
     sin_traj = sin(x) - y
 
-    plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle trajectory with diamond")
+    print(safe(square, circle_traj, (4,0), (4.5, 0), x, y), False)
+    print(safe(square, circle_traj, (4,0), (4, 0), x, y), False)
+    print(safe(square, circle_traj, (4, 0), (3, 0), x, y), True)
+    print(safe(square, circle_traj, (4, 0), (5, 0), x, y), True)
+    print(safe(diamond, circle_traj, (4, 0), (3, 0), x, y), False)
+    print(safe(diamond, circle_traj, (4, 0), (4, 0), x, y), False)
+    print(safe(diamond, circle_traj, (4, 0), (2, 0), x, y), True)
+    # plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle traje
+    # ctory with diamond", savefig = False)
     # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square")
     # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle")
     # plot_safe_grid(hexagon, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with hexagon")
