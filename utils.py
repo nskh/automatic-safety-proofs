@@ -27,7 +27,7 @@ def plot_polygon(poly: sympy.Polygon):
     plt.show()
 
 
-def compute_polygon_angles(poly: sympy.Polygon) -> list:
+def compute_polygon_angles(poly: sympy.Polygon) -> tuple[list, list]:
     # Go around the polygon and compute the angles (relative to horiz axis)
     # of each of its sides
     verts = poly.vertices
@@ -66,13 +66,13 @@ def slope_sym(traj, x, y):
     return -1 * diff(traj, x), diff(traj, y)
 
 
-def find_transitions(trajectory, angles, x, y) -> dict:
+def find_transitions(trajectory, angles, x, y) -> tuple[dict, set]:
     # NOTE: trajectory is an *expression*, not equation
     transitions = {}
+    df_dy, df_dx = slope_sym(trajectory, x, y)
+    slope = df_dy / df_dx
     for angle in angles:
         # Compute slope symbolically
-        df_dy, df_dx = slope_sym(trajectory, x, y)
-        slope = df_dy/df_dx
         # TODO(nishant): should this be atan2 here?
         # solve(Eq(atan2(dfdy, dfdx), angle))??
         soln = solve(Eq(slope, tan(angle)))
@@ -84,11 +84,12 @@ def find_transitions(trajectory, angles, x, y) -> dict:
                     transitions[angle].append(elem)
                 else:
                     transitions[angle] = [elem]
-    print(transitions)
+    # print(transitions)
 
     # soln above may still be symbolic, so we have to evaluate the expression
 
     transition_points = {}
+    set_of_transitions = set()
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
         # TODO: rename pair variable
@@ -102,6 +103,7 @@ def find_transitions(trajectory, angles, x, y) -> dict:
                 for y_soln in y_solns:
                     x_soln_eq = Eq(x, pair[x]).subs(y, y_soln)
                     transition_point = Point(x_soln_eq.rhs, y_soln)
+                    set_of_transitions.add(transition_point)
                     if angle in transition_points:
                         transition_points[angle].append(transition_point)
                     else:
@@ -112,12 +114,13 @@ def find_transitions(trajectory, angles, x, y) -> dict:
                 y_solns = solve(traj_eqn.subs(x, pair))
                 for y_soln in y_solns:
                     transition_point = Point(pair, y_soln)
+                    set_of_transitions.add(transition_point)
                     if angle in transition_points:
                         transition_points[angle].append(transition_point)
                     else:
                         transition_points[angle] = [transition_point]
 
-    return transition_points
+    return transition_points, set_of_transitions
 
 def get_angle(theta, angles): #angles correspond to polygon edges, theta is the slope at a particular point
     theta = theta % (2*pi)    #ensure theta is in the range [0, 2*pi)
@@ -133,12 +136,6 @@ def get_angle(theta, angles): #angles correspond to polygon edges, theta is the 
             return (angle1, angle2)
     assert(False) #should never exit for loop without returning something
 
-# def active_corners(poly: sympy.Polygon, trajectory, location: sympy.Point, angles_to_vertices: dict, angle_range):
-#     assert(angles_to_vertices[angle_range[0]][1] == angles_to_vertices[angle_range[1]][0])
-#     point1 = angles_to_vertices[angle_range[0]][1]
-#     point2 = poly.center - point1
-#     return point1, point2
-
 def outside_active_corners(poly: sympy.Polygon, trajectory, intruder: sympy.Point, angles_to_vertices: dict, angle_range, x, y):
     assert (angles_to_vertices[angle_range[0]][1] == angles_to_vertices[angle_range[1]][0])
     point1 = angles_to_vertices[angle_range[0]][1]
@@ -147,16 +144,18 @@ def outside_active_corners(poly: sympy.Polygon, trajectory, intruder: sympy.Poin
     offset2 = point2 - poly.center
     traj1 = trajectory.subs(x, x-offset1[0]).subs(y, y-offset1[1])
     traj2 = trajectory.subs(x, x-offset2[0]).subs(y, y-offset2[1])
-    # plot_implicit(traj1)
-    # plot_implicit(traj2)
-    # print(traj1)
-    # print(traj2)
     return (traj1.subs(x, intruder[0]).subs(y, intruder[1]))*(traj2.subs(x, intruder[0]).subs(y, intruder[1])) > 0
 
-def outside_polygon(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
+def ray_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
     shifted_intruder = Point(intruder) - Point(location)
     intersections = poly.intersection(Segment2D(shifted_intruder, Point(shifted_intruder[0] + poly.perimeter, shifted_intruder[1])))
     return len(intersections) % 2 == 0
+
+def encloses_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
+    shifted_intruder: Point = Point(intruder) - Point(location)
+    if shifted_intruder in poly.vertices or any(shifted_intruder in s for s in poly.sides):
+        return False
+    return not poly.encloses_point(shifted_intruder)
 
 def safe(poly: sympy.Polygon, trajectory, location: sympy.Point, intruder: sympy.Point, x, y):
     angles, vertex_pairs = compute_polygon_angles(poly)
@@ -165,7 +164,7 @@ def safe(poly: sympy.Polygon, trajectory, location: sympy.Point, intruder: sympy
         angles_to_vertices: dict = dict(zip(angles, vertex_pairs))
         return outside_active_corners(poly, trajectory, intruder, angles_to_vertices, angle_range, x, y)
     else: #check to see if inside polygon
-        return outside_polygon(poly, location, intruder)
+        return encloses_method(poly, location, intruder)
 
 def move_sympyplot_to_axes(p, ax):
     backend = p.backend(p)
@@ -177,11 +176,12 @@ def move_sympyplot_to_axes(p, ax):
     backend.ax.spines['top'].set_color('none')
     plt.close(backend.fig)
 
-def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, resolution = 0.25, savefig = True):
+def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, resolution = 0.25, alpha = 1, savefig = True):
     fig = plt.figure()
     ax = fig.gca()
-
-    xs, ys = np.meshgrid(np.arange(xbounds[0], xbounds[1], resolution), np.arange(ybounds[0], ybounds[1], resolution))
+    # p1 = plot_implicit(trajectory, line_color='k')
+    # backend = p1.backend(p1)
+    # ax = backend.ax
 
     x, y = symbols("x y")
     verts = poly.vertices
@@ -192,21 +192,27 @@ def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, res
         offset = verts[i] #- poly.center
         trajs.append((trajectory.subs(x, x - offset[0]).subs(y, y - offset[1]),
                       trajectory.subs(x, x + offset[0]).subs(y, y + offset[1])))
+    angles, vertex_pairs = compute_polygon_angles(poly)
+    dict_of_transitions, set_of_transitions = find_transitions(trajectory, angles, x, y)
+    print(set_of_transitions)
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
             intruder = Point(x0, y0)
-            safe = True
+            is_safe = True
             for (traj1, traj2) in trajs:
                 if (traj1.subs(x, intruder[0]).subs(y, intruder[1]))*(traj2.subs(x, intruder[0]).subs(y, intruder[1])) <= 0:
-                    safe = False
+                    is_safe = False
                     break
-
-            if safe:
-                ax.plot(x0, y0, 'bo')
+            for transition_point in set_of_transitions:
+                if is_safe and not encloses_method(poly, transition_point, intruder):
+                    is_safe = False
+                    break
+            if is_safe:
+                ax.plot(x0, y0, 'bo', alpha = alpha)
             else:
-                ax.plot(x0, y0, 'ro')
+                ax.plot(x0, y0, 'ro', alpha = alpha)
 
-    # ax.axis("equal")
+    ax.axis("equal")
     p1 = plot_implicit(trajectory, line_color='k')
     move_sympyplot_to_axes(p1, ax)
 
