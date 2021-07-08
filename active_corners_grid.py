@@ -1,4 +1,35 @@
 from utils import *
+from time import time
+from sympy import solveset, S
+def compare_point_in_polygon(poly):
+    N = 100
+    points = np.random.rand(N, 2)
+
+    start_time = time()
+    ray_result = [ray_method(poly, Point(0,0), Point(p[0], p[1])) for p in points]
+    print("Ray: " + str(time()-start_time))
+
+    start_time = time()
+    encloses_result = [encloses_method(poly, Point(0,0), Point(p[0], p[1])) for p in points]
+    print("Encloses: " + str(time()-start_time))
+
+    assert (ray_result == encloses_result)
+
+def basic_safe_region_test(square, diamond, circle_traj):
+    print(safe(square, circle_traj, Point(4, 0), Point(4.5, 0), x, y), False)
+    print(safe(square, circle_traj, Point(4, 0), Point(4, 0), x, y), False)
+    print(safe(square, circle_traj, Point(4, 0), Point(3, 0), x, y), True)
+    print(safe(square, circle_traj, Point(4, 0), Point(5, 0), x, y), True)
+    print(safe(diamond, circle_traj, Point(4, 0), Point(3, 0), x, y), False)
+    print(safe(diamond, circle_traj, Point(4, 0), Point(4, 0), x, y), False)
+    print(safe(diamond, circle_traj, Point(4, 0), Point(2, 0), x, y), True)
+
+def test_transitions(poly, trajectory):
+    angles, vertex_pairs = compute_polygon_angles(poly)
+    print(angles)
+    dict_of_transitions, set_of_transitions = find_transitions(trajectory, angles, x, y)
+    print(set_of_transitions)
+
 if __name__ == '__main__':
     r = 1
     hexagon = RegularPolygon(Point(0, 0), r, 6)
@@ -6,11 +37,11 @@ if __name__ == '__main__':
     diamond = RegularPolygon(Point(0, 0), r, 4)
     # plot_polygon(diamond)
     w = 0.5
-    square_points: list = [geometry.Point(val) \
+    square_points: list = [geometry.Point(val)
                            for val in [[w, -w], [w, w], [-w, w], [-w, -w]]]
     square: geometry.Polygon = Polygon(*square_points)
     # plot_polygon(square)
-    rect_points: list = [geometry.Point(val) \
+    rect_points: list = [geometry.Point(val)
                          for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]]
     rectangle: geometry.Polygon = Polygon(*rect_points)
     # plot_polygon(rectangle)
@@ -20,18 +51,12 @@ if __name__ == '__main__':
     circle_traj = x ** 2 + y ** 2 - traj_r ** 2  # radius 4
     sin_traj = sin(x) - y
 
-    print(safe(square, circle_traj, (4,0), (4.5, 0), x, y), False)
-    print(safe(square, circle_traj, (4,0), (4, 0), x, y), False)
-    print(safe(square, circle_traj, (4, 0), (3, 0), x, y), True)
-    print(safe(square, circle_traj, (4, 0), (5, 0), x, y), True)
-    print(safe(diamond, circle_traj, (4, 0), (3, 0), x, y), False)
-    print(safe(diamond, circle_traj, (4, 0), (4, 0), x, y), False)
-    print(safe(diamond, circle_traj, (4, 0), (2, 0), x, y), True)
-    # plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle traje
-    # ctory with diamond", savefig = False)
-    # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square")
-    # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle")
+    # compare_point_in_polygon(diamond)
+    # basic_safe_region_test(square, diamond, circle_traj)
+    # test_transitions(rectangle, sin_traj)
+
+
+    # plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle trajectory with diamond", savefig = False)
+    # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square and notch check", resolution = 1, alpha = 0.3, savefig = False)
+    # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle and notch check", savefig = True)
     # plot_safe_grid(hexagon, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with hexagon")
-    # print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,6), x, y), True)
-    # print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,4), x, y), False)
-    # print(outside_active_corners(diamond, circle_traj, Point(0,4), Point(0,5), x, y), False)
