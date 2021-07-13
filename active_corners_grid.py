@@ -29,6 +29,7 @@ def test_transitions(poly, trajectory, domain):
     print(angles)
     dict_of_transitions, set_of_transitions = find_transitions(trajectory, angles, x, y, domain = domain)
     print(set_of_transitions)
+    print(dict_of_transitions)
 
 if __name__ == '__main__':
     r = 1
@@ -53,10 +54,11 @@ if __name__ == '__main__':
 
     # compare_point_in_polygon(diamond)
     # basic_safe_region_test(square, diamond, circle_traj)
-    # test_transitions(rectangle, sin_traj, domain = Interval(-6, 6))
+    test_transitions(square, circle_traj, domain = Interval(-4, 4))
+    test_transitions(rectangle, sin_traj, domain = Interval(-6, 6))
 
 
     # plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle trajectory with diamond", savefig = False)
-    # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square and notch check", resolution = 1, alpha = 0.3, savefig = False)
-    plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle and notch check", Interval(-6, 6), savefig = True)
+    # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square and notch check", Interval(-4,4), savefig = True)
+    # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle and notch check", Interval(-6, 6), savefig = True)
     # plot_safe_grid(hexagon, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with hexagon")
