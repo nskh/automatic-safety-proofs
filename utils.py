@@ -66,7 +66,7 @@ def slope_sym(traj, x, y):
     return -1 * diff(traj, x), diff(traj, y)
 
 
-def find_transitions(trajectory, angles, x, y) -> tuple[dict, set]:
+def find_transitions(trajectory, angles, x, y, domain = S.Complexes) -> tuple[dict, set]:
     # NOTE: trajectory is an *expression*, not equation
     transitions = {}
     df_dy, df_dx = slope_sym(trajectory, x, y)
@@ -75,8 +75,10 @@ def find_transitions(trajectory, angles, x, y) -> tuple[dict, set]:
         # Compute slope symbolically
         # TODO(nishant): should this be atan2 here?
         # solve(Eq(atan2(dfdy, dfdx), angle))??
-        soln = solve(Eq(slope, tan(angle)))
-        # soln = solve(Eq(atan2(df_dy, df_dx), angle))
+        # soln = solve(Eq(slope, tan(angle)))
+        soln = solveset(Eq(slope, tan(angle)), domain = domain)
+        # soln = solveset(Eq(atan2(df_dy, df_dx), angle))
+
         for elem in soln:
             # Only add if solution exists (real or dict types)
             if type(elem) == dict or elem.is_real:
@@ -176,7 +178,7 @@ def move_sympyplot_to_axes(p, ax):
     backend.ax.spines['top'].set_color('none')
     plt.close(backend.fig)
 
-def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, resolution = 0.25, alpha = 1, savefig = True):
+def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, domain, resolution = 0.25, alpha = 1, savefig = True):
     fig = plt.figure()
     ax = fig.gca()
     # p1 = plot_implicit(trajectory, line_color='k')
@@ -193,7 +195,7 @@ def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, res
         trajs.append((trajectory.subs(x, x - offset[0]).subs(y, y - offset[1]),
                       trajectory.subs(x, x + offset[0]).subs(y, y + offset[1])))
     angles, vertex_pairs = compute_polygon_angles(poly)
-    dict_of_transitions, set_of_transitions = find_transitions(trajectory, angles, x, y)
+    dict_of_transitions, set_of_transitions = find_transitions(trajectory, angles, x, y, domain = domain)
     print(set_of_transitions)
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
@@ -213,8 +215,8 @@ def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, res
                 ax.plot(x0, y0, 'ro', alpha = alpha)
 
     ax.axis("equal")
-    p1 = plot_implicit(trajectory, line_color='k')
-    move_sympyplot_to_axes(p1, ax)
+    # p1 = plot_implicit(trajectory, line_color='k')
+    # move_sympyplot_to_axes(p1, ax)
 
     ax.set_title(title)
     if savefig:
