@@ -76,7 +76,7 @@ def find_transitions(trajectory, angles, x, y, domain = S.Complexes) -> tuple[di
         # TODO(nishant): should this be atan2 here?
         # solve(Eq(atan2(dfdy, dfdx), angle))??
         # soln = solve(Eq(slope, tan(angle)))
-        soln = solveset(Eq(slope, tan(angle)), domain = domain)
+        soln = solveset(Eq(slope, tan(angle)), x, domain = domain)
         # soln = solveset(Eq(atan2(df_dy, df_dx), angle))
 
         for elem in soln:
