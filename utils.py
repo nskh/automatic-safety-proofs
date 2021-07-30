@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
-import itertools
 import numpy as np
 import sympy
+
 from sympy import *
+from typing import Tuple, List, Dict, Set
 
 init_printing(use_unicode=True)
 
@@ -27,7 +28,7 @@ def plot_polygon(poly: sympy.Polygon):
     plt.show()
 
 
-def compute_polygon_angles(poly: sympy.Polygon) -> tuple[list, list]:
+def compute_polygon_angles(poly: sympy.Polygon) -> Tuple[List, List]:
     # Go around the polygon and compute the angles (relative to horiz axis)
     # of each of its sides
     verts = poly.vertices
@@ -68,7 +69,7 @@ def slope_sym(traj, x, y):
     return -1 * diff(traj, x), diff(traj, y)
 
 
-def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> tuple[dict, set]:
+def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> Tuple[Dict, Set]:
     # NOTE: trajectory is an *expression*, not equation
     transitions = {}
     df_dy, df_dx = slope_sym(trajectory, x, y)
@@ -148,7 +149,7 @@ def outside_active_corners(
     poly: sympy.Polygon,
     trajectory,
     intruder: sympy.Point,
-    angles_to_vertices: dict,
+    angles_to_vertices: Dict,
     angle_range,
     x,
     y,
@@ -193,7 +194,7 @@ def safe(
     angles, vertex_pairs = compute_polygon_angles(poly)
     angle_range = get_angle(atan2(*eval_slope(trajectory, location, x, y)), angles)
     if type(angle_range) == tuple:  # use active corners
-        angles_to_vertices: dict = dict(zip(angles, vertex_pairs))
+        angles_to_vertices: Dict = dict(zip(angles, vertex_pairs))
         return outside_active_corners(
             poly, trajectory, intruder, angles_to_vertices, angle_range, x, y
         )
