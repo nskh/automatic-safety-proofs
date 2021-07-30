@@ -27,7 +27,7 @@ def plot_polygon(poly: sympy.Polygon):
     plt.show()
 
 
-def compute_polygon_angles(poly: sympy.Polygon) -> list:
+def compute_polygon_angles(poly: sympy.Polygon) -> tuple[list, list]:
     # Go around the polygon and compute the angles (relative to horiz axis)
     # of each of its sides
     verts = poly.vertices
@@ -37,7 +37,7 @@ def compute_polygon_angles(poly: sympy.Polygon) -> list:
     angles = [atan2(nextp.y - p.y, nextp.x - p.x) for (p, nextp) in vertex_pairs]
 
     # Restrict angles to [0, 2pi]
-    positive_angles = [angle if angle > 0 else (angle + 2 * pi) for angle in angles]
+    positive_angles = [angle % (2*pi) for angle in angles]
     assert max(positive_angles) < 2 * pi
     assert min(positive_angles) >= 0
     return positive_angles, vertex_pairs
@@ -45,7 +45,8 @@ def compute_polygon_angles(poly: sympy.Polygon) -> list:
 
 def eval_slope(traj, point, x, y):
     # Compute the slope of a trajectory *expression* and plug in an (x,y) point
-    return slope_sym(traj, x, y).subs(x, point[0]).subs(y, point[1])
+    df_dy, df_dx = slope_sym(traj, x, y)
+    return df_dy.subs(x, point[0]).subs(y, point[1]), df_dx.subs(x, point[0]).subs(y, point[1])
 
 
 def slope_sym(traj, x, y):
@@ -61,19 +62,23 @@ def slope_sym(traj, x, y):
     # df/dx / df/dy -> dy/dx
     # TODO: does this hold for things that can't be written y = f(x)?
     # tan(-x) = -tan(x)
-    slope = -1 * diff(traj, x) / diff(traj, y)
-    return slope
+    # slope = -1 * diff(traj, x) / diff(traj, y)
+    return -1 * diff(traj, x), diff(traj, y)
 
 
-def find_transitions(trajectory, angles, x, y) -> dict:
+def find_transitions(trajectory, angles, x, y, domain = S.Complexes) -> tuple[dict, set]:
     # NOTE: trajectory is an *expression*, not equation
     transitions = {}
+    df_dy, df_dx = slope_sym(trajectory, x, y)
+    slope = df_dy / df_dx
     for angle in angles:
         # Compute slope symbolically
-        slope = slope_sym(trajectory, x, y)
         # TODO(nishant): should this be atan2 here?
         # solve(Eq(atan2(dfdy, dfdx), angle))??
-        soln = solve(Eq(slope, tan(angle)))
+        # soln = solve(Eq(slope, tan(angle)))
+        soln = solveset(Eq(slope, tan(angle)), x, domain = domain)
+        # soln = solveset(Eq(atan2(df_dy, df_dx), angle))
+
         for elem in soln:
             # Only add if solution exists (real or dict types)
             if type(elem) == dict or elem.is_real:
@@ -81,11 +86,12 @@ def find_transitions(trajectory, angles, x, y) -> dict:
                     transitions[angle].append(elem)
                 else:
                     transitions[angle] = [elem]
-    print(transitions)
+    # print(transitions)
 
     # soln above may still be symbolic, so we have to evaluate the expression
 
     transition_points = {}
+    set_of_transitions = set()
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
         # TODO: rename pair variable
@@ -99,6 +105,7 @@ def find_transitions(trajectory, angles, x, y) -> dict:
                 for y_soln in y_solns:
                     x_soln_eq = Eq(x, pair[x]).subs(y, y_soln)
                     transition_point = Point(x_soln_eq.rhs, y_soln)
+                    set_of_transitions.add(transition_point)
                     if angle in transition_points:
                         transition_points[angle].append(transition_point)
                     else:
@@ -109,14 +116,112 @@ def find_transitions(trajectory, angles, x, y) -> dict:
                 y_solns = solve(traj_eqn.subs(x, pair))
                 for y_soln in y_solns:
                     transition_point = Point(pair, y_soln)
+                    set_of_transitions.add(transition_point)
                     if angle in transition_points:
                         transition_points[angle].append(transition_point)
                     else:
                         transition_points[angle] = [transition_point]
 
-    return transition_points
+    return transition_points, set_of_transitions
 
+def get_angle(theta, angles): #angles correspond to polygon edges, theta is the slope at a particular point
+    theta = theta % (2*pi)    #ensure theta is in the range [0, 2*pi)
+    min_angle = min(angles)
+    max_angle = max(angles)
+    angle_pairs = list(zip(angles, angles[1:] + angles[:1]))
+    if (theta < min_angle or theta > max_angle):
+        return(max_angle, min_angle)
+    for (angle1, angle2) in angle_pairs:
+        if theta == angle1:
+            return angle1
+        elif (angle1 < theta and theta < angle2):
+            return (angle1, angle2)
+    assert(False) #should never exit for loop without returning something
 
+def outside_active_corners(poly: sympy.Polygon, trajectory, intruder: sympy.Point, angles_to_vertices: dict, angle_range, x, y):
+    assert (angles_to_vertices[angle_range[0]][1] == angles_to_vertices[angle_range[1]][0])
+    point1 = angles_to_vertices[angle_range[0]][1]
+    point2 = poly.center - point1
+    offset1 = point1 - poly.center
+    offset2 = point2 - poly.center
+    traj1 = trajectory.subs(x, x-offset1[0]).subs(y, y-offset1[1])
+    traj2 = trajectory.subs(x, x-offset2[0]).subs(y, y-offset2[1])
+    return (traj1.subs(x, intruder[0]).subs(y, intruder[1]))*(traj2.subs(x, intruder[0]).subs(y, intruder[1])) > 0
+
+def ray_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
+    shifted_intruder = Point(intruder) - Point(location)
+    intersections = poly.intersection(Segment2D(shifted_intruder, Point(shifted_intruder[0] + poly.perimeter, shifted_intruder[1])))
+    return len(intersections) % 2 == 0
+
+def encloses_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
+    shifted_intruder: Point = Point(intruder) - Point(location)
+    if shifted_intruder in poly.vertices or any(shifted_intruder in s for s in poly.sides):
+        return False
+    return not poly.encloses_point(shifted_intruder)
+
+def safe(poly: sympy.Polygon, trajectory, location: sympy.Point, intruder: sympy.Point, x, y):
+    angles, vertex_pairs = compute_polygon_angles(poly)
+    angle_range = get_angle(atan2(*eval_slope(trajectory, location, x, y)), angles)
+    if type(angle_range) == tuple: #use active corners
+        angles_to_vertices: dict = dict(zip(angles, vertex_pairs))
+        return outside_active_corners(poly, trajectory, intruder, angles_to_vertices, angle_range, x, y)
+    else: #check to see if inside polygon
+        return encloses_method(poly, location, intruder)
+
+def move_sympyplot_to_axes(p, ax):
+    backend = p.backend(p)
+    backend.ax = ax
+    # Fix for > sympy v1.5
+    backend._process_series(backend.parent._series, ax, backend.parent)
+    backend.ax.spines['right'].set_color('none')
+    backend.ax.spines['bottom'].set_position('zero')
+    backend.ax.spines['top'].set_color('none')
+    plt.close(backend.fig)
+
+def plot_safe_grid(poly: sympy.Polygon, trajectory, xbounds, ybounds, title, domain, resolution = 0.25, alpha = 1, savefig = True):
+    fig = plt.figure()
+    ax = fig.gca()
+    # p1 = plot_implicit(trajectory, line_color='k')
+    # backend = p1.backend(p1)
+    # ax = backend.ax
+
+    x, y = symbols("x y")
+    verts = poly.vertices
+    trajs = []
+    assert(len(verts) % 2 == 0)  # assume even number of vertices and symmetric polygon
+    for i in range(int(len(verts)/2)):
+        # assume center of polygon is (0,0)
+        offset = verts[i] #- poly.center
+        trajs.append((trajectory.subs(x, x - offset[0]).subs(y, y - offset[1]),
+                      trajectory.subs(x, x + offset[0]).subs(y, y + offset[1])))
+    angles, vertex_pairs = compute_polygon_angles(poly)
+    dict_of_transitions, set_of_transitions = find_transitions(trajectory, angles, x, y, domain = domain)
+    print(set_of_transitions)
+    for x0 in np.arange(xbounds[0], xbounds[1], resolution):
+        for y0 in np.arange(ybounds[0], ybounds[1], resolution):
+            intruder = Point(x0, y0)
+            is_safe = True
+            for (traj1, traj2) in trajs:
+                if (traj1.subs(x, intruder[0]).subs(y, intruder[1]))*(traj2.subs(x, intruder[0]).subs(y, intruder[1])) <= 0:
+                    is_safe = False
+                    break
+            for transition_point in set_of_transitions:
+                if is_safe and not encloses_method(poly, transition_point, intruder):
+                    is_safe = False
+                    break
+            if is_safe:
+                ax.plot(x0, y0, 'bo', alpha = alpha)
+            else:
+                ax.plot(x0, y0, 'ro', alpha = alpha)
+
+    ax.axis("equal")
+    # p1 = plot_implicit(trajectory, line_color='k')
+    # move_sympyplot_to_axes(p1, ax)
+
+    ax.set_title(title)
+    if savefig:
+        plt.savefig(title)
+    plt.show()
 # traj -> [x(t); y(t)] -> at some T, what is the angle of the tangent to trajectory
 # x,y points, may or may not be on the trajectory,
 
@@ -141,50 +246,50 @@ def find_transitions(trajectory, angles, x, y) -> dict:
 # test safety using all active-corner pairs so this stuff isn't required.
 
 
-def find_common_corner(angles_to_vertices: dict, angle, direction):
-    # I don't think this is actually useful but keeping it around
-    assert abs(direction) == 1
-
-    sorted_angles = sorted(angles_to_vertices.keys())
-
-    angle_index = sorted_angles.index(angle)
-    next_greatest_angle_index = (angle_index + direction) % len(
-        angles
-    )  # wrap around 2pi
-    next_greatest_angle = sorted_angles[next_greatest_angle_index]
-
-    common_corner: set = set(angles_to_vertices[angle]).intersection(
-        set(angles_to_vertices[next_greatest_angle])
-    )
-    assert len(common_corner) == 1
-    common_corner: Point = common_corner.pop()
-    return common_corner
-
-
-def direction_of_traj_angle(trajectory, transition_points, angle, epsilon):
-    # I don't think this is actually useful but keeping it around
-    assert epsilon != 0, "Epsilon cannot be 0"
-
-    p = transition_points[angle][0]  # TODO: fix hard coding
-    m = tan(angle)
-    y_on_tangent = p.y + epsilon * m
-    y_solns = solve(Eq(trajectory.subs(x, p.x + epsilon), 0))  # two solutions for y
-
-    # find closest to y_on_tangent
-    closest_y_soln = min(y_solns, key=lambda v: abs(v - y_on_tangent))
-
-    if epsilon > 0:
-        if closest_y_soln > y_on_tangent:
-            # theta increases: pick corners accordingly
-            direction = +1
-        else:
-            # theta decreases: pick corners accordingly
-            direction = -1
-    elif epsilon < 0:
-        if closest_y_soln > y_on_tangent:
-            # theta decreases: pick corners accordingly
-            direction = -1
-        else:
-            # theta increases: pick corners accordingly
-            direction = +1
-    return direction
+# def find_common_corner(angles_to_vertices: dict, angle, direction):
+#     # I don't think this is actually useful but keeping it around
+#     assert abs(direction) == 1
+#
+#     sorted_angles = sorted(angles_to_vertices.keys())
+#
+#     angle_index = sorted_angles.index(angle)
+#     next_greatest_angle_index = (angle_index + direction) % len(
+#         angles
+#     )  # wrap around 2pi
+#     next_greatest_angle = sorted_angles[next_greatest_angle_index]
+#
+#     common_corner: set = set(angles_to_vertices[angle]).intersection(
+#         set(angles_to_vertices[next_greatest_angle])
+#     )
+#     assert len(common_corner) == 1
+#     common_corner: Point = common_corner.pop()
+#     return common_corner
+#
+#
+# def direction_of_traj_angle(trajectory, transition_points, angle, epsilon):
+#     # I don't think this is actually useful but keeping it around
+#     assert epsilon != 0, "Epsilon cannot be 0"
+#
+#     p = transition_points[angle][0]  # TODO: fix hard coding
+#     m = tan(angle)
+#     y_on_tangent = p.y + epsilon * m
+#     y_solns = solve(Eq(trajectory.subs(x, p.x + epsilon), 0))  # two solutions for y
+#
+#     # find closest to y_on_tangent
+#     closest_y_soln = min(y_solns, key=lambda v: abs(v - y_on_tangent))
+#
+#     if epsilon > 0:
+#         if closest_y_soln > y_on_tangent:
+#             # theta increases: pick corners accordingly
+#             direction = +1
+#         else:
+#             # theta decreases: pick corners accordingly
+#             direction = -1
+#     elif epsilon < 0:
+#         if closest_y_soln > y_on_tangent:
+#             # theta decreases: pick corners accordingly
+#             direction = -1
+#         else:
+#             # theta increases: pick corners accordingly
+#             direction = +1
+#     return direction
