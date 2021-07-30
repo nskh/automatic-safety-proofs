@@ -69,7 +69,30 @@ if __name__ == "__main__":
     test_transitions(square, circle_traj, domain=Interval(-4, 4))
     test_transitions(rectangle, sin_traj, domain=Interval(-6, 6))
 
-    # plot_safe_grid(diamond, circle_traj, (-6, 6), (-6, 6), "Circle trajectory with diamond", savefig = False)
-    # plot_safe_grid(square, circle_traj, (-5, 5), (-5, 5), "Circle trajectory with square and notch check", Interval(-4,4), savefig = True)
-    # plot_safe_grid(rectangle, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with rectangle and notch check", Interval(-6, 6), savefig = True)
-    # plot_safe_grid(hexagon, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with hexagon")
+    plot_safe_grid(
+        diamond,
+        circle_traj,
+        (-6, 6),
+        (-6, 6),
+        "Circle trajectory with diamond",
+        savefig=False,
+    )
+    plot_safe_grid(
+        square,
+        circle_traj,
+        (-5, 5),
+        (-5, 5),
+        "Circle trajectory with square and notch check",
+        Interval(-4, 4),
+        savefig=True,
+    )
+    plot_safe_grid(
+        rectangle,
+        sin_traj,
+        (-6, 6),
+        (-3, 3),
+        "Sin trajectory with rectangle and notch check",
+        Interval(-6, 6),
+        savefig=True,
+    )
+    plot_safe_grid(hexagon, sin_traj, (-6, 6), (-3, 3), "Sin trajectory with hexagon")
