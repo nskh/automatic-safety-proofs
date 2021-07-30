@@ -1,5 +1,6 @@
 from utils import *
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     x, y = symbols("x y")
 
     s = 1  # square side length
