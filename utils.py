@@ -213,6 +213,76 @@ def move_sympyplot_to_axes(p, ax):
     plt.close(backend.fig)
 
 
+# finding close parens
+def find_parens(s: str) -> Dict[int, int]:
+    # source: https://stackoverflow.com/a/29992065
+    toret = {}
+    pstack = []
+
+    for i, c in enumerate(s):
+        if c == "(":
+            pstack.append(i)
+        elif c == ")":
+            if len(pstack) == 0:
+                raise IndexError("No matching closing parens at: " + str(i))
+            toret[pstack.pop()] = i
+
+    if len(pstack) > 0:
+        raise IndexError("No matching opening parens at: " + str(pstack.pop()))
+
+    return toret
+
+
+def swap_fn(s: str, swaps: List[Tuple[str, str]]) -> str:
+    parens = find_parens(s)
+    new = list(s)
+    newstr = s
+    for (tofind, toreplace) in swaps:
+        while newstr.find(tofind) > -1:
+            lendiff = len(toreplace) - len(tofind)
+            first_idx = newstr.find(tofind)
+            new = list(newstr)
+            new[first_idx : first_idx + len(tofind)] = toreplace
+            open_idx = newstr.find("(", first_idx)
+            # account for different operator length
+            new[open_idx + lendiff] = "["
+            close_idx = parens[open_idx]
+            # account for different operator length
+            new[close_idx + lendiff] = "]"
+            newstr = "".join(new)
+    return newstr
+
+
+def sympy_to_mathematica(cond) -> str:
+    cond_string: str = str(cond)
+    replacements = [
+        ("**", "^"),
+        ("|", "||"),
+        ("&", "&&"),
+        ("pi", "Pi"),
+    ]
+    for swap in replacements:
+        assert (
+            len(swap) == 2
+        ), "There must be only two elements for specifying replacements"
+        cond_string = cond_string.replace(swap[0], swap[1])
+
+    functions = [
+        ("sin", "Sin"),
+        ("cos", "Cos"),
+        ("tan", "Tan"),
+        ("sqrt", "Sqrt"),
+        # ("exp", "E"),  # maybe not the case
+    ]
+
+    cond_string = swap_fn(cond_string, functions)
+
+    # TODO(nishant): return entire string to send to Mathematica
+    #                with pred and RegionPlot[] call, domain, etc
+
+    return cond_string
+
+
 def plot_safe_grid(
     poly: sympy.Polygon,
     trajectory,
@@ -247,9 +317,46 @@ def plot_safe_grid(
     dict_of_transitions, set_of_transitions = find_transitions(
         trajectory, angles, x, y, domain=domain
     )
-    print(set_of_transitions)
+
+    # Generating boolean formula over (x,y) for unsafe region
+    unsafe_cond = None  # initialize to None and build up with Ors
+    ADD_NOTCHES = True
+    for (traj1, traj2) in trajs:
+        if unsafe_cond is None:
+            unsafe_cond = traj1 * traj2 <= 0
+        else:
+            unsafe_cond = unsafe_cond | (traj1 * traj2 <= 0)
+    if ADD_NOTCHES:
+        for transition_point in set_of_transitions:
+            # neg for left side, 0 for on edge, pos for on right side
+            # inside polygon IF all neg or IF all pos
+            shifted_vertex_pairs = [
+                (v + transition_point, nextv + transition_point)
+                for (v, nextv) in vertex_pairs
+            ]  # [(v1, v2), (v2, v3), ..., (vn, v1)]
+            # source: https://inginious.org/course/competitive-programming/geometry-pointinconvex
+            # source: https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+            side_conds = [
+                (y - v.y) * (nextv.x - v.x) - (x - v.x) * (nextv.y - v.y)
+                for (v, nextv) in shifted_vertex_pairs
+            ]  # [-1, 0, 4, 6]
+            # construct both cases inside
+            cond1 = true  # init to sympy.true since we're cascading Ands
+            cond2 = true  # init to sympy.true since we're cascading Ands
+            for side_cond in side_conds:
+                cond1 = cond1 & (side_cond <= 0)
+                cond2 = cond2 & (side_cond >= 0)
+            unsafe_cond = unsafe_cond | cond1 | cond2
+
+    print(sympy_to_mathematica(unsafe_cond))
+
+    nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
+    count = 0
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
+            count += 1
+            # TODO(nishant): progress for plotting dots
+            # print(f"{count/nelem*100}% \r")
             intruder = Point(x0, y0)
             is_safe = True
             for (traj1, traj2) in trajs:
