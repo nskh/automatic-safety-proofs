@@ -35,7 +35,12 @@ def compute_polygon_angles(poly: sympy.Polygon) -> Tuple[List, List]:
     # Stitch together adjacent vertex pairs (wrap around end of list)
     vertex_pairs = list(zip(verts, verts[1:] + verts[:1]))
     # Angles using atan2: always use atan2 to give correct outputs
-    angles = [atan2(nextp.y - p.y, nextp.x - p.x) for (p, nextp) in vertex_pairs]
+    vertex_offsets: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs
+    ]
+    angles: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets
+    ]
 
     # Restrict angles to [0, 2pi]
     positive_angles = [angle % (2 * pi) for angle in angles]
@@ -76,38 +81,69 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> Tuple[Dict
     slope = df_dy / df_dx
     for angle in angles:
         # Compute slope symbolically
-        # TODO(nishant): should this be atan2 here?
-        # solve(Eq(atan2(dfdy, dfdx), angle))??
-        # soln = solve(Eq(slope, tan(angle)))
-        soln = solveset(Eq(slope, tan(angle)), x, domain=domain)
+        # soln = solve(Eq(df_dx * sin(angle), df_dy * cos(angle)), dict=True)
+        # 2 vectors <x1, y1> <x2, y2>
+        # parallel iff y1*x2 = x1*y2
+        # <dfdx, dfdy> <cos(theta), sin(theta)>
+        # TODO(nishant): label data types better
+        # TODO(nishant): rename variables
+        soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
+
+        if soln == S.EmptySet:
+            soln = solveset(
+                Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
+            )
+            if soln != S.EmptySet and type(soln) != dict and type(soln) != list:
+                # In this case, type(soln): S.FiniteSet
+                soln = [{y: soln_elem} for soln_elem in list(soln)]
+        else:
+            # TODO(nishant): check data types
+            # chekc if not a dict or list before packing otherwise return regular
+            soln = [{x: soln_elem} for soln_elem in list(soln)]
+
+        # TODO(nishant): see if solveset always returns a list - does it ever return Dict
+        # assert some stuff?
+
+        # soln = solveset(Eq(slope, tan(angle)), x, domain=domain)
         # soln = solveset(Eq(atan2(df_dy, df_dx), angle))
 
         for elem in soln:
             # Only add if solution exists (real or dict types)
-            if type(elem) == dict or elem.is_real:
+            if type(elem) == dict or elem.is_real:  # basically check elem is not empty
                 if angle in transitions:
                     transitions[angle].append(elem)
                 else:
                     transitions[angle] = [elem]
-    # print(transitions)
-
     # soln above may still be symbolic, so we have to evaluate the expression
 
     transition_points = {}
     set_of_transitions = set()
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
-        # TODO: rename pair variable
         for pair in solns:
-            # dict if implicit solution - x as f(y)
-            if type(pair) == dict:  # x given as f(y)
-                # remove x from equation
-                eqn_without_x = traj_eqn.subs(pair)
-                y_solns = solve(eqn_without_x)
+            # if a dictionary, pair looks like {x: f(y)} or {y: f(x)}
+            # if not a dictionary, pair is a single real number
+            if type(pair) == dict:
+                # remove one variable from equation by substituting pair into traj_eqn
+                traj_eqn_single_var = traj_eqn.subs(pair)
+                # traj_eqn used to have two variables but now has only one
+                single_var_solns = solve(traj_eqn_single_var)
 
-                for y_soln in y_solns:
-                    x_soln_eq = Eq(x, pair[x]).subs(y, y_soln)
-                    transition_point = Point(x_soln_eq.rhs, y_soln)
+                # before going further, figure out the variable for
+                # which pair contains a solution
+                soln_var = [k for k in pair][0]  # variable is the dict key
+                other_var = y if soln_var == x else x
+
+                for single_var_soln in single_var_solns:
+                    # substitute in single_var_soln to solve for soln_var
+                    solved_eqn = Eq(soln_var, pair[soln_var]).subs(
+                        other_var, single_var_soln
+                    )
+                    # with this, we have a solution for the transition point
+                    if soln_var == x:
+                        transition_point = Point(solved_eqn.rhs, single_var_soln)
+                    elif soln_var == y:
+                        transition_point = Point(single_var_soln, solved_eqn.rhs)
                     set_of_transitions.add(transition_point)
                     if angle in transition_points:
                         transition_points[angle].append(transition_point)
@@ -116,7 +152,11 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> Tuple[Dict
 
             # if not a dictionary, we have an exact solution for x
             else:  # exact solution for x, pair is a single element
-                y_solns = solve(traj_eqn.subs(x, pair))
+                # TODO(nishant): rename to make this modular like the above
+                print("IN ELSE CASE")
+                soln_var = [k for k in pair][0]
+
+                y_solns = solve(traj_eqn.subs(soln_var, pair))
                 for y_soln in y_solns:
                     transition_point = Point(pair, y_soln)
                     set_of_transitions.add(transition_point)
@@ -233,7 +273,8 @@ def plot_safe_grid(
     x, y = symbols("x y")
     verts = poly.vertices
     trajs = []
-    assert len(verts) % 2 == 0  # assume even number of vertices and symmetric polygon
+    # assume even number of vertices and symmetric polygon
+    assert len(verts) % 2 == 0, "Polygon given did not have an even number of sides!"
     for i in range(int(len(verts) / 2)):
         # assume center of polygon is (0,0)
         offset = verts[i]  # - poly.center
@@ -286,12 +327,9 @@ def plot_safe_grid(
 
 # TODO(nishant): write better in spec
 # given obstacle at (x_O, y_O)
-# algortihm is check for polygon inclusion at transition points AND check point
+# algorithm is check for polygon inclusion at transition points AND check point
 # is outside all active-corner-pairs
 
-# TODO(nishant): create github repo
-
-# TODO(elanor): implement "outside all active-corner pairs" test
 # assume symmetric polygons and write something to identify the active corner pairs
 # try with a hexagon, square, diamond, rectangle
 
