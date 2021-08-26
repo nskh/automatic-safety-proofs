@@ -93,77 +93,54 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> Tuple[Dict
             soln = solveset(
                 Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
             )
-            if soln != S.EmptySet and type(soln) != dict and type(soln) != list:
+            if soln != S.EmptySet and type(soln) != list:
                 # In this case, type(soln): S.FiniteSet
                 soln = [{y: soln_elem} for soln_elem in list(soln)]
         else:
-            # TODO(nishant): check data types
-            # chekc if not a dict or list before packing otherwise return regular
+            # Pack into list of dict so it's clear which variable has been solved for
             soln = [{x: soln_elem} for soln_elem in list(soln)]
 
-        # TODO(nishant): see if solveset always returns a list - does it ever return Dict
-        # assert some stuff?
-
-        # soln = solveset(Eq(slope, tan(angle)), x, domain=domain)
-        # soln = solveset(Eq(atan2(df_dy, df_dx), angle))
-
         for elem in soln:
-            # Only add if solution exists (real or dict types)
-            if type(elem) == dict or elem.is_real:  # basically check elem is not empty
-                if angle in transitions:
-                    transitions[angle].append(elem)
-                else:
-                    transitions[angle] = [elem]
+            if angle in transitions:
+                transitions[angle].append(elem)
+            else:
+                transitions[angle] = [elem]
     # soln above may still be symbolic, so we have to evaluate the expression
+    # that's what happens below
 
     transition_points = {}
     set_of_transitions = set()
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
         for pair in solns:
-            # if a dictionary, pair looks like {x: f(y)} or {y: f(x)}
-            # if not a dictionary, pair is a single real number
-            if type(pair) == dict:
-                # remove one variable from equation by substituting pair into traj_eqn
-                traj_eqn_single_var = traj_eqn.subs(pair)
-                # traj_eqn used to have two variables but now has only one
-                single_var_solns = solve(traj_eqn_single_var)
+            # pair should always be a dictionary
+            assert type(pair) == dict, "Solution element was not a dictionary!"
+            # pair looks like {x: f(y)} or {y: f(x)}
+            # remove one variable from equation by substituting pair into traj_eqn
+            traj_eqn_single_var = traj_eqn.subs(pair)
+            # traj_eqn used to have two variables but now has only one
+            single_var_solns = solve(traj_eqn_single_var)
 
-                # before going further, figure out the variable for
-                # which pair contains a solution
-                soln_var = [k for k in pair][0]  # variable is the dict key
-                other_var = y if soln_var == x else x
+            # before going further, figure out the variable for
+            # which pair contains a solution
+            soln_var = [k for k in pair][0]  # variable is the dict key
+            other_var = y if soln_var == x else x
 
-                for single_var_soln in single_var_solns:
-                    # substitute in single_var_soln to solve for soln_var
-                    solved_eqn = Eq(soln_var, pair[soln_var]).subs(
-                        other_var, single_var_soln
-                    )
-                    # with this, we have a solution for the transition point
-                    if soln_var == x:
-                        transition_point = Point(solved_eqn.rhs, single_var_soln)
-                    elif soln_var == y:
-                        transition_point = Point(single_var_soln, solved_eqn.rhs)
-                    set_of_transitions.add(transition_point)
-                    if angle in transition_points:
-                        transition_points[angle].append(transition_point)
-                    else:
-                        transition_points[angle] = [transition_point]
-
-            # if not a dictionary, we have an exact solution for x
-            else:  # exact solution for x, pair is a single element
-                # TODO(nishant): rename to make this modular like the above
-                print("IN ELSE CASE")
-                soln_var = [k for k in pair][0]
-
-                y_solns = solve(traj_eqn.subs(soln_var, pair))
-                for y_soln in y_solns:
-                    transition_point = Point(pair, y_soln)
-                    set_of_transitions.add(transition_point)
-                    if angle in transition_points:
-                        transition_points[angle].append(transition_point)
-                    else:
-                        transition_points[angle] = [transition_point]
+            for single_var_soln in single_var_solns:
+                # substitute in single_var_soln to solve for soln_var
+                solved_eqn = Eq(soln_var, pair[soln_var]).subs(
+                    other_var, single_var_soln
+                )
+                # with this, we have a solution for the transition point
+                if soln_var == x:
+                    transition_point = Point(solved_eqn.rhs, single_var_soln)
+                elif soln_var == y:
+                    transition_point = Point(single_var_soln, solved_eqn.rhs)
+                set_of_transitions.add(transition_point)
+                if angle in transition_points:
+                    transition_points[angle].append(transition_point)
+                else:
+                    transition_points[angle] = [transition_point]
 
     return transition_points, set_of_transitions
 
