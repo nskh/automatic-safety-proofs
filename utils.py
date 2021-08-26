@@ -348,7 +348,44 @@ def plot_safe_grid(
                 cond2 = cond2 & (side_cond >= 0)
             unsafe_cond = unsafe_cond | cond1 | cond2
 
-    print(sympy_to_mathematica(unsafe_cond))
+    # Translating to mathematica here for one-click plotting
+    # boolean safe region condition for RegionPlot
+    cond_mathematica: str = sympy_to_mathematica(unsafe_cond)
+    # range over which to plot
+    plotrange_mathematica: str = (
+        f"{{x, {xbounds[0]}, {xbounds[1]}}}, {{y, {ybounds[0]}, {ybounds[1]}}}"
+    )
+    # trajectory equation to draw in Mathematica
+    traj_eqn = Eq(trajectory, 0)
+    # cut beginning 3 chars "Eq(" and last character ")"
+    traj_mathematica: str = sympy_to_mathematica(str(traj_eqn)[3:-1]).replace(
+        ", ", " == "
+    )
+
+    # TODO(nishant): add parameter or logic for offsetx
+    offsetx = 1
+    offsety = solve(traj_eqn.subs(x, offsetx))[0]
+    mathematica_vertices = str([(v.x + offsetx, v.y + offsety) for v in verts])
+    mathematica_vertices = "{" + sympy_to_mathematica(mathematica_vertices)[1:-1] + "}"
+    mathematica_vertices = (
+        "Polygon[" + mathematica_vertices.replace("(", "{").replace(")", "}") + "]"
+    )
+
+    TRAJ_COLOR = "Purple"
+    POLY_COLOR = "Green"
+    mathematica_header = (
+        "\n======== Output for Plotting Safe Region in Mathematica ========\n"
+    )
+    mathematica_footer = (
+        "\n=========================== Copy me! ==========================="
+    )
+    mathematica_output = f"""Show[
+    RegionPlot[{cond_mathematica},  {plotrange_mathematica}],
+    ContourPlot[{traj_mathematica},  {plotrange_mathematica}, ContourStyle->{{{TRAJ_COLOR}, Dashed}}],
+    Graphics[ {{FaceForm[None], EdgeForm[{POLY_COLOR}], {mathematica_vertices} }} ],
+    GridLines->Automatic, Ticks->Automatic\n]"""
+
+    print(mathematica_header, mathematica_output, mathematica_footer)
 
     nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
     count = 0
