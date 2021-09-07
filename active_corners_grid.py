@@ -30,14 +30,17 @@ def basic_safe_region_test(square, diamond, circle_traj):
     print(safe(diamond, circle_traj, Point(4, 0), Point(2, 0), x, y), True)
 
 
-def test_transitions(poly, trajectory, domain):
+def test_transitions(poly, trajectory, domain, x=None, y=None):
     angles, vertex_pairs = compute_polygon_angles(poly)
-    print(angles)
+    print("Angles:")
+    pprint(angles)
     dict_of_transitions, set_of_transitions = find_transitions(
         trajectory, angles, x, y, domain=domain
     )
-    print(set_of_transitions)
-    print(dict_of_transitions)
+    print("Set of transitions:")
+    pprint(set_of_transitions)
+    print("Dict of transitions:")
+    pprint(dict_of_transitions)
 
 
 if __name__ == "__main__":
