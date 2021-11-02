@@ -17,6 +17,7 @@ def plot_polygon(poly: sympy.Polygon):
 
     for p in verts:
         ax.scatter(p.x, p.y, c="r")
+        plt.text(p.x + 0.05, p.y + 0.05, f"({p.x},{p.y})")
 
     for (p, nextp) in zip(verts, verts[1:] + verts[:1]):
         x = np.linspace(float(p.x), float(nextp.x), 100, dtype=float)
@@ -44,8 +45,8 @@ def compute_polygon_angles(poly: sympy.Polygon) -> Tuple[List, List]:
 
     # Restrict angles to [0, 2pi]
     positive_angles = [angle % (2 * pi) for angle in angles]
-    assert max(positive_angles) < 2 * pi
-    assert min(positive_angles) >= 0
+    # assert max(positive_angles) < 2 * pi
+    # assert min(positive_angles) >= 0
     return positive_angles, vertex_pairs
 
 
@@ -75,8 +76,12 @@ def slope_sym(traj, x, y):
 
 
 def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> Tuple[Dict, Set]:
+    """
+    TODO(nishant): add docstrings
+    """
     # NOTE: trajectory is an *expression*, not equation
     transitions = {}
+    # TODO(nishant): explain slope and variables for non f(x,y) functions
     df_dy, df_dx = slope_sym(trajectory, x, y)
     slope = df_dy / df_dx
     for angle in angles:
@@ -145,6 +150,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes) -> Tuple[Dict
     return transition_points, set_of_transitions
 
 
+# TODO(nishant): this is broken, delete
 def get_angle(
     theta, angles
 ):  # angles correspond to polygon edges, theta is the slope at a particular point
@@ -205,18 +211,19 @@ def encloses_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.
     return not poly.encloses_point(shifted_intruder)
 
 
-def safe(
-    poly: sympy.Polygon, trajectory, location: sympy.Point, intruder: sympy.Point, x, y
-):
-    angles, vertex_pairs = compute_polygon_angles(poly)
-    angle_range = get_angle(atan2(*eval_slope(trajectory, location, x, y)), angles)
-    if type(angle_range) == tuple:  # use active corners
-        angles_to_vertices: Dict = dict(zip(angles, vertex_pairs))
-        return outside_active_corners(
-            poly, trajectory, intruder, angles_to_vertices, angle_range, x, y
-        )
-    else:  # check to see if inside polygon
-        return encloses_method(poly, location, intruder)
+# THIS IS BAD
+# def safe(
+#     poly: sympy.Polygon, trajectory, location: sympy.Point, intruder: sympy.Point, x, y
+# ):
+#     angles, vertex_pairs = compute_polygon_angles(poly)
+#     angle_range = get_angle(atan2(*eval_slope(trajectory, location, x, y)), angles)
+#     if type(angle_range) == tuple:  # use active corners
+#         angles_to_vertices: Dict = dict(zip(angles, vertex_pairs))
+#         return outside_active_corners(
+#             poly, trajectory, intruder, angles_to_vertices, angle_range, x, y
+#         )
+#     else:  # check to see if inside polygon
+#         return encloses_method(poly, location, intruder)
 
 
 def move_sympyplot_to_axes(p, ax):
@@ -270,6 +277,38 @@ def swap_fn(s: str, swaps: List[Tuple[str, str]]) -> str:
     return newstr
 
 
+def swap_piecewise(s: str):
+    newstr = s
+    while newstr.find("Piecewise(") > -1:
+        parens = find_parens(newstr)
+        val = newstr.find("Piecewise(") + len("Piecewise(") - 1
+        newstr = newstr[:val] + "[{" + newstr[val + 1 :]
+        newstr = newstr[: parens[val] + 1] + "}]" + newstr[parens[val] + 2 :]
+        a = newstr[val + 2 : parens[val] + 1]  # input to Piecewise
+        newa = []
+        count = 0
+        for (i, c) in enumerate(a):
+            if c == "(":
+                count += 1
+                if count == 1:
+                    newa.append("{")
+                else:
+                    newa.append("(")
+            elif c == ")":
+                count -= 1
+                if count == 0:
+                    newa.append("}")
+                else:
+                    newa.append(")")
+            else:
+                newa.append(c)
+
+        a = "".join(newa)
+        newstr = newstr[: val + 2] + a + newstr[parens[val] + 1 :]
+    return newstr
+
+
+# TODO(nishant): section for all the text transformations
 def sympy_to_mathematica(cond) -> str:
     cond_string: str = str(cond)
     replacements = [
@@ -294,10 +333,313 @@ def sympy_to_mathematica(cond) -> str:
 
     cond_string = swap_fn(cond_string, functions)
 
+    cond_string = swap_piecewise(cond_string)
+
     # TODO(nishant): return entire string to send to Mathematica
     #                with pred and RegionPlot[] call, domain, etc
 
     return cond_string
+
+
+def plot_safe_grid_piecewise(
+    x,
+    y,
+    poly: sympy.Polygon,
+    trajectory,  # piecewise
+    xbounds,
+    ybounds,
+    title,
+    domain,
+    resolution=0.25,
+    alpha=1,
+    savefig=False,
+    add_notches=True,
+    overlay_traj=False,
+):
+    """Generates clauses
+    TODO(nishant): docstring
+    """
+
+    # TODO(nishant): figure out input spec
+    # TODO(nishant): merge two ways of doing piecewise? prob not rn
+    # TODO(nishant): test piecewise with functions of y
+
+    angles, vertex_pairs = compute_polygon_angles(poly)
+    verts = poly.vertices
+    # compute width to use for g()
+    # TODO(nishant): make this work for Y also
+    if y not in trajectory.free_symbols:
+        func_var = x
+        keyfunc = lambda p: p.x
+    elif x not in trajectory.free_symbols:
+        func_var = y
+        keyfunc = lambda p: p.y
+    else:
+        raise Exception("Trajectory had two variables!")
+
+    w_point = max(
+        [
+            -1 * min([v - poly.centroid for v in verts], key=keyfunc),
+            max([v - poly.centroid for v in verts], key=keyfunc),
+        ],
+        key=keyfunc,
+    )
+    w = getattr(w_point, str(func_var))
+
+    set_of_transitions = set()
+    if type(trajectory) == Piecewise:
+        for (subtraj, subcond) in trajectory.as_expr_set_pairs():
+            # trim domain by computing intersection
+            subdomain = subcond.intersect(domain)
+
+            # TODO(nishant) handle f(x) and f(y) trajs
+
+            # TODO(nishant): assert only 1 free symbol
+            # find transitions for piecewise domain over this interval
+            func_var = subtraj.free_symbols.pop()
+
+            if y not in subtraj.free_symbols:  # form y=f(x)
+                _, subset_of_transitions = find_transitions(
+                    -y + subtraj, angles, x, y, domain=subdomain
+                )
+            elif x not in subtraj.free_symbols:  # form x=f(y)
+                _, subset_of_transitions = find_transitions(
+                    -x + subtraj, angles, x, y, domain=subdomain
+                )
+            set_of_transitions.update(subset_of_transitions)
+
+            # add piecewise boundary
+            left_bound = Point(subdomain.inf, subtraj.subs(func_var, subdomain.inf))
+            right_bound = Point(subdomain.sup, subtraj.subs(func_var, subdomain.sup))
+            set_of_transitions.add(left_bound)
+            set_of_transitions.add(right_bound)
+    else:
+        if y not in trajectory.free_symbols:
+            _, subset_of_transitions = find_transitions(
+                -y + trajectory, angles, x, y, domain=domain
+            )
+        elif x not in trajectory.free_symbols:
+            _, subset_of_transitions = find_transitions(
+                -x + trajectory, angles, x, y, domain=domain
+            )
+
+        set_of_transitions.update(subset_of_transitions)
+
+        left_bound = Point(domain.inf, trajectory.subs(x, domain.inf))
+        right_bound = Point(domain.sup, trajectory.subs(x, domain.sup))
+        set_of_transitions.add(left_bound)
+        set_of_transitions.add(right_bound)
+
+    # TODO(nishant): get this working for f(y) also
+    sorted_transitions: list = sorted(set_of_transitions, key=lambda point: point.x)
+    x_transitions = [p.x for p in sorted_transitions]
+    midpoints = np.convolve(x_transitions, [1, 1], "valid") / 2
+    deriv_traj = diff(trajectory, x)
+    dydx_midpoints = [deriv_traj.subs(x, val) for val in midpoints]
+    midpoint_angles = [atan2(d, 1) for d in dydx_midpoints]
+    # above needs to be modified to work for f(y) also!
+
+    # TODO(nishant): more comments in this function
+
+    vertex_pairs_right = list(zip(verts, verts[1:] + verts[:1]))
+    vertex_offsets_right: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_right
+    ]
+    angles_right: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_right
+    ]
+    positive_angles_right = [angle % (2 * pi) for angle in angles_right]
+
+    vertex_pairs_left = list(zip(verts[-1:] + verts[:-1], verts))
+    vertex_offsets_left: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_left
+    ]
+    angles_left: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_left
+    ]
+    positive_angles_left = [angle % (2 * pi) for angle in angles_left]
+
+    corners_to_angles = dict()
+    for i in range(len(verts)):
+        if positive_angles_right[i] < positive_angles_left[i]:
+            corners_to_angles[verts[i]] = Interval(
+                positive_angles_left[i], positive_angles_right[i] + 2 * pi
+            )
+        else:
+            corners_to_angles[verts[i]] = Interval(
+                positive_angles_left[i], positive_angles_right[i]
+            )
+
+    active_corners = {}
+    for midpoint_angle in midpoint_angles:
+        for k, v in corners_to_angles.items():
+            # TODO(nishant): if not symmetric, add 180 deg
+            if midpoint_angle % (2 * pi) in v:
+                active_corners[midpoint_angle] = k
+    x_intervals = list(
+        zip(x_transitions[:-1], x_transitions[1:])
+    )  # same len as midpoints
+
+    total_cond = None
+    for i, x_interval in enumerate(x_intervals):
+        x_left = x_interval[0]
+        y_left = trajectory.subs(x, x_left)
+        x_right = x_interval[1]
+        y_right = trajectory.subs(x, x_right)
+        poly_center_left = Point(x_left, y_left)
+        poly_center_right = Point(x_right, y_right)
+
+        # TODO(nishant): if asymmetric use two corners, not center for constructing line
+        active_corner_offset = active_corners[midpoint_angles[i]]
+        line_left = Line(poly_center_left, poly_center_left + active_corner_offset)
+        line_right = Line(poly_center_right, poly_center_right + active_corner_offset)
+        # using Line.equation() creates duplicate x,y variables and ruins .subs() call later
+        left_a, left_b, left_c = line_left.coefficients
+        right_a, right_b, right_c = line_right.coefficients
+        left_eq = left_a * x + left_b * y + left_c
+        right_eq = right_a * x + right_b * y + right_c
+        corner_cond = left_eq * right_eq <= 0
+
+        # TODO(nishant): change this to handle y functions too
+        x_cond = (x >= (x_left - w)) & (x <= (x_right + w))
+
+        # construct g functions
+        # trajectory over this interval, held constant outside of it
+        if type(trajectory) == Piecewise:
+            current_piece = trajectory.as_expr_set_pairs(Interval(x_left, x_right))
+            current_fn = current_piece[0][0]
+            g = y - Piecewise(
+                (y_left, x < x_left), (current_fn, x <= x_right), (y_right, x > x_right)
+            )
+        else:
+            g = y - Piecewise(
+                (y_left, x < x_left), (trajectory, x <= x_right), (y_right, x > x_right)
+            )
+        #     TODO(nishant): rewrite for asymmetric
+        g1 = g.subs(x, x - active_corner_offset.x).subs(y, y - active_corner_offset.y)
+        g2 = g.subs(x, x + active_corner_offset.x).subs(y, y + active_corner_offset.y)
+
+        full_cond = corner_cond & x_cond & (g1 * g2 <= 0)
+        #     full_cond = (g1*g2 <= 0)
+        #     print(full_cond)
+        if total_cond is None:
+            total_cond = full_cond
+        else:
+            total_cond = total_cond | full_cond
+    #     print("")
+
+    if add_notches:
+        # adding notches
+        for transition_point in set_of_transitions:
+            # neg for left side, 0 for on edge, pos for on right side
+            # inside polygon IF all neg or IF all pos
+            shifted_vertex_pairs = [
+                (v + transition_point, nextv + transition_point)
+                for (v, nextv) in vertex_pairs
+            ]  # [(v1, v2), (v2, v3), ..., (vn, v1)]
+            # source: https://inginious.org/course/competitive-programming/geometry-pointinconvex
+            # source: https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+            side_conds = [
+                (y - v.y) * (nextv.x - v.x) - (x - v.x) * (nextv.y - v.y)
+                for (v, nextv) in shifted_vertex_pairs
+            ]
+            # construct both cases inside
+            cond1 = true  # init to sympy.true since we're cascading Ands
+            cond2 = true  # init to sympy.true since we're cascading Ands
+            for side_cond in side_conds:
+                cond1 = cond1 & (side_cond <= 0)
+                cond2 = cond2 & (side_cond >= 0)
+            total_cond = total_cond | cond1 | cond2
+
+    # Translating to mathematica here for one-click plotting
+    # boolean safe region condition for RegionPlot
+    cond_mathematica: str = sympy_to_mathematica(total_cond)
+    # range over which to plot
+    # TODO(nishant): fix bounds to be only one variable
+    plotrange_mathematica: str = (
+        f"{{x, {xbounds[0]}, {xbounds[1]}}}, {{y, {ybounds[0]}, {ybounds[1]}}}"
+    )
+    # trajectory equation to draw in Mathematica
+    # TODO(nishant): prob not 0 now, maybe set equal to y?
+    # traj_eqn = Eq(trajectory, 0)
+    # cut beginning 3 chars "Eq(" and last character ")"
+    # traj_mathematica: str = sympy_to_mathematica(str(traj_eqn)[3:-1]).replace(
+    #     ", ", " == "
+    # )
+    traj_mathematica: str = sympy_to_mathematica(trajectory)
+
+    # TODO(nishant): add parameter or logic for offsetx
+    offsetx = 1
+    # offsety = solve(traj_eqn.subs(x, offsetx))[0]
+    offsety = trajectory.subs(x, offsetx)
+    mathematica_vertices = str([(v.x + offsetx, v.y + offsety) for v in verts])
+    mathematica_vertices = "{" + sympy_to_mathematica(mathematica_vertices)[1:-1] + "}"
+    mathematica_vertices = (
+        "Polygon[" + mathematica_vertices.replace("(", "{").replace(")", "}") + "]"
+    )
+
+    TRAJ_COLOR = "Purple"
+    POLY_COLOR = "Green"
+    mathematica_header = (
+        "\n======== Output for Plotting Safe Region in Mathematica ========\n"
+    )
+    mathematica_footer = (
+        "\n=========================== Copy me! ===========================\n"
+    )
+    mathematica_output = f"""\nShow[
+    RegionPlot[{cond_mathematica},  {plotrange_mathematica}, PlotPoints -> 60,  MaxRecursion -> 5],
+    Plot[{traj_mathematica},  {plotrange_mathematica}, PlotStyle->{{{TRAJ_COLOR}, Dashed}}],
+    Graphics[ {{FaceForm[None], EdgeForm[{POLY_COLOR}], {mathematica_vertices} }} ],
+    GridLines->Automatic, Ticks->Automatic, AspectRatio->Automatic\n]\n"""
+
+    print(mathematica_header, mathematica_output, mathematica_footer)
+
+    if overlay_traj:
+        p1 = plot(trajectory)
+
+    fig = plt.figure(figsize=(15, 5))
+    ax = fig.gca()
+
+    if overlay_traj:
+        move_sympyplot_to_axes(p1, ax)
+
+    nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
+    count = 0
+    for x0 in np.arange(xbounds[0], xbounds[1], resolution):
+        for y0 in np.arange(ybounds[0], ybounds[1], resolution):
+            count += 1
+            # TODO(nishant): progress for plotting dots
+            # print(f"{count/nelem*100}% \r")
+            # intruder = Point(x0, y0)
+            is_safe = (~total_cond).subs([(x, x0), (y, y0)])
+            # is_safe = True
+            # for (traj1, traj2) in trajs:
+            #     if (traj1.subs(x, intruder[0]).subs(y, intruder[1])) * (
+            #         traj2.subs(x, intruder[0]).subs(y, intruder[1])
+            #     ) <= 0:
+            #         is_safe = False
+            #         break
+            # if not is_safe:
+            #     for transition_point in set_of_transitions:
+            #         if is_safe and not encloses_method(
+            #             poly, transition_point, intruder
+            #         ):
+            #             is_safe = False
+            #             break
+            # TODO(nishant): resolution scaling
+            if is_safe:
+                ax.plot(x0, y0, "bo", alpha=alpha, markersize=resolution * 4)
+            else:
+                ax.plot(x0, y0, "ro", alpha=alpha, markersize=resolution * 4)
+
+    ax.axis("equal")
+    # p1 = plot_implicit(trajectory, line_color='k')
+    # move_sympyplot_to_axes(p1, ax)
+
+    ax.set_title(title)
+    if savefig:
+        plt.savefig(title)
+    plt.show()
 
 
 def plot_safe_grid(
@@ -309,7 +651,9 @@ def plot_safe_grid(
     domain,
     resolution=0.25,
     alpha=1,
-    savefig=True,
+    savefig=False,
+    add_notches=True,
+    piecewise_bounds=None,
 ):
     fig = plt.figure()
     ax = fig.gca()
@@ -332,19 +676,49 @@ def plot_safe_grid(
             )
         )
     angles, vertex_pairs = compute_polygon_angles(poly)
-    dict_of_transitions, set_of_transitions = find_transitions(
-        trajectory, angles, x, y, domain=domain
-    )
+
+    if type(trajectory) is list:
+        # Then we're operating with a piecewise function
+        assert type(domain) is list, "type(domain) was not a list"
+        assert len(trajectory) == len(
+            domain
+        ), "trajectories and domains were not of the same length"
+        set_of_transitions = set()
+        for subtraj, subdomain in zip(trajectory, domain):
+            _, subset_of_transitions = find_transitions(
+                subtraj, angles, x, y, domain=subdomain
+            )
+            set_of_transitions.update(subset_of_transitions)
+
+        # add each piecewise boundary also
+        # TODO(nishant): add better checking this coheres with domains, or automate
+        assert piecewise_bounds is not None, "must specify piecewise_bounds!"
+        set_of_transitions.update(piecewise_bounds)
+
+        print(set_of_transitions)
+    else:
+        dict_of_transitions, set_of_transitions = find_transitions(
+            trajectory, angles, x, y, domain=domain
+        )
+
+    # order each transition point [begin with left bound, end w right bound]
+    # in between each boundary point find the midpoint and identify active corners
+    # for each boundary:
+    #   compute f(x) and store in dict mapping x_bound -> f(x_bound)
+    #   compute line btwn active corners based on corresponding active corner for midpoint??
+    # for each interval
+    #   compute g(x) based on bounds in dict
+    #   compute line?? either here or above
+    #   generate clause w this info
 
     # Generating boolean formula over (x,y) for unsafe region
     unsafe_cond = None  # initialize to None and build up with Ors
-    ADD_NOTCHES = True
     for (traj1, traj2) in trajs:
         if unsafe_cond is None:
             unsafe_cond = traj1 * traj2 <= 0
         else:
             unsafe_cond = unsafe_cond | (traj1 * traj2 <= 0)
-    if ADD_NOTCHES:
+    if add_notches:
         for transition_point in set_of_transitions:
             # neg for left side, 0 for on edge, pos for on right side
             # inside polygon IF all neg or IF all pos
@@ -397,11 +771,11 @@ def plot_safe_grid(
     mathematica_footer = (
         "\n=========================== Copy me! ==========================="
     )
-    mathematica_output = f"""Show[
-    RegionPlot[{cond_mathematica},  {plotrange_mathematica}],
+    mathematica_output = f"""\nShow[
+    RegionPlot[{cond_mathematica},  {plotrange_mathematica}, PlotPoints -> 60,  MaxRecursion -> 5],
     ContourPlot[{traj_mathematica},  {plotrange_mathematica}, ContourStyle->{{{TRAJ_COLOR}, Dashed}}],
     Graphics[ {{FaceForm[None], EdgeForm[{POLY_COLOR}], {mathematica_vertices} }} ],
-    GridLines->Automatic, Ticks->Automatic\n]"""
+    GridLines->Automatic, Ticks->Automatic\n]\n"""
 
     print(mathematica_header, mathematica_output, mathematica_footer)
 
@@ -420,10 +794,13 @@ def plot_safe_grid(
                 ) <= 0:
                     is_safe = False
                     break
-            for transition_point in set_of_transitions:
-                if is_safe and not encloses_method(poly, transition_point, intruder):
-                    is_safe = False
-                    break
+            if not is_safe:
+                for transition_point in set_of_transitions:
+                    if is_safe and not encloses_method(
+                        poly, transition_point, intruder
+                    ):
+                        is_safe = False
+                        break
             if is_safe:
                 ax.plot(x0, y0, "bo", alpha=alpha)
             else:
