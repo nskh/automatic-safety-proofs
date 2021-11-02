@@ -20,14 +20,14 @@ def compare_point_in_polygon(poly):
     assert ray_result == encloses_result
 
 
-def basic_safe_region_test(square, diamond, circle_traj):
-    print(safe(square, circle_traj, Point(4, 0), Point(4.5, 0), x, y), False)
-    print(safe(square, circle_traj, Point(4, 0), Point(4, 0), x, y), False)
-    print(safe(square, circle_traj, Point(4, 0), Point(3, 0), x, y), True)
-    print(safe(square, circle_traj, Point(4, 0), Point(5, 0), x, y), True)
-    print(safe(diamond, circle_traj, Point(4, 0), Point(3, 0), x, y), False)
-    print(safe(diamond, circle_traj, Point(4, 0), Point(4, 0), x, y), False)
-    print(safe(diamond, circle_traj, Point(4, 0), Point(2, 0), x, y), True)
+# def basic_safe_region_test(square, diamond, circle_traj):
+#     print(safe(square, circle_traj, Point(4, 0), Point(4.5, 0), x, y), False)
+#     print(safe(square, circle_traj, Point(4, 0), Point(4, 0), x, y), False)
+#     print(safe(square, circle_traj, Point(4, 0), Point(3, 0), x, y), True)
+#     print(safe(square, circle_traj, Point(4, 0), Point(5, 0), x, y), True)
+#     print(safe(diamond, circle_traj, Point(4, 0), Point(3, 0), x, y), False)
+#     print(safe(diamond, circle_traj, Point(4, 0), Point(4, 0), x, y), False)
+#     print(safe(diamond, circle_traj, Point(4, 0), Point(2, 0), x, y), True)
 
 
 def test_transitions(poly, trajectory, domain, x=None, y=None):
