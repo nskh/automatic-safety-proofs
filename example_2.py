@@ -36,7 +36,7 @@ cond = compute_unsafe_cond(
 )
 print("Boolean condition for unsafe region:\n", cond)
 
-print("\nPlotting dot grid visualization of safe and unsafe regions...")
+print("\nPlotting dot grid visualization of safe and unsafe regions...\n")
 plot_condition(x, y, cond, xbounds, ybounds, title=example_name)
 mathematica_output = print_mathematica(
     x, y, cond, xbounds, ybounds, traj_piecewise, rectangle, False
