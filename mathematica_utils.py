@@ -1,3 +1,4 @@
+from sympy import *
 from typing import Dict, List, Set, Tuple
 
 # finding close parens
@@ -71,7 +72,6 @@ def swap_piecewise(s: str):
     return newstr
 
 
-# TODO(nishant): section for all the text transformations
 def sympy_to_mathematica(cond) -> str:
     cond_string: str = str(cond)
     replacements = [
@@ -104,24 +104,35 @@ def sympy_to_mathematica(cond) -> str:
 def print_mathematica(
     x, y, cond, xbounds, ybounds, trajectory, poly, print_command=False
 ):
+    if y not in trajectory.free_symbols:
+        func_var = x
+    elif x not in trajectory.free_symbols:
+        func_var = y
+    else:
+        raise Exception("Trajectory had two variables!")
+
     # Translating to mathematica here for one-click plotting
     # boolean safe region condition for RegionPlot
     cond_mathematica: str = sympy_to_mathematica(cond)
-    # range over which to plot
-    # TODO(nishant): fix bounds to be only one variable
-    plotrange_mathematica: str = (
+    # f(x) works with Plot[], f(y) needs contour plot
+    region_plotrange_mathematica: str = (
         f"{{x, {xbounds[0]}, {xbounds[1]}}}, {{y, {ybounds[0]}, {ybounds[1]}}}"
     )
-    # trajectory equation to draw in Mathematica
-    # TODO(nishant): verify y equations get plotted correctly
-    # f(x) works with Plot[], f(y) needs contour plot
-    traj_mathematica: str = sympy_to_mathematica(trajectory)
+    if func_var == x:
+        traj_plotrange_mathematica: str = f"{{x, {xbounds[0]}, {xbounds[1]}}}"
+        traj_mathematica: str = sympy_to_mathematica(trajectory)
+        plot_type = "Plot"
+        style_type = "PlotStyle"
+        offsetx = (xbounds[1] + xbounds[0]) / 2
+        offsety = trajectory.subs(x, offsetx)
+    elif func_var == y:
+        traj_plotrange_mathematica: str = region_plotrange_mathematica
+        traj_mathematica: str = sympy_to_mathematica(-x + trajectory) + " == 0"
+        plot_type = "ContourPlot"
+        style_type = "ContourStyle"
+        offsety = (ybounds[1] + ybounds[0]) / 2
+        offsetx = trajectory.subs(y, offsety)
 
-    # TODO(nishant): add parameter or logic for offsetx
-    offsetx = 1
-    # offsety = solve(traj_eqn.subs(x, offsetx))[0]
-    # TODO(nishant): handle this offset issue
-    offsety = trajectory.subs(x, offsetx)
     verts = poly.vertices
     mathematica_vertices = str([(v.x + offsetx, v.y + offsety) for v in verts])
     mathematica_vertices = "{" + sympy_to_mathematica(mathematica_vertices)[1:-1] + "}"
@@ -138,8 +149,8 @@ def print_mathematica(
         "\n=========================== Copy me! ===========================\n"
     )
     mathematica_output = f"""\nShow[
-    RegionPlot[{cond_mathematica},  {plotrange_mathematica}, PlotPoints -> 60,  MaxRecursion -> 5],
-    Plot[{traj_mathematica},  {plotrange_mathematica}, PlotStyle->{{{TRAJ_COLOR}, Dashed}}],
+    RegionPlot[{cond_mathematica},  {region_plotrange_mathematica}, PlotPoints -> 60,  MaxRecursion -> 5],
+    {plot_type}[{traj_mathematica},  {traj_plotrange_mathematica}, {style_type}->{{{TRAJ_COLOR}, Dashed}}],
     Graphics[ {{FaceForm[None], EdgeForm[{POLY_COLOR}], {mathematica_vertices} }} ],
     GridLines->Automatic, Ticks->Automatic, AspectRatio->Automatic\n]\n"""
 
