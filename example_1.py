@@ -22,7 +22,7 @@ domain = Interval(-12, 9)
 xbounds = [-15, 12]
 ybounds = [-3, 9]
 
-cond = plot_safe_grid_piecewise(
+cond = compute_unsafe_cond(
     x,
     y,
     square,
