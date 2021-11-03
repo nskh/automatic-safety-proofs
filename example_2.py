@@ -27,7 +27,7 @@ xbounds = (domain.inf - 3, domain.sup + 3)
 ybounds = (-2, 9)
 example_name = "ACAS X Climb with Rectangle"
 
-cond = plot_safe_grid_piecewise(
+cond = compute_unsafe_cond(
     x,
     y,
     rectangle,

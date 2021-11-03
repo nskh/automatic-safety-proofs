@@ -159,7 +159,7 @@ def encloses_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.
 
 
 # TODO(nishant): rename this
-def plot_safe_grid_piecewise(
+def compute_unsafe_cond(
     x,
     y,
     poly: sympy.Polygon,

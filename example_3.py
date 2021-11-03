@@ -37,7 +37,7 @@ ybounds = (-3, 19)
 # Run algorithm
 example_name = "Top-Down UAV Trajectory"
 
-cond = plot_safe_grid_piecewise(
+cond = compute_unsafe_cond(
     x,
     y,
     hexagon,
