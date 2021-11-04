@@ -18,17 +18,31 @@ def plot_condition(
     fig = plt.figure()
     ax = fig.gca()
 
-    nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
-    count = 0
+    # nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
+    # count = 0
+    SAFE_COLOR = "#0000bb"
+    UNSAFE_COLOR = "#bb0010"
+    dot_colors = []
+    if resolution < 0.5:
+        dotscale = 6
+    elif resolution < 1:
+        dotscale = 4
+    else:
+        dotscale = 3
+
+    xpoints = []
+    ypoints = []
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
-            count += 1
+            # count += 1
+            xpoints.append(x0)
+            ypoints.append(y0)
             is_safe = (~cond).subs([(x, x0), (y, y0)])
             if is_safe:
-                ax.plot(x0, y0, "bo", alpha=alpha, markersize=resolution * 4)
+                dot_colors.append(SAFE_COLOR)
             else:
-                ax.plot(x0, y0, "ro", alpha=alpha, markersize=resolution * 4)
-
+                dot_colors.append(UNSAFE_COLOR)
+    ax.scatter(xpoints, ypoints, s=resolution * dotscale, c=dot_colors)
     ax.axis("equal")
 
     ax.set_title(title)
