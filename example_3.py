@@ -31,7 +31,7 @@ plot(traj_piecewise)
 # Define domain and plot bounds
 domain = Interval(-12, 10)
 xbounds = (domain.inf - 3, domain.sup + 3)
-ybounds = (-3, 19)
+ybounds = (-3, 22)
 
 
 # Run algorithm
@@ -49,7 +49,7 @@ print("Boolean condition for unsafe region:\n", cond)
 print(
     "\nPlotting dot grid visualization of safe and unsafe regions...\nThis may take up to 20 seconds to plot.\n"
 )
-plot_condition(x, y, cond, xbounds, ybounds, title=example_name, resolution=0.75)
+plot_condition(x, y, cond, xbounds, ybounds, title=example_name, resolution=0.5)
 mathematica_output = print_mathematica(
     x, y, cond, xbounds, ybounds, traj_piecewise, hexagon
 )

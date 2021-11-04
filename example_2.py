@@ -41,6 +41,6 @@ print(
 )
 plot_condition(x, y, cond, xbounds, ybounds, title=example_name)
 mathematica_output = print_mathematica(
-    x, y, cond, xbounds, ybounds, traj_piecewise, rectangle, False
+    x, y, cond, xbounds, ybounds, traj_piecewise, rectangle
 )
 print("Mathematica command for plotting:\n", mathematica_output)
