@@ -16,13 +16,13 @@ def plot_condition(
     savefig=False,
 ):
     fig = plt.figure()
+    fig.set_dpi(200)
     ax = fig.gca()
 
     # nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
     # count = 0
-    SAFE_COLOR = "#0000bb"
-    UNSAFE_COLOR = "#bb0010"
-    dot_colors = []
+    SAFE_COLOR = "#1f77b4"
+    UNSAFE_COLOR = "#ff7f0e"
     if resolution < 0.5:
         dotscale = 6
     elif resolution < 1:
@@ -30,19 +30,29 @@ def plot_condition(
     else:
         dotscale = 3
 
-    xpoints = []
-    ypoints = []
+    xpoints_safe = []
+    xpoints_unsafe = []
+    ypoints_safe = []
+    ypoints_unsafe = []
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
             # count += 1
-            xpoints.append(x0)
-            ypoints.append(y0)
             is_safe = (~cond).subs([(x, x0), (y, y0)])
             if is_safe:
-                dot_colors.append(SAFE_COLOR)
+                xpoints_safe.append(x0)
+                ypoints_safe.append(y0)
             else:
-                dot_colors.append(UNSAFE_COLOR)
-    ax.scatter(xpoints, ypoints, s=resolution * dotscale, c=dot_colors)
+                xpoints_unsafe.append(x0)
+                ypoints_unsafe.append(y0)
+    ax.scatter(xpoints_safe, ypoints_safe, s=resolution * dotscale, c=SAFE_COLOR)
+    ax.scatter(
+        xpoints_unsafe,
+        ypoints_unsafe,
+        s=resolution * dotscale,
+        c=UNSAFE_COLOR,
+        marker="^",
+    )
+    ax.legend(["safe", "unsafe"])
     ax.axis("equal")
 
     ax.set_title(title)
