@@ -3,15 +3,19 @@
 This README walks through steps required to run the examples for our TACAS submission "Automating geometric proofs of collision avoidance via active corners". Our artifact automatically constructs and visualizes a formulation of a "safe region", the set of obstacle locations where a collision will not occur given an object and trajectory. Commands to run in the terminal begin with a $; do not actually include the "$" character in your terminal command.
 
 On the VM, open a terminal. Download and unzip a zip file of the directory:
-TODO(nishant): change this to reflect a different zip file location
+
 `$ wget https://github.com/nskh/automatic-safety-proofs/archive/clean_artifact.zip`
+
 `$ unzip clean_artifact.zip`
 
 CD into the directory
+
 `$ cd automatic-safety-proofs-clean_artifact`
 
 Install dependencies
+
 `$ chmod +x install_pip.sh`
+
 `$ ./install_pip.sh`
 
 Four examples are included. The first is a simple toy example to illustrate the functionality of our tool. The second and third are the applications included in our submitted paper. The last example is a piecewise function f(y) that is equivalent to a segment of the second trajectory. When you run the examples, they output three plots (the fourth outputs two plots) and two blocks of text. 
@@ -26,7 +30,11 @@ The first plot is the polygon object used for unsafe region computation. The sec
 - The fourth example is similar to the second, with a parabolic-then-linear path described as a piecewise function f(y). Due to limitations of Sympy, there is no plot of this trajectory in the example, though the computation of the unsafe region works the same way it does in the first three examples.
 
 To run examples:
+
 `$ python3 example_1.py`
+
 `$ python3 example_2.py`
+
 `$ python3 example_3.py`
+
 `$ python3 example_4.py`
