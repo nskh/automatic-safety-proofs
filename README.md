@@ -1,6 +1,6 @@
 # Automated Geometric Safety Proofs
 
-This README walks through steps required to run the examples for our TACAS submission "Automating geometric proofs of collision avoidance via active corners". Our artifact automatically constructs and visualizes a formulation of a "safe region", the set of obstacle locations where a collision will not occur given an object and trajectory. Commands to run in the terminal begin with a $; do not actually include the "$" character in your terminal command.
+This README walks through steps required to run the examples for our CAV submission "Automating geometric proofs of collision avoidance via active corners". Our artifact automatically constructs and visualizes a formulation of a "safe region", the set of obstacle locations where a collision will not occur given an object and trajectory. Commands to run in the terminal begin with a $; do not actually include the "$" character in your terminal command.
 
 On the VM, open a terminal. Download and unzip a zip file of the directory:
 
