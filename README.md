@@ -14,9 +14,9 @@ CD into the directory
 
 Install dependencies
 
-`$ chmod +x install_pip.sh`
+`$ chmod +x install_pip_local.sh`
 
-`$ ./install_pip.sh`
+`$ ./install_pip_local.sh`
 
 Four examples are included. The first is a simple toy example to illustrate the functionality of our tool. The second and third are the applications included in our submitted paper. The last example is a piecewise function f(y) that is equivalent to a segment of the second trajectory. When you run the examples, they output three plots (the fourth outputs two plots) and two blocks of text. 
 
