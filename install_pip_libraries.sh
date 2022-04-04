@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 pip install cycler
 pip install kiwisolver
 pip install matplotlib
