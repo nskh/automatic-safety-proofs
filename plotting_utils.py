@@ -16,38 +16,43 @@ def plot_condition(
     savefig=False,
 ):
     fig = plt.figure()
+    fig.set_dpi(200)
     ax = fig.gca()
 
-    nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
-    # TODO(nishant): progress bar when plotting somehow?
-    count = 0
+    # nelem = (xbounds[1] - xbounds[0]) * (ybounds[1] - ybounds[0]) / (resolution ** 2)
+    # count = 0
+    SAFE_COLOR = "#1f77b4"
+    UNSAFE_COLOR = "#ff7f0e"
+    if resolution < 0.5:
+        dotscale = 6
+    elif resolution < 1:
+        dotscale = 4
+    else:
+        dotscale = 3
+
+    xpoints_safe = []
+    xpoints_unsafe = []
+    ypoints_safe = []
+    ypoints_unsafe = []
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
-            count += 1
-            # TODO(nishant): progress for plotting dots
-            # print(f"{count/nelem*100}% \r")
-            # intruder = Point(x0, y0)
+            # count += 1
             is_safe = (~cond).subs([(x, x0), (y, y0)])
-            # is_safe = True
-            # for (traj1, traj2) in trajs:
-            #     if (traj1.subs(x, intruder[0]).subs(y, intruder[1])) * (
-            #         traj2.subs(x, intruder[0]).subs(y, intruder[1])
-            #     ) <= 0:
-            #         is_safe = False
-            #         break
-            # if not is_safe:
-            #     for transition_point in set_of_transitions:
-            #         if is_safe and not encloses_method(
-            #             poly, transition_point, intruder
-            #         ):
-            #             is_safe = False
-            #             break
-            # TODO(nishant): resolution scaling
             if is_safe:
-                ax.plot(x0, y0, "bo", alpha=alpha, markersize=resolution * 4)
+                xpoints_safe.append(x0)
+                ypoints_safe.append(y0)
             else:
-                ax.plot(x0, y0, "ro", alpha=alpha, markersize=resolution * 4)
-
+                xpoints_unsafe.append(x0)
+                ypoints_unsafe.append(y0)
+    ax.scatter(xpoints_safe, ypoints_safe, s=resolution * dotscale, c=SAFE_COLOR)
+    ax.scatter(
+        xpoints_unsafe,
+        ypoints_unsafe,
+        s=resolution * dotscale,
+        c=UNSAFE_COLOR,
+        marker="^",
+    )
+    ax.legend(["safe", "unsafe"])
     ax.axis("equal")
 
     ax.set_title(title)
