@@ -37,6 +37,7 @@ def plot_condition(
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
             # count += 1
+            # TODO: use is_safe
             is_safe = (~cond).subs([(x, x0), (y, y0)])
             if is_safe:
                 xpoints_safe.append(x0)
