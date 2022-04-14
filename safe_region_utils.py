@@ -293,6 +293,7 @@ def compute_unsafe_cond(
     sorted_transitions: list = sorted(
         set_of_transitions, key=lambda point: getattr(point, str(func_var))
     )
+    print(sorted_transitions)
     func_var_transitions = [getattr(p, str(func_var)) for p in sorted_transitions]
     midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
     if func_var == x:
@@ -341,6 +342,9 @@ def compute_unsafe_cond(
     active_corners: dict = {}
     for midpoint_angle in midpoint_angles:
         for k, v in corners_to_angles.items():
+            print(midpoint_angle)
+            print(v)
+            # NOTE: fails for symbolic trajectory parameters
             if midpoint_angle % (2 * pi) in v:
                 active_corners[midpoint_angle] = k
     var_intervals = list(
