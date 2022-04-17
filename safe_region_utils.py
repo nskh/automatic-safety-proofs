@@ -9,6 +9,9 @@ from plotting_utils import *
 
 init_printing(use_unicode=True)
 
+# global debug if printing
+PRINTS = False
+
 
 def compute_polygon_angles(poly: sympy.Polygon) -> list:
     """Return angles corresponding to each vertex of a polygon.
@@ -137,7 +140,8 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
             try:
                 soln = [{x: soln_elem} for soln_elem in list(soln)]
             except:
-                print(soln)
+                if PRINTS:
+                    print(soln)
 
         for elem in soln:
             if angle in transitions:
@@ -174,8 +178,9 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                 )
                 # with this, we have a solution for the transition point
                 if soln_var == x:
-                    # print("x-coord:", solved_eqn.rhs)
-                    # print("y-coord:", single_var_soln)
+                    if PRINTS:
+                        print("x-coord:", solved_eqn.rhs)
+                        print("y-coord:", single_var_soln)
                     transition_point = Point(solved_eqn.rhs, single_var_soln)
                 elif soln_var == y:
                     transition_point = Point(single_var_soln, solved_eqn.rhs)
@@ -302,7 +307,8 @@ def compute_unsafe_cond(
     sorted_transitions: list = sorted(
         set_of_transitions, key=lambda point: getattr(point, str(func_var))
     )
-    print(sorted_transitions)
+    if PRINTS:
+        print(sorted_transitions)
     func_var_transitions = [getattr(p, str(func_var)) for p in sorted_transitions]
     midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
     if func_var == x:
@@ -351,8 +357,9 @@ def compute_unsafe_cond(
     active_corners: dict = {}
     for midpoint_angle in midpoint_angles:
         for k, v in corners_to_angles.items():
-            print(midpoint_angle)
-            print(v)
+            if PRINTS:
+                print(midpoint_angle)
+                print(v)
             # NOTE: fails for symbolic trajectory parameters
             if midpoint_angle % (2 * pi) in v:
                 active_corners[midpoint_angle] = k
@@ -600,7 +607,8 @@ def compute_unsafe_cond_symbolic(
     sorted_transitions: list = sorted(
         set_of_transitions, key=lambda point: getattr(point, str(func_var))
     )
-    # print(sorted_transitions)
+    if PRINTS:
+        print(sorted_transitions)
     func_var_transitions = [getattr(p, str(func_var)) for p in sorted_transitions]
     midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
     if func_var == x:
