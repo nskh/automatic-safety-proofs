@@ -773,25 +773,26 @@ def compute_unsafe_cond_symbolic(
     if add_notches:
         # adding notches
         for transition_point in set_of_transitions:
-            # neg for left side, 0 for on edge, pos for on right side
-            # inside polygon IF all neg or IF all pos
-            shifted_vertex_pairs = [
-                (v + transition_point, nextv + transition_point)
-                for (v, nextv) in vertex_pairs
-            ]  # [(v1, v2), (v2, v3), ..., (vn, v1)]
-            # source: https://inginious.org/course/competitive-programming/geometry-pointinconvex
-            # source: https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
-            side_conds = [
-                (y - v.y) * (nextv.x - v.x) - (x - v.x) * (nextv.y - v.y)
-                for (v, nextv) in shifted_vertex_pairs
-            ]
-            # construct both cases inside
-            cond1 = true  # init to sympy.true since we're cascading Ands
-            cond2 = true  # init to sympy.true since we're cascading Ands
-            for side_cond in side_conds:
-                cond1 = cond1 & (side_cond <= 0)
-                cond2 = cond2 & (side_cond >= 0)
-            total_cond = total_cond | cond1 | cond2
+            if transition_point.x.is_finite and transition_point.y.is_finite:
+                # neg for left side, 0 for on edge, pos for on right side
+                # inside polygon IF all neg or IF all pos
+                shifted_vertex_pairs = [
+                    (v + transition_point, nextv + transition_point)
+                    for (v, nextv) in vertex_pairs
+                ]  # [(v1, v2), (v2, v3), ..., (vn, v1)]
+                # source: https://inginious.org/course/competitive-programming/geometry-pointinconvex
+                # source: https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+                side_conds = [
+                    (y - v.y) * (nextv.x - v.x) - (x - v.x) * (nextv.y - v.y)
+                    for (v, nextv) in shifted_vertex_pairs
+                ]
+                # construct both cases inside
+                cond1 = true  # init to sympy.true since we're cascading Ands
+                cond2 = true  # init to sympy.true since we're cascading Ands
+                for side_cond in side_conds:
+                    cond1 = cond1 & (side_cond <= 0)
+                    cond2 = cond2 & (side_cond >= 0)
+                total_cond = total_cond | cond1 | cond2
 
     if print_latex:
         print(latex(total_cond))
