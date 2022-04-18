@@ -15,6 +15,17 @@ def plot_condition(
     alpha=1,
     savefig=False,
 ):
+    # First, check if we can plot `cond` at all
+    if len(cond.free_symbols) > 2:
+        print(
+            "Can't plot `cond` since it has too many variables.",
+            "Please use .subs() to plot an instantation of this condition.",
+        )
+        print(
+            f"Extraneous variables to substitute out are {set(map(str, cond.free_symbols)) - {'x', 'y'}}."
+        )
+        return
+
     fig = plt.figure()
     fig.set_dpi(200)
     ax = fig.gca()
