@@ -128,7 +128,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
         # use vectors <dfdx, dfdy> <cos(theta), sin(theta)>
         soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
 
-        if soln == S.EmptySet:
+        if soln is S.EmptySet:
             soln = solveset(
                 Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
             )
@@ -137,17 +137,22 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                 soln = [{y: soln_elem} for soln_elem in list(soln)]
         else:
             # Pack into list of dict so it's clear which variable has been solved for
-            try:
-                soln = [{x: soln_elem} for soln_elem in list(soln)]
-            except:
-                if PRINTS:
-                    print(soln)
+            soln = [{x: soln_elem} for soln_elem in list(soln)]
 
-        for elem in soln:
-            if angle in transitions:
-                transitions[angle].append(elem)
-            else:
-                transitions[angle] = [elem]
+        # TODO: figure out cardinality of this set
+        if type(soln) is list:
+            for elem in soln:
+                if angle in transitions:
+                    transitions[angle].append(elem)
+                else:
+                    transitions[angle] = [elem]
+        else:
+            if soln is not S.EmptySet:
+                if angle in transitions:
+                    transitions[angle].append(soln)
+                else:
+                    transitions[angle] = [soln]
+
     # soln above may still be symbolic, so we have to evaluate the expression
     # that's what happens below
 
@@ -298,8 +303,12 @@ def compute_unsafe_cond(
             right_bound = Point(trajectory.subs(func_var, domain.sup), domain.sup)
 
         set_of_transitions.update(subset_of_transitions)
-        set_of_transitions.add(left_bound)
-        set_of_transitions.add(right_bound)
+        if left_bound.x.is_finite and left_bound.y.is_finite:
+            set_of_transitions.add(left_bound)
+        if right_bound.x.is_finite and right_bound.y.is_finite:
+            set_of_transitions.add(right_bound)
+        # set_of_transitions.add(left_bound)
+        # set_of_transitions.add(right_bound)
 
     # In order to identify which corners are active over which intervals,
     # sort transitions and identify active corners at the midpoints of the intervals
@@ -665,9 +674,7 @@ def compute_unsafe_cond_symbolic(
     var_intervals = list(
         zip(func_var_transitions[:-1], func_var_transitions[1:])
     )  # same len as midpoints
-    assert (
-        var_intervals
-    ), "var_intervals must not eval to False as a bool (empty or None)"
+    assert var_intervals, f"var_intervals: {var_intervals}. Evaluated to False."
 
     # Construct the full boolean formulation of the *unsafe* region
     total_cond = None
@@ -699,11 +706,22 @@ def compute_unsafe_cond_symbolic(
         # corner_cond = left_eq * right_eq <= 0
 
         # Ensure this check only applies between the transition points (plus/minus width)
+        # Discard nonsense > -inf or < +inf
         if func_var == x:
-            func_var_cond = (x >= (x_left - w)) & (x <= (x_right + w))
+            if x_left is -oo:
+                func_var_cond = x <= (x_right + w)
+            elif x_right is oo:
+                func_var_cond = x >= (x_left - w)
+            else:
+                func_var_cond = (x >= (x_left - w)) & (x <= (x_right + w))
         elif func_var == y:
             # note that w is actually height when found above
-            func_var_cond = (y >= (y_left - w)) & (y <= (y_right + w))
+            if y_left is -oo:
+                func_var_cond = y <= (y_right + w)
+            elif y_right is oo:
+                func_var_cond = y >= (y_left - w)
+            else:
+                func_var_cond = (y >= (y_left - w)) & (y <= (y_right + w))
 
         # construct g functions
         # same trajectory over this interval, held constant outside of it
@@ -718,11 +736,24 @@ def compute_unsafe_cond_symbolic(
                         f"Warning! more than one piecewise segment detected over interval ({y_left}, {y_right}). Results may be erroneous due to mis-specified piecewise functions."
                     )
                 current_fn = current_piece[0][0]
-                g = y - Piecewise(
-                    (y_left, x < x_left),
-                    (current_fn, x <= x_right),
-                    (y_right, x > x_right),
-                )
+                # Discard nonsense infinities
+                # TODO(nishant): pull this logic out into a different function
+                if x_left is -oo:
+                    g = y - Piecewise(
+                        (current_fn, x <= x_right),
+                        (y_right, x > x_right),
+                    )
+                elif x_right is oo:
+                    g = y - Piecewise(
+                        (y_left, x < x_left),
+                        (current_fn, x <= x_right),
+                    )
+                else:
+                    g = y - Piecewise(
+                        (y_left, x < x_left),
+                        (current_fn, x <= x_right),
+                        (y_right, x > x_right),
+                    )
             elif func_var == y:
                 # Use an open interval in case two cases hold exactly at y_left
                 current_piece = trajectory.as_expr_set_pairs(
@@ -733,24 +764,59 @@ def compute_unsafe_cond_symbolic(
                         f"Warning! more than one piecewise segment detected over interval ({y_left}, {y_right}). Results may be erroneous due to mis-specified piecewise functions."
                     )
                 current_fn = current_piece[0][0]
-                g = x - Piecewise(
-                    (x_left, y < y_left),
-                    (current_fn, y <= y_right),
-                    (x_right, y > y_right),
-                )
+                if y_left is -oo:
+                    g = x - Piecewise(
+                        (current_fn, y <= y_right),
+                        (x_right, y > y_right),
+                    )
+                elif y_right is oo:
+                    g = x - Piecewise(
+                        (x_left, y < y_left),
+                        (current_fn, y <= y_right),
+                    )
+                else:
+                    g = x - Piecewise(
+                        (x_left, y < y_left),
+                        (current_fn, y <= y_right),
+                        (x_right, y > y_right),
+                    )
         else:
             if func_var == x:
-                g = y - Piecewise(
-                    (y_left, x < x_left),
-                    (trajectory, x <= x_right),
-                    (y_right, x > x_right),
-                )
+                # Discard nonsense infinities
+                if x_left is -oo:
+                    g = y - Piecewise(
+                        (trajectory, x <= x_right),
+                        (y_right, x > x_right),
+                    )
+                elif x_right is oo:
+                    g = y - Piecewise(
+                        (y_left, x < x_left),
+                        (trajectory, x <= x_right),
+                    )
+                else:
+                    g = y - Piecewise(
+                        (y_left, x < x_left),
+                        (trajectory, x <= x_right),
+                        (y_right, x > x_right),
+                    )
             elif func_var == y:
-                g = x - Piecewise(
-                    (x_left, y < y_left),
-                    (trajectory, y <= y_right),
-                    (x_right, y > y_right),
-                )
+                # Discard nonsense infinities
+                if y_left is -oo:
+                    g = x - Piecewise(
+                        (trajectory, y <= y_right),
+                        (x_right, y > y_right),
+                    )
+                elif y_right is oo:
+                    g = x - Piecewise(
+                        (x_left, y < y_left),
+                        (trajectory, y <= y_right),
+                    )
+                else:
+                    g = x - Piecewise(
+                        (x_left, y < y_left),
+                        (trajectory, y <= y_right),
+                        (x_right, y > y_right),
+                    )
 
         # Assume symmetric polygon and test all active corner pairs
         full_cond = None
