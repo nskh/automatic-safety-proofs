@@ -44,6 +44,42 @@ def compute_polygon_angles(poly: sympy.Polygon) -> list:
     return positive_angles, vertex_pairs
 
 
+def compute_corners_to_angles(poly: sympy.Polygon) -> Dict:
+    verts = poly.vertices
+    # This section maps each vertex to a range of angles, so we can find
+    # the active corners for each of the angles in midpoint_angles
+    vertex_pairs_right = list(zip(verts, verts[1:] + verts[:1]))
+    vertex_offsets_right: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_right
+    ]
+    angles_right: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_right
+    ]
+    positive_angles_right = [angle % (2 * pi) for angle in angles_right]
+
+    vertex_pairs_left = list(zip(verts[-1:] + verts[:-1], verts))
+    vertex_offsets_left: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_left
+    ]
+    angles_left: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_left
+    ]
+    positive_angles_left = [angle % (2 * pi) for angle in angles_left]
+
+    # construct a dict mapping vertices to ranges of angles
+    corners_to_angles = dict()
+    for i in range(len(verts)):
+        if positive_angles_right[i] < positive_angles_left[i]:
+            corners_to_angles[verts[i]] = Interval(
+                positive_angles_left[i], positive_angles_right[i] + 2 * pi
+            )
+        else:
+            corners_to_angles[verts[i]] = Interval(
+                positive_angles_left[i], positive_angles_right[i]
+            )
+    return corners_to_angles
+
+
 def ray_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
     shifted_intruder = Point(intruder) - Point(location)
     intersections = poly.intersection(
@@ -127,7 +163,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
         # parallel iff y1*x2 = x1*y2
         # use vectors <dfdx, dfdy> <cos(theta), sin(theta)>
         soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
-
+        print(f"solveset solution: {soln.doit()}")
         if soln is S.EmptySet:
             soln = solveset(
                 Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
@@ -137,7 +173,14 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                 soln = [{y: soln_elem} for soln_elem in list(soln)]
         else:
             # Pack into list of dict so it's clear which variable has been solved for
-            soln = [{x: soln_elem} for soln_elem in list(soln)]
+            print(f"solution when finding transitions for angle {angle}: {soln}")
+            if type(soln) is FiniteSet:
+                soln = [{x: soln_elem} for soln_elem in list(soln)]
+            elif type(soln) is Complement:
+                # discard rhs of complmement (shows up in Adler examples for circle path)
+                soln = [{x: soln_elem} for soln_elem in list(soln.args[0])]
+            else:
+                soln = [{x: soln}]
 
         # TODO: figure out cardinality of this set
         if type(soln) is list:
@@ -161,6 +204,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
         for pair in solns:
+            print(f"pair used for transition point finding: {pair}")
             # pair should always be a dictionary
             assert type(pair) == dict, "Solution element was not a dictionary!"
             # pair looks like {x: f(y)} or {y: f(x)}
@@ -259,9 +303,6 @@ def compute_unsafe_cond(
             # outside of the domain for each piece of the trajectory
             subdomain = subcond.intersect(domain)
 
-            # find transitions for piecewise domain over this interval
-            func_var = subtraj.free_symbols.pop()
-
             if y not in subtraj.free_symbols:  # form y=f(x)
                 _, subset_of_transitions = find_transitions(
                     -y + subtraj, angles, x, y, domain=subdomain
@@ -328,37 +369,7 @@ def compute_unsafe_cond(
     # find the trajectory tangent angle at each midpoint
     midpoint_angles = [atan2(d, 1) for d in dydx_midpoints]
 
-    # This section maps each vertex to a range of angles, so we can find
-    # the active corners for each of the angles in midpoint_angles
-    vertex_pairs_right = list(zip(verts, verts[1:] + verts[:1]))
-    vertex_offsets_right: List[Tuple] = [
-        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_right
-    ]
-    angles_right: List[float] = [
-        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_right
-    ]
-    positive_angles_right = [angle % (2 * pi) for angle in angles_right]
-
-    vertex_pairs_left = list(zip(verts[-1:] + verts[:-1], verts))
-    vertex_offsets_left: List[Tuple] = [
-        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_left
-    ]
-    angles_left: List[float] = [
-        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_left
-    ]
-    positive_angles_left = [angle % (2 * pi) for angle in angles_left]
-
-    # construct a dict mapping vertices to ranges of angles
-    corners_to_angles = dict()
-    for i in range(len(verts)):
-        if positive_angles_right[i] < positive_angles_left[i]:
-            corners_to_angles[verts[i]] = Interval(
-                positive_angles_left[i], positive_angles_right[i] + 2 * pi
-            )
-        else:
-            corners_to_angles[verts[i]] = Interval(
-                positive_angles_left[i], positive_angles_right[i]
-            )
+    corners_to_angles = compute_corners_to_angles(poly)
 
     # Map each midpoint angle to the active corner. Because we're only supporting
     # symmetric polygons so far, we only need to find a single active corner here,
@@ -490,375 +501,6 @@ def compute_unsafe_cond(
                 cond1 = cond1 & (side_cond <= 0)
                 cond2 = cond2 & (side_cond >= 0)
             total_cond = total_cond | cond1 | cond2
-
-    if print_latex:
-        print(latex(total_cond))
-
-    return total_cond
-
-
-def compute_unsafe_cond_symbolic(
-    x,
-    y,
-    poly: sympy.Polygon,
-    trajectory,  # piecewise
-    domain,
-    add_notches=True,
-    print_latex=False,
-):
-    """Given a trajectory, polygon, and domain, computes a boolean formulation of
-    the *unsafe* region. Simply negate to get the formulation of the safe region.
-
-    Args:
-        x (): Sympy symbolic variable
-        y ([type]): Sympy symbolic variable
-        poly (sympy.Polygon): Polygon to use for safe/unsafe region construction. In this
-            release of software, polygon must be symmetric.
-        trajectory: Single-variable Sympy *expression* for trajectory. May be Piecewise.
-        domain: Interval domain over which to compute unsafe region.
-        add_notches (bool, optional): Whether or not to add notches for region formulation.
-            Defaults to True.
-        print_latex (bool, optional): Whether or not to print Latex output for boolean
-            formulation of the unsafe region. Defaults to False.
-
-    Raises:
-        Exception: Complains if trajectory has two variables.
-
-    Returns:
-        Sympy boolean formula for *unsafe region* over domain above.
-    """
-    angles, vertex_pairs = compute_polygon_angles(poly)
-    verts = poly.vertices
-    if y not in trajectory.free_symbols:
-        func_var = x
-        keyfunc = lambda p: p.x
-    elif x not in trajectory.free_symbols:
-        func_var = y
-        keyfunc = lambda p: p.y
-    else:
-        raise Exception("Trajectory had two variables!")
-
-    # compute width to use in g() function later
-    # for functions f(y), this is actually height
-    w_point = max(
-        [
-            -1 * min([v - poly.centroid for v in verts], key=keyfunc),
-            max([v - poly.centroid for v in verts], key=keyfunc),
-        ],
-        key=keyfunc,
-    )
-    w = getattr(w_point, str(func_var))
-
-    # construct a large set of transitions
-    set_of_transitions = set()
-    if type(trajectory) == Piecewise:
-        # For piecewise trajectories, we need to find transitions for each piece
-        for (subtraj, subcond) in trajectory.as_expr_set_pairs():
-            # trim domain by computing intersection, so we don't find transitions
-            # outside of the domain for each piece of the trajectory
-            subdomain = subcond.intersect(domain)
-
-            # find transitions for piecewise domain over this interval
-            func_var = subtraj.free_symbols.pop()
-
-            if y not in subtraj.free_symbols:  # form y=f(x)
-                _, subset_of_transitions = find_transitions(
-                    -y + subtraj, angles, x, y, domain=subdomain
-                )
-                # add piecewise boundary
-                left_bound = Point(subdomain.inf, subtraj.subs(func_var, subdomain.inf))
-                right_bound = Point(
-                    subdomain.sup, subtraj.subs(func_var, subdomain.sup)
-                )
-            elif x not in subtraj.free_symbols:  # form x=f(y)
-                _, subset_of_transitions = find_transitions(
-                    -x + subtraj, angles, x, y, domain=subdomain
-                )
-                # add piecewise boundary
-                left_bound = Point(subtraj.subs(func_var, subdomain.inf), subdomain.inf)
-                right_bound = Point(
-                    subtraj.subs(func_var, subdomain.sup), subdomain.sup
-                )
-            set_of_transitions.update(subset_of_transitions)
-
-            if left_bound.x.is_finite and left_bound.y.is_finite:
-                set_of_transitions.add(left_bound)
-            if right_bound.x.is_finite and right_bound.y.is_finite:
-                set_of_transitions.add(right_bound)
-    else:
-        if y not in trajectory.free_symbols:
-            _, subset_of_transitions = find_transitions(
-                -y + trajectory, angles, x, y, domain=domain
-            )
-            # Add left and right boundaries to check for notch there too
-            left_bound = Point(domain.inf, trajectory.subs(func_var, domain.inf))
-            right_bound = Point(domain.sup, trajectory.subs(func_var, domain.sup))
-        elif x not in trajectory.free_symbols:
-            _, subset_of_transitions = find_transitions(
-                -x + trajectory, angles, x, y, domain=domain
-            )
-            # Add left and right boundaries to check for notch there too
-            left_bound = Point(trajectory.subs(func_var, domain.inf), domain.inf)
-            right_bound = Point(trajectory.subs(func_var, domain.sup), domain.sup)
-
-        set_of_transitions.update(subset_of_transitions)
-        # if left_bound.x.is_finite and left_bound.y.is_finite:
-        #     set_of_transitions.add(left_bound)
-        # if right_bound.x.is_finite and right_bound.y.is_finite:
-        #     set_of_transitions.add(right_bound)
-
-        set_of_transitions.add(left_bound)
-        set_of_transitions.add(right_bound)
-
-    # In order to identify which corners are active over which intervals,
-    # sort transitions and identify active corners at the midpoints of the intervals
-    # defined by transition points.
-    sorted_transitions: list = sorted(
-        set_of_transitions, key=lambda point: getattr(point, str(func_var))
-    )
-    if PRINTS:
-        print(sorted_transitions)
-    func_var_transitions = [getattr(p, str(func_var)) for p in sorted_transitions]
-    midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
-    if func_var == x:
-        deriv_traj = diff(trajectory, x)
-    elif func_var == y:
-        deriv_traj = 1 / diff(trajectory, y)  # invert dx/dy to get slope dy/dx
-    dydx_midpoints = [deriv_traj.subs(func_var, val) for val in midpoints]
-    # find the trajectory tangent angle at each midpoint
-    midpoint_angles = [atan2(d, 1) for d in dydx_midpoints]
-
-    # This section maps each vertex to a range of angles, so we can find
-    # the active corners for each of the angles in midpoint_angles
-    vertex_pairs_right = list(zip(verts, verts[1:] + verts[:1]))
-    vertex_offsets_right: List[Tuple] = [
-        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_right
-    ]
-    angles_right: List[float] = [
-        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_right
-    ]
-    positive_angles_right = [angle % (2 * pi) for angle in angles_right]
-
-    vertex_pairs_left = list(zip(verts[-1:] + verts[:-1], verts))
-    vertex_offsets_left: List[Tuple] = [
-        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_left
-    ]
-    angles_left: List[float] = [
-        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_left
-    ]
-    positive_angles_left = [angle % (2 * pi) for angle in angles_left]
-
-    # construct a dict mapping vertices to ranges of angles
-    corners_to_angles = dict()
-    for i in range(len(verts)):
-        if positive_angles_right[i] < positive_angles_left[i]:
-            corners_to_angles[verts[i]] = Interval(
-                positive_angles_left[i], positive_angles_right[i] + 2 * pi
-            )
-        else:
-            corners_to_angles[verts[i]] = Interval(
-                positive_angles_left[i], positive_angles_right[i]
-            )
-
-    # # Map each midpoint angle to the active corner. Because we're only supporting
-    # # symmetric polygons so far, we only need to find a single active corner here,
-    # # and we can use its opposing corner (due to central symmetry) later.
-    # active_corners: dict = {}
-    # for midpoint_angle in midpoint_angles:
-    #     for k, v in corners_to_angles.items():
-    #         print(midpoint_angle)
-    #         print(v)
-    #         # NOTE: fails for symbolic trajectory parameters
-    #         if midpoint_angle % (2 * pi) in v:
-    #             active_corners[midpoint_angle] = k
-    var_intervals = list(
-        zip(func_var_transitions[:-1], func_var_transitions[1:])
-    )  # same len as midpoints
-    assert var_intervals, f"var_intervals: {var_intervals}. Evaluated to False."
-
-    # Construct the full boolean formulation of the *unsafe* region
-    total_cond = None
-    for i, var_interval in enumerate(var_intervals):
-        if func_var == x:
-            x_left = var_interval[0]
-            y_left = trajectory.subs(x, x_left)
-            x_right = var_interval[1]
-            y_right = trajectory.subs(x, x_right)
-        elif func_var == y:
-            y_left = var_interval[0]
-            x_left = trajectory.subs(y, y_left)
-            y_right = var_interval[1]
-            x_right = trajectory.subs(y, y_right)
-
-        poly_center_left = Point(x_left, y_left)
-        poly_center_right = Point(x_right, y_right)
-
-        # # Assume symmetric polygon.
-        # active_corner_offset = active_corners[midpoint_angles[i]]
-        # line_left = Line(poly_center_left, poly_center_left + active_corner_offset)
-        # line_right = Line(poly_center_right, poly_center_right + active_corner_offset)
-        # # using Line.equation() creates duplicate x,y variables and ruins .subs() call later
-        # # Ensure this check only applies between the active corners at the start and end of the interval
-        # left_a, left_b, left_c = line_left.coefficients
-        # right_a, right_b, right_c = line_right.coefficients
-        # left_eq = left_a * x + left_b * y + left_c
-        # right_eq = right_a * x + right_b * y + right_c
-        # corner_cond = left_eq * right_eq <= 0
-
-        # Ensure this check only applies between the transition points (plus/minus width)
-        # Discard nonsense > -inf or < +inf
-        if func_var == x:
-            if x_left is -oo:
-                func_var_cond = x <= (x_right + w)
-            elif x_right is oo:
-                func_var_cond = x >= (x_left - w)
-            else:
-                func_var_cond = (x >= (x_left - w)) & (x <= (x_right + w))
-        elif func_var == y:
-            # note that w is actually height when found above
-            if y_left is -oo:
-                func_var_cond = y <= (y_right + w)
-            elif y_right is oo:
-                func_var_cond = y >= (y_left - w)
-            else:
-                func_var_cond = (y >= (y_left - w)) & (y <= (y_right + w))
-
-        # construct g functions
-        # same trajectory over this interval, held constant outside of it
-        if type(trajectory) == Piecewise:
-            if func_var == x:
-                # Use an open interval in case two cases hold exactly at x_left
-                current_piece = trajectory.as_expr_set_pairs(
-                    Interval.open(x_left, x_right)
-                )
-                if len(current_piece) > 1:
-                    print(
-                        f"Warning! more than one piecewise segment detected over interval ({y_left}, {y_right}). Results may be erroneous due to mis-specified piecewise functions."
-                    )
-                current_fn = current_piece[0][0]
-                # Discard nonsense infinities
-                # TODO(nishant): pull this logic out into a different function
-                if x_left is -oo:
-                    g = y - Piecewise(
-                        (current_fn, x <= x_right),
-                        (y_right, x > x_right),
-                    )
-                elif x_right is oo:
-                    g = y - Piecewise(
-                        (y_left, x < x_left),
-                        (current_fn, x <= x_right),
-                    )
-                else:
-                    g = y - Piecewise(
-                        (y_left, x < x_left),
-                        (current_fn, x <= x_right),
-                        (y_right, x > x_right),
-                    )
-            elif func_var == y:
-                # Use an open interval in case two cases hold exactly at y_left
-                current_piece = trajectory.as_expr_set_pairs(
-                    Interval.open(y_left, y_right)
-                )
-                if len(current_piece) > 1:
-                    print(
-                        f"Warning! more than one piecewise segment detected over interval ({y_left}, {y_right}). Results may be erroneous due to mis-specified piecewise functions."
-                    )
-                current_fn = current_piece[0][0]
-                if y_left is -oo:
-                    g = x - Piecewise(
-                        (current_fn, y <= y_right),
-                        (x_right, y > y_right),
-                    )
-                elif y_right is oo:
-                    g = x - Piecewise(
-                        (x_left, y < y_left),
-                        (current_fn, y <= y_right),
-                    )
-                else:
-                    g = x - Piecewise(
-                        (x_left, y < y_left),
-                        (current_fn, y <= y_right),
-                        (x_right, y > y_right),
-                    )
-        else:
-            if func_var == x:
-                # Discard nonsense infinities
-                if x_left is -oo:
-                    g = y - Piecewise(
-                        (trajectory, x <= x_right),
-                        (y_right, x > x_right),
-                    )
-                elif x_right is oo:
-                    g = y - Piecewise(
-                        (y_left, x < x_left),
-                        (trajectory, x <= x_right),
-                    )
-                else:
-                    g = y - Piecewise(
-                        (y_left, x < x_left),
-                        (trajectory, x <= x_right),
-                        (y_right, x > x_right),
-                    )
-            elif func_var == y:
-                # Discard nonsense infinities
-                if y_left is -oo:
-                    g = x - Piecewise(
-                        (trajectory, y <= y_right),
-                        (x_right, y > y_right),
-                    )
-                elif y_right is oo:
-                    g = x - Piecewise(
-                        (x_left, y < y_left),
-                        (trajectory, y <= y_right),
-                    )
-                else:
-                    g = x - Piecewise(
-                        (x_left, y < y_left),
-                        (trajectory, y <= y_right),
-                        (x_right, y > y_right),
-                    )
-
-        # Assume symmetric polygon and test all active corner pairs
-        full_cond = None
-        for vert in verts[0 : len(verts) // 2]:
-            g1 = g.subs(x, x - vert.x).subs(y, y - vert.y)
-            g2 = g.subs(x, x + vert.x).subs(y, y + vert.y)
-            # full_cond = corner_cond & func_var_cond & (g1 * g2 <= 0)
-            if full_cond is None:
-                full_cond = func_var_cond & (g1 * g2 <= 0)
-            else:
-                full_cond = full_cond | (func_var_cond & (g1 * g2 <= 0))
-
-        if total_cond is None:
-            # print(full_cond)
-            total_cond = full_cond
-        else:
-            # print(full_cond, "not none")
-            total_cond = total_cond | full_cond
-
-    if add_notches:
-        # adding notches
-        for transition_point in set_of_transitions:
-            if transition_point.x.is_finite and transition_point.y.is_finite:
-                # neg for left side, 0 for on edge, pos for on right side
-                # inside polygon IF all neg or IF all pos
-                shifted_vertex_pairs = [
-                    (v + transition_point, nextv + transition_point)
-                    for (v, nextv) in vertex_pairs
-                ]  # [(v1, v2), (v2, v3), ..., (vn, v1)]
-                # source: https://inginious.org/course/competitive-programming/geometry-pointinconvex
-                # source: https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
-                side_conds = [
-                    (y - v.y) * (nextv.x - v.x) - (x - v.x) * (nextv.y - v.y)
-                    for (v, nextv) in shifted_vertex_pairs
-                ]
-                # construct both cases inside
-                cond1 = true  # init to sympy.true since we're cascading Ands
-                cond2 = true  # init to sympy.true since we're cascading Ands
-                for side_cond in side_conds:
-                    cond1 = cond1 & (side_cond <= 0)
-                    cond2 = cond2 & (side_cond >= 0)
-                total_cond = total_cond | cond1 | cond2
 
     if print_latex:
         print(latex(total_cond))
