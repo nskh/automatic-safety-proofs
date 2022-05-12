@@ -1,5 +1,8 @@
+from enum import unique
+from tkinter import Y
 from sympy import *
 import itertools
+import time
 from typing import Tuple, List, Dict, Set
 from safe_region_objects import *
 
@@ -315,7 +318,7 @@ def compute_all_transitions(
 
         # set_of_transitions.add(TransitionPoint(left_bound, None, trajectory))
         # set_of_transitions.add(TransitionPoint(right_bound, None, trajectory))
-    return set_of_transitions, lookup_dict
+    return set_of_transitions, lookup_dict, func_var
 
 
 def sort_or_order(transitions: Set[Point2D], lookup_dict: Dict, func_var: Symbol):
@@ -348,7 +351,7 @@ def sort_or_order(transitions: Set[Point2D], lookup_dict: Dict, func_var: Symbol
         add_pos_inf = False
 
         # include all possible combinations of true Transition points in/out of set
-        """TODO: add docstring to explain because this is complicated"""
+        """TODO!: add docstring to explain because this is complicated"""
         boundary_coords = set(
             map(
                 lambda tp: getattr(tp.point, str(func_var)),
@@ -391,7 +394,7 @@ def sort_or_order(transitions: Set[Point2D], lookup_dict: Dict, func_var: Symbol
                 add_pos_inf,
             )
             # may return empty list if invalid (doesn't start or end with Boundary)
-            # TODO: probably removable
+            # TODO!: probably removable
             if possible_transition_ordering:
                 possible_transitions.append(possible_transition_ordering)
         return possible_transitions
@@ -480,6 +483,7 @@ def generate_clause(
     lookup_dict: Dict,
     add_notches=True,
     print_latex=False,
+    notches_only=False,
 ):
     _, vertex_pairs = compute_polygon_angles(poly)
     verts = poly.vertices
@@ -667,12 +671,20 @@ def generate_clause(
         # Assume symmetric polygon and test all active corner pairs
         full_cond = None
         for vert in verts[0 : len(verts) // 2]:
-            # TODO: handle infinities!
+            # TODO!: handle infinities! one sided??
             if (
-                x_left.is_finite
-                and y_left.is_finite
-                and x_right.is_finite
-                and y_right.is_finite
+                x_left is not oo
+                and x_left is not -oo
+                and x_right is not oo
+                and x_right is not -oo
+                and y_left is not oo
+                and y_left is not -oo
+                and y_right is not oo
+                and y_right is not -oo
+                # x_left.is_finite
+                # and y_left.is_finite
+                # and x_right.is_finite
+                # and y_right.is_finite
             ):
                 poly_center_left = Point(x_left, y_left)
                 poly_center_right = Point(x_right, y_right)
@@ -686,8 +698,48 @@ def generate_clause(
                 left_eq = left_a * x + left_b * y + left_c
                 right_eq = right_a * x + right_b * y + right_c
                 corner_cond = left_eq * right_eq <= 0
+            elif (x_left is -oo and func_var == x) or (y_left is -oo and func_var == y):
+                poly_center_right = Point(x_right, y_right)
+
+                # TODO!: add some prints to debug here
+                line_right = Line(poly_center_right, poly_center_right + vert)
+                # using Line.equation() creates duplicate x,y variables and ruins .subs() call later
+                # Ensure this check only applies between the active corners at the start and end of the interval
+                right_a, right_b, right_c = line_right.coefficients
+                right_eq = right_a * x + right_b * y + right_c
+                # construct left-hand inequality (out to -inf)
+                ineq_rhs = solve(right_eq, func_var)
+                if ineq_rhs:
+                    # if soln exists
+                    corner_cond = func_var <= ineq_rhs[0]
+                else:
+                    print(
+                        f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
+                    )
+                    corner_cond = True
+            elif (x_right is oo and func_var == x) or (y_right is oo and func_var == y):
+                poly_center_left = Point(x_left, y_left)
+
+                # TODO!: add some prints to debug here
+                line_left = Line(poly_center_left, poly_center_left + vert)
+                # using Line.equation() creates duplicate x,y variables and ruins .subs() call later
+                # Ensure this check only applies between the active corners at the start and end of the interval
+                left_a, left_b, left_c = line_left.coefficients
+                left_eq = left_a * x + left_b * y + left_c
+                # construct right-hand inequality (out to +inf)
+                ineq_rhs = solve(left_eq, func_var)
+                if ineq_rhs:
+                    corner_cond = func_var >= ineq_rhs[0]
+                else:
+                    print(
+                        f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
+                    )
+                    corner_cond = True
             else:
                 # Set to True, effectively ignoring it in the And
+                print(
+                    f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
+                )
                 corner_cond = True
 
             g1 = g.subs(x, x - vert.x).subs(y, y - vert.y)
@@ -705,11 +757,16 @@ def generate_clause(
             total_cond = total_cond | full_cond
 
     if add_notches:
+        # TODO remove me!!
+        if notches_only:
+            total_cond = False
         # adding notches
         for transition_point in sorted_transitions:
             if (
-                transition_point.point.x.is_finite
-                and transition_point.point.y.is_finite
+                transition_point.point.x is not oo
+                and transition_point.point.x is not -oo
+                and transition_point.point.y is not oo
+                and transition_point.point.y is not -oo
             ):
                 # neg for left side, 0 for on edge, pos for on right side
                 # inside polygon IF all neg or IF all pos
@@ -730,8 +787,74 @@ def generate_clause(
                     cond1 = cond1 & (side_cond <= 0)
                     cond2 = cond2 & (side_cond >= 0)
                 total_cond = total_cond | cond1 | cond2
+            else:
+                print(f"Skipping non-finite notch point {transition_point}")
 
     if print_latex:
         print(latex(total_cond))
 
     return total_cond
+
+
+def compute_unsafe_conds_symbolic(
+    x,
+    y,
+    poly,
+    trajectory,
+    domain=Reals,
+    intervals=None,
+    add_notches=True,
+    print_runtime=False,
+    print_orderings=False,
+    print_latex=False,
+    notches_only=False,
+):
+    transitions, lookup, func_var = compute_all_transitions(
+        x,
+        y,
+        poly,
+        trajectory,
+        domain=domain,
+        intervals=intervals,
+    )
+
+    t0 = time.time()
+    transition_orderings = sort_or_order(transitions, lookup, func_var)
+    if print_orderings:
+        for ordering in transition_orderings:
+            for i, tp in enumerate(ordering):
+                if i == 0:
+                    print(f"[{tp},")
+                elif i == len(ordering) - 1:
+                    print(f"{tp}]")
+                else:
+                    print(f"{tp},")
+
+        print("")
+    if print_runtime:
+        print(
+            f"Took {time.time()-t0} seconds to compute",
+            f"{len(transition_orderings)} possible orderings.",
+        )
+
+    t0 = time.time()
+    clauses = [
+        generate_clause(
+            x,
+            y,
+            poly,
+            trajectory,
+            sorted_transitions,
+            lookup,
+            add_notches=add_notches,
+            notches_only=notches_only,
+            print_latex=print_latex,
+        )
+        for sorted_transitions in transition_orderings
+    ]
+    if print_runtime:
+        print(f"Took {time.time()-t0} seconds to compute {len(clauses)} clauses")
+
+    return clauses, ExplicitFormulationSymbolic(
+        clauses, transition_orderings, lookup, trajectory, intervals, func_var
+    )
