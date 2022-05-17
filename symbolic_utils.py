@@ -1,5 +1,6 @@
 from enum import unique
 from tkinter import Y
+from setuptools import Command
 from sympy import *
 import itertools
 import time
@@ -119,8 +120,6 @@ def compute_all_transitions(
     poly: Polygon,
     trajectory,  # piecewise
     domain,
-    add_notches=True,
-    print_latex=False,
     intervals=None,
 ):
     """Given a trajectory, polygon, and domain, computes a boolean formulation of
@@ -331,73 +330,74 @@ def sort_or_order(transitions: Set[Point2D], lookup_dict: Dict, func_var: Symbol
         transitions (Set[Point2D]): set of all transition points
         func_var (Symbol): trajectory variable (either x or y)
     """
-    try:
-        sorted_transitions: list = sorted(
-            transitions,
-            key=lambda tp: getattr(tp.point, str(func_var)),
+    # try:
+    #     print("sorting was successful!")
+    #     sorted_transitions: list = sorted(
+    #         transitions,
+    #         key=lambda tp: getattr(tp.point, str(func_var)),
+    #     )
+    #     return [sorted_transitions]
+    # except TypeError as error:
+    # construct dict mapping x-val (or y-val) to transition object
+    var_to_transition: Dict = {}
+    for transition in transitions:
+        lookup_coord = getattr(transition.point, str(func_var))
+        if lookup_coord in var_to_transition:
+            var_to_transition[lookup_coord].append(transition)
+        else:
+            var_to_transition[lookup_coord] = [transition]
+
+    add_neg_inf = False
+    add_pos_inf = False
+
+    # include all possible combinations of true Transition points in/out of set
+    """TODO!: add docstring to explain because this is complicated"""
+    boundary_coords = set(
+        map(
+            lambda tp: getattr(tp.point, str(func_var)),
+            filter(lambda t: t.is_bound, transitions),
         )
-        return [sorted_transitions]
-    except TypeError as error:
-        # construct dict mapping x-val (or y-val) to transition object
-        var_to_transition: Dict = {}
-        for transition in transitions:
-            lookup_coord = getattr(transition.point, str(func_var))
-            if lookup_coord in var_to_transition:
-                var_to_transition[lookup_coord].append(transition)
-            else:
-                var_to_transition[lookup_coord] = [transition]
+    )
+    if -oo in boundary_coords:
+        add_neg_inf = True
+        boundary_coords.remove(-oo)
+    if oo in boundary_coords:
+        add_pos_inf = True
+        boundary_coords.remove(oo)
 
-        add_neg_inf = False
-        add_pos_inf = False
-
-        # include all possible combinations of true Transition points in/out of set
-        """TODO!: add docstring to explain because this is complicated"""
-        boundary_coords = set(
-            map(
-                lambda tp: getattr(tp.point, str(func_var)),
-                filter(lambda t: t.is_bound, transitions),
-            )
+    true_transition_coords = set(
+        map(
+            lambda tp: getattr(tp.point, str(func_var)),
+            filter(lambda t: not t.is_bound, transitions),
         )
-        if -oo in boundary_coords:
-            add_neg_inf = True
-            boundary_coords.remove(-oo)
-        if oo in boundary_coords:
-            add_pos_inf = True
-            boundary_coords.remove(oo)
+    )
+    possible_orderings = []
+    for i in range(len(true_transition_coords) + 1):
+        for comb in itertools.combinations(true_transition_coords, i):
+            orderings = itertools.permutations(boundary_coords | set(comb))
+            for ordering in orderings:
+                if check_ordering(
+                    ordering,
+                    var_to_transition,
+                    lookup_dict,
+                    add_neg_inf,
+                    add_pos_inf,
+                ):
+                    possible_orderings.append(ordering)
 
-        true_transition_coords = set(
-            map(
-                lambda tp: getattr(tp.point, str(func_var)),
-                filter(lambda t: not t.is_bound, transitions),
-            )
+    possible_transitions = []
+    for ordering in possible_orderings:
+        possible_transition_ordering = reconstruct_transition_points(
+            var_to_transition,
+            ordering,
+            add_neg_inf,
+            add_pos_inf,
         )
-        possible_orderings = []
-        for i in range(len(true_transition_coords) + 1):
-            for comb in itertools.combinations(true_transition_coords, i):
-                orderings = itertools.permutations(boundary_coords | set(comb))
-                for ordering in orderings:
-                    if check_ordering(
-                        ordering,
-                        var_to_transition,
-                        lookup_dict,
-                        add_neg_inf,
-                        add_pos_inf,
-                    ):
-                        possible_orderings.append(ordering)
-
-        possible_transitions = []
-        for ordering in possible_orderings:
-            possible_transition_ordering = reconstruct_transition_points(
-                var_to_transition,
-                ordering,
-                add_neg_inf,
-                add_pos_inf,
-            )
-            # may return empty list if invalid (doesn't start or end with Boundary)
-            # TODO!: probably removable
-            if possible_transition_ordering:
-                possible_transitions.append(possible_transition_ordering)
-        return possible_transitions
+        # may return empty list if invalid (doesn't start or end with Boundary)
+        # TODO!: probably removable
+        if possible_transition_ordering:
+            possible_transitions.append(possible_transition_ordering)
+    return possible_transitions
 
 
 def check_ordering(
@@ -453,19 +453,22 @@ def reconstruct_transition_points(
 ):
     ordered_transitions = []
     # use extend because var_to_transition maps coordinates (x or y) to lists
+    # Must start with -oo if it exists
     if add_neg_inf:
         ordered_transitions.extend(var_to_transition[-oo])
     # elif not var_to_transition[ordering[0]][0].is_bound:
     #     # must begin with a boundary type transition point
     #     return []
-    if add_pos_inf:
-        ordered_transitions.extend(var_to_transition[oo])
     # elif not var_to_transition[ordering[-1]][0].is_bound:
     #     # must also end with a boundary type transition point
     #     return []
 
     for coord in ordering:
         ordered_transitions.extend(var_to_transition[coord])
+
+    # +oo must go at the end if it is to be added
+    if add_pos_inf:
+        ordered_transitions.extend(var_to_transition[oo])
 
     assert (
         ordered_transitions[0].is_bound and ordered_transitions[-1].is_bound
@@ -578,14 +581,15 @@ def generate_clause(
                 # but there should only be one common function, hence set intersection below
                 common_funcs = left_funcs.intersection(right_funcs)
                 if len(common_funcs) != 1:
-                    print(x_left)
-                    print(left_funcs)
-                    print(x_right)
-                    print(right_funcs)
-                    print(common_funcs)
+                    print(
+                        f"No common function over interval [{x_left}, {x_right}]: functions were {left_funcs} and {right_funcs} with overlap {common_funcs}"
+                    )
+                    print(trajectory)
+                    print(var_intervals)
+                    print(sorted_transitions)
                 assert (
                     len(common_funcs) == 1
-                ), f"Ambiguous which function to use here, given {common_funcs}"
+                ), f"Ambiguous which function to use here, given function intersection {common_funcs}"
                 current_fn = common_funcs.pop()
 
                 # Discard nonsense infinities
@@ -707,15 +711,17 @@ def generate_clause(
                 # Ensure this check only applies between the active corners at the start and end of the interval
                 right_a, right_b, right_c = line_right.coefficients
                 right_eq = right_a * x + right_b * y + right_c
+                # TODO: this is slow
                 # construct left-hand inequality (out to -inf)
                 ineq_rhs = solve(right_eq, func_var)
                 if ineq_rhs:
                     # if soln exists
                     corner_cond = func_var <= ineq_rhs[0]
                 else:
-                    print(
-                        f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
-                    )
+                    if PRINTS:
+                        print(
+                            f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
+                        )
                     corner_cond = True
             elif (x_right is oo and func_var == x) or (y_right is oo and func_var == y):
                 poly_center_left = Point(x_left, y_left)
@@ -727,19 +733,22 @@ def generate_clause(
                 left_a, left_b, left_c = line_left.coefficients
                 left_eq = left_a * x + left_b * y + left_c
                 # construct right-hand inequality (out to +inf)
+                # TODO: this is slow
                 ineq_rhs = solve(left_eq, func_var)
                 if ineq_rhs:
                     corner_cond = func_var >= ineq_rhs[0]
                 else:
-                    print(
-                        f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
-                    )
+                    if PRINTS:
+                        print(
+                            f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
+                        )
                     corner_cond = True
             else:
                 # Set to True, effectively ignoring it in the And
-                print(
-                    f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
-                )
+                if PRINTS:
+                    print(
+                        f"Skipping non-finite interval between ({x_left}, {y_left}) and ({x_right}, {y_right})"
+                    )
                 corner_cond = True
 
             g1 = g.subs(x, x - vert.x).subs(y, y - vert.y)
@@ -788,7 +797,8 @@ def generate_clause(
                     cond2 = cond2 & (side_cond >= 0)
                 total_cond = total_cond | cond1 | cond2
             else:
-                print(f"Skipping non-finite notch point {transition_point}")
+                if PRINTS:
+                    print(f"Skipping non-finite notch point {transition_point}")
 
     if print_latex:
         print(latex(total_cond))
