@@ -59,7 +59,9 @@ class ExplicitFormulationSymbolic:
     def instantiate(self, values: List[Tuple[Symbol, Number]]):
         """Return a single, correct, numeric instance of this explicit formulation given parameters."""
         if len(self.clauses) == 1:
-            return self.clauses.subs(values)
+            return ExplicitFormulationNumeric(
+                self.orderings[0], self.clauses[0].subs(values)
+            )
 
         piecewise_funcs = [piece[0] for piece in self.trajectory.args]
         intervals_num = [
