@@ -36,7 +36,15 @@ def find_transitions_symbolic(trajectory, angles, x, y, domain=S.Complexes):
         # 2 vectors <x1, y1> <x2, y2>
         # parallel iff y1*x2 = x1*y2
         # use vectors <dfdx, dfdy> <cos(theta), sin(theta)>
-        soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
+        # print(angle)
+        # print(df_dx * sin(angle))
+        # print(df_dy * cos(angle), "\n")
+        try:
+            soln = solveset(
+                Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain
+            )
+        except:
+            soln = solve(Eq(df_dx * sin(angle), df_dy * cos(angle)), x)
         # print(f"solveset solution: {soln.doit()}")b
         if soln is S.EmptySet:
             soln = solveset(
@@ -53,6 +61,8 @@ def find_transitions_symbolic(trajectory, angles, x, y, domain=S.Complexes):
             elif type(soln) is Complement:
                 # discard rhs of complmement (shows up in Adler examples for circle path)
                 soln = [{x: soln_elem} for soln_elem in list(soln.args[0])]
+            elif type(soln) is list:
+                soln = [{x: soln_elem} for soln_elem in soln]
             else:
                 soln = [{x: soln}]
 
@@ -81,13 +91,18 @@ def find_transitions_symbolic(trajectory, angles, x, y, domain=S.Complexes):
             # pair should always be a dictionary
             assert type(pair) == dict, "Solution element was not a dictionary!"
             # pair looks like {x: f(y)} or {y: f(x)}
-            # remove one variable from equation by substituting pair into traj_eqn
-            traj_eqn_single_var = traj_eqn.subs(pair)
-
             # before going further, figure out the variable for
             # which pair contains a solution
             soln_var = [k for k in pair][0]  # variable is the dict key
             other_var = y if soln_var == x else x
+
+            # remove one variable from equation by substituting pair into traj_eqn
+            if type(pair[soln_var]) == Intersection:
+                if Reals in pair[soln_var].args:
+                    pair = {soln_var: list(pair[soln_var].args[1])[0]}
+                    # print(type(pair[soln_var]))
+                    # print(pair)
+            traj_eqn_single_var = traj_eqn.subs(pair)
 
             # traj_eqn used to have two variables but now has only one
             # TODO: not true with symbolic
@@ -372,10 +387,12 @@ def sort_or_order(transitions: Set[Point2D], lookup_dict: Dict, func_var: Symbol
         )
     )
     possible_orderings = []
+    num_tested = 0
     for i in range(len(true_transition_coords) + 1):
         for comb in itertools.combinations(true_transition_coords, i):
             orderings = itertools.permutations(boundary_coords | set(comb))
             for ordering in orderings:
+                num_tested += 1
                 if check_ordering(
                     ordering,
                     var_to_transition,
@@ -384,6 +401,10 @@ def sort_or_order(transitions: Set[Point2D], lookup_dict: Dict, func_var: Symbol
                     add_pos_inf,
                 ):
                     possible_orderings.append(ordering)
+                    if len(possible_orderings) % 100 == 0:
+                        print(len(possible_orderings))
+                    # if num_tested % 100 == 0:
+                    #     print(num_tested)
 
     possible_transitions = []
     for ordering in possible_orderings:
@@ -433,18 +454,19 @@ def check_ordering(
                 # check if each element smaller than successive ones
                 if elem1 > elem2:
                     return False
-
-                # make sure functions match for successive entries
-                left_funcs = set(lookup_dict[elem1])
-                right_funcs = set(lookup_dict[elem1])
-                # interval endpoints may come from multiple functions (if piecewise boundary)
-                # but there should only be one common function, hence set intersection below
-                common_funcs = left_funcs.intersection(right_funcs)
-                if len(common_funcs) == 0:
-                    return False
-
             except TypeError:
                 pass
+
+    for i in range(len(ordering) - 1):
+        # make sure functions match for successive entries
+        left_funcs = set(lookup_dict[ordering[i]])
+        right_funcs = set(lookup_dict[ordering[i + 1]])
+        # interval endpoints may come from multiple functions (if piecewise boundary)
+        # but there should only be one common function, hence set intersection below
+        common_funcs = left_funcs.intersection(right_funcs)
+        if len(common_funcs) == 0:
+            return False
+
     return True
 
 
@@ -587,6 +609,7 @@ def generate_clause(
                     print(trajectory)
                     print(var_intervals)
                     print(sorted_transitions)
+                    return []
                 assert (
                     len(common_funcs) == 1
                 ), f"Ambiguous which function to use here, given function intersection {common_funcs}"
@@ -714,8 +737,13 @@ def generate_clause(
                 # TODO: this is slow
                 # construct left-hand inequality (out to -inf)
                 ineq_rhs = solve(right_eq, func_var)
+                # ineq_rhs = solveset(right_eq, func_var, Reals)
                 if ineq_rhs:
                     # if soln exists
+                    # if type(ineq_rhs) == Intersection:
+                    #     if Reals in ineq_rhs.args:
+                    #         ineq_rhs = list(ineq_rhs.args[1])[0]
+                    #         print(ineq_rhs)
                     corner_cond = func_var <= ineq_rhs[0]
                 else:
                     if PRINTS:
@@ -735,6 +763,7 @@ def generate_clause(
                 # construct right-hand inequality (out to +inf)
                 # TODO: this is slow
                 ineq_rhs = solve(left_eq, func_var)
+                # ineq_rhs = solveset(left_eq, func_var, Reals)
                 if ineq_rhs:
                     corner_cond = func_var >= ineq_rhs[0]
                 else:
@@ -828,6 +857,8 @@ def compute_unsafe_conds_symbolic(
         intervals=intervals,
     )
 
+    print(transitions)
+
     t0 = time.time()
     transition_orderings = sort_or_order(transitions, lookup, func_var)
     if print_orderings:
@@ -848,8 +879,27 @@ def compute_unsafe_conds_symbolic(
         )
 
     t0 = time.time()
-    clauses = [
-        generate_clause(
+    # clauses = [
+    #     generate_clause(
+    #         x,
+    #         y,
+    #         poly,
+    #         trajectory,
+    #         sorted_transitions,
+    #         lookup,
+    #         add_notches=add_notches,
+    #         notches_only=notches_only,
+    #         print_latex=print_latex,
+    #     )
+    #     for sorted_transitions in transition_orderings
+    # ]
+
+    # generate all clauses
+    clauses = []
+    for i, sorted_transitions in enumerate(transition_orderings):
+        if print_runtime and i % 3 == 0:
+            print(f"{i} out of {len(transition_orderings)} done")
+        clause = generate_clause(
             x,
             y,
             poly,
@@ -860,8 +910,12 @@ def compute_unsafe_conds_symbolic(
             notches_only=notches_only,
             print_latex=print_latex,
         )
-        for sorted_transitions in transition_orderings
-    ]
+        # some may be empty if they fail
+        if clause:
+            clauses.append(clause)
+        else:
+            print(f"failure to generate clause for ordering {sorted_transitions}")
+
     if print_runtime:
         print(f"Took {time.time()-t0} seconds to compute {len(clauses)} clauses")
 
