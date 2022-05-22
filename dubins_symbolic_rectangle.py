@@ -47,6 +47,9 @@ def dubins():
             x <= b,
         ),
     )
+    traj_piecewise = (
+        traj_piecewise.subs(R, 10).subs(theta, pi / 3).subs(p, 3).subs(b, 1)
+    )
 
     w = Symbol("w", real=True, positive=True, nonzero=True)
     h = Symbol("h", real=True, positive=True, nonzero=True)
@@ -54,12 +57,17 @@ def dubins():
         geometry.Point(val) for val in [[w, -h], [w, h], [-w, h], [-w, -h]]
     ]
     rect_param: geometry.Polygon = Polygon(*rect_points)
+    rect_num = rect_param.subs(w, 0.5).subs(h, 0.25)
 
     piecewise_intervals = [
         Interval(bound, R),
         Interval(p, bound),
         Interval(b, p),
         Interval(-oo, b),
+    ]
+    num_intervals = [
+        sub_int.subs(R, 10).subs(theta, pi / 3).subs(p, 3).subs(b, 1)
+        for sub_int in piecewise_intervals
     ]
 
     clauses_dubins, explicit_dubins = compute_unsafe_conds_symbolic(
@@ -90,5 +98,5 @@ def dubins():
 
 
 if __name__ == "__main__":
-    print("dubins")
+    print("dubins numeric")
     dubins()
