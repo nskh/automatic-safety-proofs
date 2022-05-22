@@ -73,10 +73,10 @@ def dubins():
     clauses_dubins, explicit_dubins = compute_unsafe_conds_symbolic(
         x,
         y,
-        rect_param,
+        rect_num,
         traj_piecewise,
         domain=Reals,
-        intervals=piecewise_intervals,
+        intervals=num_intervals,
         print_orderings=True,
         print_runtime=True,
     )
