@@ -15,6 +15,17 @@ def plot_condition(
     alpha=1,
     savefig=False,
 ):
+    # First, check if we can plot `cond` at all
+    if len(cond.free_symbols) > 2:
+        print(
+            "Can't plot `cond` since it has too many variables.",
+            "Please use .subs() to plot an instantation of this condition.",
+        )
+        print(
+            f"Extraneous variables to substitute out are {set(map(str, cond.free_symbols)) - {'x', 'y'}}."
+        )
+        return
+
     fig = plt.figure()
     fig.set_dpi(200)
     ax = fig.gca()
@@ -37,6 +48,7 @@ def plot_condition(
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
             # count += 1
+            # TODO: use is_safe
             is_safe = (~cond).subs([(x, x0), (y, y0)])
             if is_safe:
                 xpoints_safe.append(x0)

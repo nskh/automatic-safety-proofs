@@ -91,6 +91,7 @@ def sympy_to_mathematica(cond) -> str:
         ("cos", "Cos"),
         ("tan", "Tan"),
         ("sqrt", "Sqrt"),
+        # ("Abs", "Abs"),
         # ("exp", "E"),  # maybe not the case
     ]
 

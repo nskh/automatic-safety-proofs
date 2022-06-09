@@ -9,6 +9,9 @@ from plotting_utils import *
 
 init_printing(use_unicode=True)
 
+# global debug if printing
+PRINTS = False
+
 
 def compute_polygon_angles(poly: sympy.Polygon) -> list:
     """Return angles corresponding to each vertex of a polygon.
@@ -39,6 +42,42 @@ def compute_polygon_angles(poly: sympy.Polygon) -> list:
     # assert max(positive_angles) < 2 * pi
     # assert min(positive_angles) >= 0
     return positive_angles, vertex_pairs
+
+
+def compute_corners_to_angles(poly: sympy.Polygon) -> Dict:
+    verts = poly.vertices
+    # This section maps each vertex to a range of angles, so we can find
+    # the active corners for each of the angles in midpoint_angles
+    vertex_pairs_right = list(zip(verts, verts[1:] + verts[:1]))
+    vertex_offsets_right: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_right
+    ]
+    angles_right: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_right
+    ]
+    positive_angles_right = [angle % (2 * pi) for angle in angles_right]
+
+    vertex_pairs_left = list(zip(verts[-1:] + verts[:-1], verts))
+    vertex_offsets_left: List[Tuple] = [
+        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_left
+    ]
+    angles_left: List[float] = [
+        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_left
+    ]
+    positive_angles_left = [angle % (2 * pi) for angle in angles_left]
+
+    # construct a dict mapping vertices to ranges of angles
+    corners_to_angles = dict()
+    for i in range(len(verts)):
+        if positive_angles_right[i] < positive_angles_left[i]:
+            corners_to_angles[verts[i]] = Interval(
+                positive_angles_left[i], positive_angles_right[i] + 2 * pi
+            )
+        else:
+            corners_to_angles[verts[i]] = Interval(
+                positive_angles_left[i], positive_angles_right[i]
+            )
+    return corners_to_angles
 
 
 def ray_method(poly: sympy.Polygon, location: sympy.Point, intruder: sympy.Point):
@@ -124,8 +163,8 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
         # parallel iff y1*x2 = x1*y2
         # use vectors <dfdx, dfdy> <cos(theta), sin(theta)>
         soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
-
-        if soln == S.EmptySet:
+        print(f"solveset solution: {soln.doit()}")
+        if soln is S.EmptySet:
             soln = solveset(
                 Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
             )
@@ -134,13 +173,29 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                 soln = [{y: soln_elem} for soln_elem in list(soln)]
         else:
             # Pack into list of dict so it's clear which variable has been solved for
-            soln = [{x: soln_elem} for soln_elem in list(soln)]
-
-        for elem in soln:
-            if angle in transitions:
-                transitions[angle].append(elem)
+            print(f"solution when finding transitions for angle {angle}: {soln}")
+            if type(soln) is FiniteSet:
+                soln = [{x: soln_elem} for soln_elem in list(soln)]
+            elif type(soln) is Complement:
+                # discard rhs of complmement (shows up in Adler examples for circle path)
+                soln = [{x: soln_elem} for soln_elem in list(soln.args[0])]
             else:
-                transitions[angle] = [elem]
+                soln = [{x: soln}]
+
+        # TODO: figure out cardinality of this set
+        if type(soln) is list:
+            for elem in soln:
+                if angle in transitions:
+                    transitions[angle].append(elem)
+                else:
+                    transitions[angle] = [elem]
+        else:
+            if soln is not S.EmptySet:
+                if angle in transitions:
+                    transitions[angle].append(soln)
+                else:
+                    transitions[angle] = [soln]
+
     # soln above may still be symbolic, so we have to evaluate the expression
     # that's what happens below
 
@@ -149,18 +204,21 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
         for pair in solns:
+            print(f"pair used for transition point finding: {pair}")
             # pair should always be a dictionary
             assert type(pair) == dict, "Solution element was not a dictionary!"
             # pair looks like {x: f(y)} or {y: f(x)}
             # remove one variable from equation by substituting pair into traj_eqn
             traj_eqn_single_var = traj_eqn.subs(pair)
-            # traj_eqn used to have two variables but now has only one
-            single_var_solns = solve(traj_eqn_single_var)
 
             # before going further, figure out the variable for
             # which pair contains a solution
             soln_var = [k for k in pair][0]  # variable is the dict key
             other_var = y if soln_var == x else x
+
+            # traj_eqn used to have two variables but now has only one
+            # TODO: not true with symbolic
+            single_var_solns = solve(traj_eqn_single_var, other_var)
 
             for single_var_soln in single_var_solns:
                 # substitute in single_var_soln to solve for soln_var
@@ -169,6 +227,9 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                 )
                 # with this, we have a solution for the transition point
                 if soln_var == x:
+                    if PRINTS:
+                        print("x-coord:", solved_eqn.rhs)
+                        print("y-coord:", single_var_soln)
                     transition_point = Point(solved_eqn.rhs, single_var_soln)
                 elif soln_var == y:
                     transition_point = Point(single_var_soln, solved_eqn.rhs)
@@ -242,9 +303,6 @@ def compute_unsafe_cond(
             # outside of the domain for each piece of the trajectory
             subdomain = subcond.intersect(domain)
 
-            # find transitions for piecewise domain over this interval
-            func_var = subtraj.free_symbols.pop()
-
             if y not in subtraj.free_symbols:  # form y=f(x)
                 _, subset_of_transitions = find_transitions(
                     -y + subtraj, angles, x, y, domain=subdomain
@@ -265,8 +323,10 @@ def compute_unsafe_cond(
                 )
             set_of_transitions.update(subset_of_transitions)
 
-            set_of_transitions.add(left_bound)
-            set_of_transitions.add(right_bound)
+            if left_bound.x.is_finite and left_bound.y.is_finite:
+                set_of_transitions.add(left_bound)
+            if right_bound.x.is_finite and right_bound.y.is_finite:
+                set_of_transitions.add(right_bound)
     else:
         if y not in trajectory.free_symbols:
             _, subset_of_transitions = find_transitions(
@@ -284,8 +344,12 @@ def compute_unsafe_cond(
             right_bound = Point(trajectory.subs(func_var, domain.sup), domain.sup)
 
         set_of_transitions.update(subset_of_transitions)
-        set_of_transitions.add(left_bound)
-        set_of_transitions.add(right_bound)
+        if left_bound.x.is_finite and left_bound.y.is_finite:
+            set_of_transitions.add(left_bound)
+        if right_bound.x.is_finite and right_bound.y.is_finite:
+            set_of_transitions.add(right_bound)
+        # set_of_transitions.add(left_bound)
+        # set_of_transitions.add(right_bound)
 
     # In order to identify which corners are active over which intervals,
     # sort transitions and identify active corners at the midpoints of the intervals
@@ -293,6 +357,8 @@ def compute_unsafe_cond(
     sorted_transitions: list = sorted(
         set_of_transitions, key=lambda point: getattr(point, str(func_var))
     )
+    if PRINTS:
+        print(sorted_transitions)
     func_var_transitions = [getattr(p, str(func_var)) for p in sorted_transitions]
     midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
     if func_var == x:
@@ -303,37 +369,7 @@ def compute_unsafe_cond(
     # find the trajectory tangent angle at each midpoint
     midpoint_angles = [atan2(d, 1) for d in dydx_midpoints]
 
-    # This section maps each vertex to a range of angles, so we can find
-    # the active corners for each of the angles in midpoint_angles
-    vertex_pairs_right = list(zip(verts, verts[1:] + verts[:1]))
-    vertex_offsets_right: List[Tuple] = [
-        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_right
-    ]
-    angles_right: List[float] = [
-        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_right
-    ]
-    positive_angles_right = [angle % (2 * pi) for angle in angles_right]
-
-    vertex_pairs_left = list(zip(verts[-1:] + verts[:-1], verts))
-    vertex_offsets_left: List[Tuple] = [
-        (nextp.x - p.x, nextp.y - p.y) for (p, nextp) in vertex_pairs_left
-    ]
-    angles_left: List[float] = [
-        atan2(offset_y, offset_x) for (offset_x, offset_y) in vertex_offsets_left
-    ]
-    positive_angles_left = [angle % (2 * pi) for angle in angles_left]
-
-    # construct a dict mapping vertices to ranges of angles
-    corners_to_angles = dict()
-    for i in range(len(verts)):
-        if positive_angles_right[i] < positive_angles_left[i]:
-            corners_to_angles[verts[i]] = Interval(
-                positive_angles_left[i], positive_angles_right[i] + 2 * pi
-            )
-        else:
-            corners_to_angles[verts[i]] = Interval(
-                positive_angles_left[i], positive_angles_right[i]
-            )
+    corners_to_angles = compute_corners_to_angles(poly)
 
     # Map each midpoint angle to the active corner. Because we're only supporting
     # symmetric polygons so far, we only need to find a single active corner here,
@@ -341,6 +377,10 @@ def compute_unsafe_cond(
     active_corners: dict = {}
     for midpoint_angle in midpoint_angles:
         for k, v in corners_to_angles.items():
+            if PRINTS:
+                print(midpoint_angle)
+                print(v)
+            # NOTE: fails for symbolic trajectory parameters
             if midpoint_angle % (2 * pi) in v:
                 active_corners[midpoint_angle] = k
     var_intervals = list(
