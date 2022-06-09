@@ -48,12 +48,8 @@ def dubins():
         ),
     )
 
-    w = Symbol("w", real=True, positive=True, nonzero=True)
     h = Symbol("h", real=True, positive=True, nonzero=True)
-    rect_points: list = [
-        geometry.Point(val) for val in [[w, -h], [w, h], [-w, h], [-w, -h]]
-    ]
-    rect_param: geometry.Polygon = Polygon(*rect_points)
+    hexagon_param = RegularPolygon(Point(0, 0), w, 6)
 
     piecewise_intervals = [
         Interval(bound, R),
@@ -65,7 +61,7 @@ def dubins():
     clauses_dubins, explicit_dubins = compute_unsafe_conds_symbolic(
         x,
         y,
-        rect_param,
+        hexagon_param,
         traj_piecewise,
         domain=Reals,
         intervals=piecewise_intervals,
@@ -90,5 +86,5 @@ def dubins():
 
 
 if __name__ == "__main__":
-    print("dubins symbolic rectangle")
+    print("dubins symbolic hexagon")
     dubins()
