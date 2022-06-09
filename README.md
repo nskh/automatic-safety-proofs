@@ -1,5 +1,11 @@
 # Automated Geometric Safety Proofs
 
+## FMCAD Evaluation Cases
+
+Examples used to generate our FMCAD results can be found in the Python files beginning with `acas_x_`, `adler_`, and `dubins_`, and correspond to the table of results in Section VI (Table I). There is a self-contained Mathematica file (separate installation required): `fmcad-paper-qe.nb` that contains our examples for the Mathematica CAD quantifier elimination results in our paper.
+
+## Installation and visual (numeric) examples
+
 This README walks through steps required to install this library and run examples. This library automatically constructs and visualizes a formulation of a "safe region": the set of obstacle locations where a collision *will not occur* given an object and trajectory. Commands to run in the terminal begin with a $; do not actually include the "$" character in your terminal command.
 
 Open a terminal and `cd` to the library directory.
