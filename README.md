@@ -1,6 +1,6 @@
 # Automated Geometric Safety Proofs
 
-You can download our FMCAD paper by clicking on [this link](fmcad22paper.pdf)
+## You can view our FMCAD paper by clicking on [this link](fmcad22paper.pdf).
 
 ## FMCAD Evaluation Cases
 
