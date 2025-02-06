@@ -1,0 +1,259 @@
+bound_ex  % [ parameters ]
+		: THEORY
+
+  BEGIN
+
+  IMPORTING analysis@top
+
+  mvt_gen_ge: LEMMA
+  FORALL(f:[real-> real],c:real):
+  (derivable?[real](f) AND
+  FORALL(x:real): deriv[real](f)(x) >= c)
+  IMPLIES
+  FORALL(a,b:real): a>=b IMPLIES
+  f(a) - f(b) >= c*(a-b)
+
+  mvt_gen_le: LEMMA
+  FORALL(f:[real-> real],c:real):
+  (derivable?[real](f) AND
+  FORALL(x:real): deriv[real](f)(x) <= c)
+  IMPLIES
+  FORALL(a,b:real): a>=b IMPLIES
+  f(a) - f(b) <= c*(a-b)
+
+  bound1_ex: LEMMA
+  FORALL(f:[real-> real],x0,y0:real):
+  derivable?[real](f) AND
+  (FORALL(x:real): deriv[real](f)(x) >= 1) AND
+  (EXISTS(x:real): (y0 - f(x) <= x0 - x + 1/2) AND x0 + 1 >= x)
+  IMPLIES
+  y0 - f(x0+1) + 1/2 <= 0
+
+  bound2_ex: LEMMA
+  FORALL(f:[real-> real],x0,y0:real):
+  derivable?[real](f) AND
+  (FORALL(x:real): deriv[real](f)(x) <= 0) AND
+  (EXISTS(x:real): (y0 - f(x) >= -1/2) AND x0 + 1 >= x)
+  IMPLIES
+  y0 - f(x0+1) + 1/2 >= 0
+
+  bound2_ex_more_premises: LEMMA
+  FORALL(f:[real-> real],x0,y0:real):
+  derivable?[real](f) AND
+  (FORALL(x:real): deriv[real](f)(x) <= 0) AND
+  (EXISTS(x:real): (y0 - f(x) >= -1/2) AND (y0 - f(x) <= x0 - x + 1/2) AND (y0 - f(x) <= - x0 + x + 1/2) AND x0 + 1 >= x)
+  IMPLIES
+  y0 - f(x0+1) + 1/2 >= 0
+
+
+  bound3_ex_should_fail: LEMMA
+  FORALL(f:[real-> real],x0,y0:real):
+  derivable?[real](f) AND
+  (FORALL(x:real): deriv[real](f)(x) <= 0) AND
+  (EXISTS(x:real): (y0 - f(x) >= -1/2) AND x0 + 1 >= x)
+  IMPLIES
+  y0 - f(x0+1) + 1/2 <= 0
+
+  % below won't work yet since the proof goals are in the form of products
+  bound4_ex_full_lemma: LEMMA 
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) <= 0) AND
+    (EXISTS (x : real) :
+    ((yo - f(x) + 1/2 >= 0) AND
+     (-x + xo - yo + f(x) + 1/2 >= 0) AND
+     (x - xo - yo + f(x) + 1/2 >= 0)))
+    IMPLIES
+    ((yo - f(xo) - 1/2)*(yo - f(xo - 1) + 1/2) <= 0) OR
+    ((yo - f(xo) - 1/2)*(yo - f(xo + 1) + 1/2) <= 0) OR
+    ((yo - f(xo - 1) + 1/2)*(yo - f(xo + 1) + 1/2) <= 0)
+
+  % proven
+  bound5_ex_full_lemma_new_goal: LEMMA 
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) <= 0) AND
+    (EXISTS (x : real) :
+    ((yo - f(x) + 1/2 >= 0) AND
+     (-x + xo - yo + f(x) + 1/2 >= 0) AND
+     (x - xo - yo + f(x) + 1/2 >= 0)))
+    IMPLIES
+    yo - f(xo+1) + 1/2 >= 0
+
+  % added more bounds on the deriv for the top corner, got to needing to show xo >= x
+  % interesting progress so that's a good start, need to unpack with Tanner and look at the math more
+  bound6_ex_full_lemma_big_goal: LEMMA 
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) <= 0) AND
+    (FORALL(x:real): deriv[real](f)(x) >= -1) AND    
+    (EXISTS (x : real) :
+    ((yo - f(x) + 1/2 >= 0) AND
+     (-x + xo - yo + f(x) + 1/2 >= 0) AND
+     (x - xo - yo + f(x) + 1/2 >= 0)))
+    IMPLIES
+    yo - f(xo+1) + 1/2 >= 0 AND
+    yo - f(xo) - 1/2 <= 0
+
+  % should be easier to prove? can do one branch but not the rest
+    bound7_lr_active: LEMMA 
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 1) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND
+    (EXISTS(x:real): (yo - f(x) >= -1/2) AND (yo - f(x) <= xo - x + 1/2) AND (yo - f(x) <= - xo + x + 1/2) AND xo + 1 >= x AND xo - 1 <= x)
+    IMPLIES
+    ((yo - f(xo - 1) + 1/2) >= 0 AND
+     (yo - f(xo + 1) + 1/2) <= 0) OR
+    ((yo - f(xo - 1) + 1/2) <= 0 AND % can cut this second part but was interesting to throw it in
+     (yo - f(xo + 1) + 1/2) >= 0)    % since this is technically what our product framing means
+
+  % triangle slope 1 
+  bound8_big_lemma: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 1) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND
+    (EXISTS (x : real) :
+     (yo - f(x) + 1/2 >= 0) AND
+     (-x + xo - yo + f(x) + 1/2 >= 0) AND
+     (x - xo - yo + f(x) + 1/2 >= 0) AND
+     xo + 1 >= x AND xo - 1 <= x)
+    IMPLIES
+    ((yo - f(xo) - 1/2 >= 0) AND
+     (yo - f(xo - 1) + 1/2 <= 0)) OR
+    ((yo - f(xo) - 1/2 >= 0) AND
+     (yo - f(xo + 1) + 1/2 <= 0)) OR
+    ((yo - f(xo) - 1/2 <= 0) AND
+     (yo - f(xo - 1) + 1/2 >= 0)) OR
+    ((yo - f(xo) - 1/2 <= 0) AND
+     (yo - f(xo + 1) + 1/2 >= 0)) OR
+    ((yo - f(xo - 1) + 1/2 >= 0) AND
+     (yo - f(xo + 1) + 1/2 <= 0)) OR
+    ((yo - f(xo + 1) + 1/2 >= 0) AND
+     (yo - f(xo - 1) + 1/2 <= 0))
+
+  % triangle slope 2 
+  bound9_slope_2: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 2) AND % TODO let's see we can drop one of these
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND
+    (EXISTS (x : real) :
+     (yo - f(x) + 1 >= 0) AND
+     (-2*x + 2*xo - yo + f(x) + 1 >= 0) AND
+     (2*x - 2*xo - yo + f(x) + 1 >= 0) AND
+     xo + 1 >= x AND xo - 1 <= x)
+    IMPLIES
+    ((yo - f(xo) - 1 >= 0) AND
+     (yo - f(xo - 1) + 1 <= 0)) OR
+    ((yo - f(xo) - 1 >= 0) AND
+     (yo - f(xo + 1) + 1 <= 0)) OR
+    ((yo - f(xo) - 1 <= 0) AND
+     (yo - f(xo - 1) + 1 >= 0)) OR
+    ((yo - f(xo) - 1 <= 0) AND
+     (yo - f(xo + 1) + 1 >= 0)) OR
+    ((yo - f(xo - 1) + 1 >= 0) AND
+     (yo - f(xo + 1) + 1 <= 0)) OR
+    ((yo - f(xo + 1) + 1 >= 0) AND
+     (yo - f(xo - 1) + 1 <= 0))
+
+  bound10_slope_2_less_deriv: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 2) AND % OK we could drop the other one
+    (EXISTS (x : real) :
+     (yo - f(x) + 1 >= 0) AND
+     (-2*x + 2*xo - yo + f(x) + 1 >= 0) AND
+     (2*x - 2*xo - yo + f(x) + 1 >= 0) AND
+     xo + 1 >= x AND xo - 1 <= x)
+    IMPLIES
+    ((yo - f(xo) - 1 >= 0) AND
+     (yo - f(xo - 1) + 1 <= 0)) OR
+    ((yo - f(xo) - 1 >= 0) AND
+     (yo - f(xo + 1) + 1 <= 0)) OR
+    ((yo - f(xo) - 1 <= 0) AND
+     (yo - f(xo - 1) + 1 >= 0)) OR
+    ((yo - f(xo) - 1 <= 0) AND
+     (yo - f(xo + 1) + 1 >= 0)) OR
+    ((yo - f(xo - 1) + 1 >= 0) AND
+     (yo - f(xo + 1) + 1 <= 0)) OR
+    ((yo - f(xo + 1) + 1 >= 0) AND
+     (yo - f(xo - 1) + 1 <= 0))
+
+  % proven same as triangle! 
+  bound11_rect_function: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x) 
+    IMPLIES
+    ((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0))
+
+  % see if prooflite can handle this?
+  bound13_rect_function: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x) 
+    IMPLIES
+    ((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0))  
+
+
+%|- bound11_rect_function : PROOF
+%|- (THEN (SKEEP*) (LEMMA "mvt_gen_ge") (INST?) (ASSERT)
+%|-  (SPREAD (SPLIT -1)
+%|-   ((THEN (ASSERT) (INST -1 "xo + 2" "x") (ASSERT) (LEMMA "mvt_gen_ge") (INST?)
+%|-     (ASSERT)
+%|-     (SPREAD (SPLIT -1) ((THEN (INST -1 "x" "xo - 2") (ASSERT)) (PROPAX))))
+%|-    (PROPAX))))
+%|- QED bound11_rect_function
+
+%|- bound13_rect_function : PROOF
+%|- (THEN
+%|-  (SKEEP*)
+%|-  (LEMMA "mvt_gen_ge")
+%|-  (INST?)
+%|-  (ASSERT)
+%|-  (SPREAD
+%|-      (SPLIT -1)
+%|-      ((THEN
+%|-          (ASSERT)
+%|-          (INST -1 "xo + 2" "x")
+%|-          (ASSERT)
+%|-          (LEMMA "mvt_gen_ge")
+%|-          (INST?)
+%|-          (ASSERT)
+%|-          (SPREAD
+%|-              (SPLIT -1)
+%|-              ((THEN
+%|-                  (INST -1 "x" "xo - 2")
+%|-                  (ASSERT)) (PROPAX)))) (PROPAX))))
+%|- QED bound13_rect_function
+
+
+END bound_ex
