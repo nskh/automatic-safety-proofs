@@ -1,0 +1,10 @@
+(diamond_example_proof
+ (IsSoundDiamond 0
+  (IsSoundDiamond-1 nil 3868008137
+   ("" (skeep)
+    (("" (expand "DiamondSoundness")
+      (("" (flatten) (("" (skeep) (("" (postpone) nil nil)) nil)) nil))
+      nil))
+    nil)
+   nil shostak)))
+
