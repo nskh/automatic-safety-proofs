@@ -13,6 +13,42 @@ bound_ex  % [ parameters ]
   FORALL(a,b:real): a>=b IMPLIES
   f(a) - f(b) >= c*(a-b)
 
+%|- mvt_gen_ge : PROOF
+%|- (THEN (SKEEP) (SKEEP)
+%|-  (SPREAD (CASE "a=b")
+%|-   ((ASSERT)
+%|-    (SPREAD (LEMMA "mean_value[real]")
+%|-     ((THEN (INST -1 "b" "a" "f") (ASSERT) (SKEEP) (INST -5 "c!1")
+%|-       (EXPAND "deriv" -5) (ASSERT) (MULT-BY -5 "a-b") (ASSERT))
+%|-      (THEN (LEMMA "connected_real") (PROPAX)))))))
+%|- QED mvt_gen_ge
+
+  mvt_gen_ge_bound: LEMMA
+  FORALL(f:[real-> real],a,b,c:real):
+  (derivable?[real](f) AND a>=b AND
+  FORALL(x:real | b < x AND x < a): deriv[real](f)(x) >= c)
+  IMPLIES
+  f(a) - f(b) >= c*(a-b)
+
+%|- mvt_gen_ge_bound : PROOF
+%|- (THEN (SKEEP)
+%|-  (SPREAD (CASE "a=b")
+%|-   ((ASSERT)
+%|-    (SPREAD (LEMMA "mean_value[real]")
+%|-     ((THEN (INST -1 "b" "a" "f") (ASSERT) (SKEEP)
+%|-       (SPREAD (INST -6 "c!1")
+%|-        ((THEN (EXPAND "deriv" -6) (ASSERT) (MULT-BY -6 "a-b") (ASSERT))
+%|-         (ASSERT))))
+%|-      (THEN (LEMMA "connected_real") (PROPAX)))))))
+%|- QED mvt_gen_ge_bound
+
+  mvt_gen_ge_bound_left: LEMMA
+  FORALL(f:[real-> real],a,b,c:real):
+  (derivable?[real](f) AND a>=b AND
+  FORALL(x:real | b < x): deriv[real](f)(x) >= c)
+  IMPLIES
+  f(a) - f(b) >= c*(a-b)
+
   mvt_gen_le: LEMMA
   FORALL(f:[real-> real],c:real):
   (derivable?[real](f) AND
@@ -20,6 +56,10 @@ bound_ex  % [ parameters ]
   IMPLIES
   FORALL(a,b:real): a>=b IMPLIES
   f(a) - f(b) <= c*(a-b)
+
+%|- mvt_gen_le : PROOF
+%|- (POSTPONE)
+%|- QED mvt_gen_le
 
   bound1_ex: LEMMA
   FORALL(f:[real-> real],x0,y0:real):
@@ -221,7 +261,79 @@ bound_ex  % [ parameters ]
     ((yo - f(xo + 2) - 1 >= 0) AND
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0))
+
+bound14_rect_function_one_goal: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x) 
+    IMPLIES
+ %   ((yo - f(xo - 2) - 1 >= 0) AND
+ %   (yo - f(xo + 2) + 1 <= 0)) OR
+    % this is the correct goal
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0))
+%    ((yo - f(xo + 2) - 1 >= 0) AND
+%     (yo - f(xo - 2) + 1 <= 0)) OR
+%    ((yo - f(xo + 2) + 1 >= 0) AND
+%     (yo - f(xo - 2) - 1 <= 0))
+
+bound14_rect_function_wrong_goal: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x) 
+    IMPLIES
+    % cannot prove either branch of this conjunction with strategy above
+    ((yo - f(xo - 2) - 1 >= 0) AND
+    (yo - f(xo + 2) + 1 <= 0))
+    % this is the correct goal
+%    ((yo - f(xo - 2) + 1 >= 0) AND
+%     (yo - f(xo + 2) - 1 <= 0))
+%    ((yo - f(xo + 2) - 1 >= 0) AND
+%     (yo - f(xo - 2) + 1 <= 0)) OR
+%    ((yo - f(xo + 2) + 1 >= 0) AND
+%     (yo - f(xo - 2) - 1 <= 0))
+
+
+  % add a bound x >= 0 to domain, see how to handle this?
+  bound14_rect_function_bounded: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x) AND
+    % notch case here at (0, 0): transition point for, say y = x^2 
+    ((xo + 2 >= 0) AND
+     ( xo - 2 <= 0) AND
+     (yo + 1 >= 0) AND
+     (yo - 1 <= 0)) 
+    IMPLIES
+    ((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
      (yo - f(xo - 2) - 1 <= 0))  
+
 
 
 %|- bound11_rect_function : PROOF
