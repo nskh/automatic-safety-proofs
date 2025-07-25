@@ -161,14 +161,12 @@ def verts_and_lines(
 
 # TODO(nishant): automatically extract exists-clause bounds from the premise
 def construct_lemma(
+    verts,
     active_exists_premise,
     active_corner_condition,
     lemma_name,
-    deriv_clause1="derivable?[real](f)",
-    deriv_clause2=" >= 0)",
-    deriv_clause3=None,
-    exists_upper=None,
-    exists_lower=None,
+    deriv_clause1=" >= 0)",
+    deriv_clause2=None,
 ):
     """
     Produces a lemma string of the form:
@@ -184,12 +182,25 @@ def construct_lemma(
         active_corner_condition
     """
     # Build the exists clause from the main exists-premise and the two bounds.
-    exists_clause = f"(EXISTS (x : real) :\n    ({sympy_to_pvs(str(active_exists_premise))}) AND\n    {exists_upper} >= x AND {exists_lower} <= x)"
+    max_offset = max([v.x for v in verts.values()])
+    exists_upper = f"xo + {max_offset}"
 
-    if deriv_clause3:
-        full_preamble = f"{deriv_clause1} AND\n    (FORALL(x:real): deriv[real](f)(x) {deriv_clause2}) AND\n    (FORALL(x:real): deriv[real](f)(x) {deriv_clause3}) AND\n    {exists_clause}"
+    min_offset = min([v.x for v in verts.values()])
+    exists_lower = f"xo + {min_offset}"
+    exists_clause = f"""(EXISTS (x : real) :
+    ({sympy_to_pvs(str(active_exists_premise))}) AND
+    {exists_upper} >= x AND {exists_lower} <= x)"""
+
+    differentiable_statement = "derivable?[real](f)"
+    if deriv_clause2:
+        full_preamble = f"""{differentiable_statement} AND
+    (FORALL(x:real): deriv[real](f)(x) {deriv_clause1}) AND
+    (FORALL(x:real): deriv[real](f)(x) {deriv_clause2}) AND
+    {exists_clause}"""
     else:
-        full_preamble = f"{deriv_clause1} AND\n    (FORALL(x:real): deriv[real](f)(x) {deriv_clause2}) AND\n    {exists_clause}"
+        full_preamble = f"""{differentiable_statement} AND
+    (FORALL(x:real): deriv[real](f)(x) {deriv_clause1}) AND
+    {exists_clause}"""
 
     lemma_str = f"""{lemma_name}: LEMMA
     FORALL(f:[real-> real],xo,yo:real):
@@ -201,15 +212,17 @@ def construct_lemma(
 
 
 class ProofNode:
-    def __init__(self, command, args=None):
+    def __init__(self, command, args=None, kwargs=None, children=None):
         self.command = command
         self.args = args if args else []
-        self.children = []
+        self.kwargs = kwargs if kwargs else {}
+        self.children = children if children is not None else []
 
     def __repr__(self):
         args_str = f" {self.args}" if self.args else ""
+        kwargs_str = f" {self.kwargs}" if self.kwargs else ""
         children_str = f" children={len(self.children)}" if self.children else ""
-        return f"ProofNode({self.command}{args_str}{children_str})"
+        return f"ProofNode({self.command}{args_str}{kwargs_str}{children_str})"
 
     def add_child(self, node):
         self.children.append(node)
@@ -220,22 +233,24 @@ class ProofNode:
         return nodes
 
     def generate(self, indent="%|- ", depth=0, n_spaces=4):
-        if self.command == "()":  # Special handling for wrapper nodes
-            # Generate children with extra parentheses
+        base_indent = indent + " " * depth * n_spaces
+        # Compose argument string
+        arg_str = " ".join(str(arg) for arg in self.args) if self.args else ""
+        kwarg_str = (
+            " ".join(f":{k} {v}" for k, v in self.kwargs.items()) if self.kwargs else ""
+        )
+        all_args = " ".join(filter(None, [arg_str, kwarg_str]))
+        # Special handling for wrapper nodes
+        if self.command == "()":
             child_proofs = [c.generate(indent, depth) for c in self.children]
             return f"({' '.join(child_proofs)})"
-        base_indent = indent + " " * depth * n_spaces
-
         # Base case - no children
         if not self.children:
-            return f"({self.command}{' ' + ' '.join(str(arg) for arg in self.args) if self.args else ''})"
-
+            return f"({self.command}{' ' + all_args if all_args else ''})"
         # Multiple children or nested structures
-        result = f"({self.command}{' ' + ' '.join(str(arg) for arg in self.args) if self.args else ''}"
-
+        result = f"({self.command}{' ' + all_args if all_args else ''}"
         child_proofs = [c.generate(indent, depth + 1) for c in self.children]
         child_str = f"\n{base_indent} ".join(child_proofs)
-
         return f"{result}\n{base_indent} {child_str})"
 
 
@@ -256,17 +271,22 @@ class ProofBuilder:
                 then.add_child(step)
         return then
 
+    def create_spread_case(self, case_str, branches):
+        spread = ProofNode("SPREAD")
+        case = ProofNode("CASE", [f'"{case_str}"'])
+        spread.add_child(case)
+        for branch in branches:
+            spread.add_child(branch)
+        return spread
+
     def create_spread_split(self, branches):
         spread = ProofNode("SPREAD")
         split = ProofNode("SPLIT", ["-1"])
         spread.add_child(split)
-
-        # Create a wrapper node to enclose all branch nodes
         wrapper = ProofNode("()")
         for branch in branches:
             wrapper.add_child(branch[0])
         spread.add_child(wrapper)
-
         return spread
 
     def create_mvt_step(self, mvt_lemma):
@@ -276,38 +296,210 @@ class ProofBuilder:
             ProofNode("ASSERT"),
         ]
 
-    def create_inst_step(self, term1, term2):
-        return [
-            ProofNode("INST", ["-1", f'"{term1}"', f'"{term2}"']),
-            ProofNode("ASSERT"),
-        ]
+    def create_inst_step(self, *args, **kwargs):
+        # args: positional arguments for INST, kwargs: keyword arguments (e.g., :WHERE 1)
+        return [ProofNode("INST", list(args), kwargs), ProofNode("ASSERT")]
 
-    def build_rect_proof(self, lemma_name, mvt_lemma, inst_terms):
+    def create_instq_step(self, *args, **kwargs):
+        # For INST? with optional :WHERE, etc.
+        return [ProofNode("INST?", list(args), kwargs), ProofNode("ASSERT")]
+
+    def build_example_proof(self):
+        # Example: builds a proof tree matching the structure in bound22_rect_function_bounded
+        # (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP) (ASSERT)
+        #   (SPREAD (CASE "xo-2 >=0")
+        #     (...)
+        #     (...)
+        #   )
+        # )
+        then = self.create_then_sequence(
+            ProofNode("SKEEP*"),
+            ProofNode("SKOLETIN*"),
+            ProofNode("FLATTEN"),
+            ProofNode("SKEEP"),
+            ProofNode("ASSERT"),
+        )
+        # Branch 1 (abbreviated)
+        branch1 = self.create_then_sequence(
+            ProofNode("LEMMA", ['"mvt_gen_ge_bound"']),
+            ProofNode("INST", ["-1", '"f"', '"xo + 2"', '"x"', '"0"']),
+            ProofNode(
+                "SPREAD",
+                children=[
+                    ProofNode("SPLIT", ["-1"]),
+                    ProofNode(
+                        "()",
+                        children=[
+                            self.create_then_sequence(
+                                ProofNode("ASSERT"),
+                                ProofNode("LEMMA", ['"mvt_gen_ge_bound"']),
+                                ProofNode(
+                                    "INST", ["-1", '"f"', '"x"', '"xo-2"', '"0"']
+                                ),
+                                ProofNode("ASSERT"),
+                                ProofNode("SKEEP"),
+                                ProofNode("INST?"),
+                                ProofNode("ASSERT"),
+                            ),
+                            ProofNode("PROPAX"),
+                            ProofNode("ASSERT"),
+                            self.create_then_sequence(
+                                ProofNode("SKEEP"),
+                                ProofNode("INST?", [], {"WHERE": 1}),
+                                ProofNode("ASSERT"),
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        )
+        # Branch 2 (abbreviated)
+        branch2 = self.create_then_sequence(
+            ProofNode("ASSERT"),
+            ProofNode("EXPAND", ['"f"']),
+            ProofNode("ASSERT"),
+            ProofNode("LEMMA", ['"mvt_gen_ge_bound"']),
+            ProofNode("INST", ["-1", '"f"', '"xo+2"', '"x"', '"0"']),
+            ProofNode(
+                "SPREAD",
+                children=[
+                    ProofNode("SPLIT", ["-1"]),
+                    ProofNode(
+                        "()",
+                        children=[
+                            self.create_then_sequence(
+                                ProofNode("ASSERT"),
+                                ProofNode("EXPAND", ['"f"']),
+                                ProofNode(
+                                    "SPREAD",
+                                    children=[
+                                        ProofNode("CASE", ['"x=0"']),
+                                        self.create_then_sequence(
+                                            ProofNode("ASSERT"),
+                                            ProofNode("LEMMA", ['"mvt_gen_ge_bound"']),
+                                            ProofNode(
+                                                "INST",
+                                                ["-1", '"f"', '"x"', '"0"', '"0"'],
+                                            ),
+                                            ProofNode("ASSERT"),
+                                            ProofNode("SKEEP"),
+                                            ProofNode("INST?"),
+                                            ProofNode("ASSERT"),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                            ProofNode("EXPAND", ['"f"', "1"]),
+                            ProofNode("PROPAX"),
+                            ProofNode("ASSERT"),
+                            self.create_then_sequence(
+                                ProofNode("SKEEP"),
+                                ProofNode("INST?", [], {"WHERE": 1}),
+                                ProofNode("ASSERT"),
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        )
+        spread = self.create_spread_case("xo-2 >=0", [branch1, branch2])
+        then.add_child(spread)
+        return then
+
+    def build_rect_proof(
+        self,
+        lemma_name,
+        mvt_lemma,
+        inst_main,
+        spread_cases,
+        preamble_nodes=None,
+    ):
+        """
+        Flexible rectangle proof builder (structure-driven).
+        lemma_name: name of the lemma
+        mvt_lemma: name of the MVT lemma to use (e.g., "mvt_gen_ge_bound")
+        inst_main: list of terms for the main INST (e.g., ["f", "xo + 2", "x", "0"])
+        spread_cases: list of dicts, each with:
+            - 'case_label': label for the CASE
+            - 'split_branches': list of dicts, each with 'type' and optional params
+        preamble_nodes: optional list of ProofNode for THEN preamble (default: standard)
+        Returns: ProofScript
+        """
+
+        def make_branch(branch):
+            btype = branch.get("type")
+            if btype == "then":
+                steps = branch.get("steps", [])
+                nodes = []
+                for step in steps:
+                    cmd = step["cmd"]
+                    args = step.get("args", [])
+                    kwargs = step.get("kwargs", {})
+                    nodes.append(ProofNode(cmd, args, kwargs))
+                return self.create_then_sequence(*nodes)
+            elif btype == "assert-then":
+                steps = branch.get("steps", [])
+                nodes = [ProofNode("ASSERT")]
+                for step in steps:
+                    cmd = step["cmd"]
+                    args = step.get("args", [])
+                    kwargs = step.get("kwargs", {})
+                    nodes.append(ProofNode(cmd, args, kwargs))
+                return self.create_then_sequence(*nodes)
+            elif btype == "propax":
+                return ProofNode("PROPAX")
+            elif btype == "assert":
+                return ProofNode("ASSERT")
+            else:
+                raise ValueError(f"Unknown branch type: {btype}")
+
         script = ProofScript(lemma_name)
-
+        if preamble_nodes is None:
+            preamble_nodes = [
+                ProofNode("SKEEP*"),
+                ProofNode("SKOLETIN*"),
+                ProofNode("FLATTEN"),
+                ProofNode("SKEEP"),
+            ]
         root = self.create_then_sequence(
-            ProofNode("SKEEP*"), *self.create_mvt_step(mvt_lemma)
+            *preamble_nodes,
+            ProofNode(
+                "SPREAD",
+                children=[
+                    ProofNode("CASE", [f'"{case['case_label']}"']) if i == 0 else None
+                    for i, case in enumerate(spread_cases)
+                ]
+                + [
+                    ProofNode(
+                        "()",
+                        children=[
+                            self.create_then_sequence(
+                                ProofNode("LEMMA", [f'"{mvt_lemma}"']),
+                                ProofNode(
+                                    "INST", ["-1"] + [f'"{t}"' for t in inst_main]
+                                ),
+                            ),
+                            ProofNode(
+                                "SPREAD",
+                                children=[
+                                    ProofNode("SPLIT", ["-1"]),
+                                    ProofNode(
+                                        "()",
+                                        children=[
+                                            *(
+                                                make_branch(branch)
+                                                for branch in case["split_branches"]
+                                            )
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
+                    )
+                    for case in spread_cases
+                ],
+            ),
         )
-
-        # Inner branch with THEN sequence
-        inner_then = self.create_then_sequence(
-            *self.create_inst_step(inst_terms[1], inst_terms[2])
-        )
-
-        # Inner SPREAD with branches in list
-        inner_spread = self.create_spread_split([[inner_then], [ProofNode("PROPAX")]])
-
-        # Main branch with THEN sequence
-        main_branch = self.create_then_sequence(
-            ProofNode("ASSERT"),
-            *self.create_inst_step(inst_terms[0], inst_terms[1]),
-            *self.create_mvt_step(mvt_lemma),
-            inner_spread,
-        )
-
-        # Outer SPREAD with branches in list
-        outer_spread = self.create_spread_split([[main_branch], [ProofNode("PROPAX")]])
-        root.add_child(outer_spread)
         script.root = root
         return script
 
@@ -324,6 +516,7 @@ class ProofScript:
             lines.append(f"%|- {self.root.generate()}")
             lines.append(f"%|- QED {self.lemma_name}")
             return "\n".join(lines)
-        except:
+        except Exception as e:
             print(self.lemma_name)
             print(self.root)
+            print(e)

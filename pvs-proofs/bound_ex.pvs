@@ -61,6 +61,14 @@ bound_ex  % [ parameters ]
 %|- (POSTPONE)
 %|- QED mvt_gen_le
 
+  mvt_gen_le_bound: LEMMA
+  FORALL(f:[real-> real],a,b,c:real):
+  (derivable?[real](f) AND a>=b AND
+  FORALL(x:real | b < x AND x < a): deriv[real](f)(x) <= c)
+  IMPLIES
+  f(a) - f(b) <= c*(a-b)
+
+
   bound1_ex: LEMMA
   FORALL(f:[real-> real],x0,y0:real):
   derivable?[real](f) AND
@@ -263,50 +271,6 @@ bound_ex  % [ parameters ]
     ((yo - f(xo + 2) + 1 >= 0) AND
      (yo - f(xo - 2) - 1 <= 0))
 
-bound14_rect_function_one_goal: LEMMA
-    FORALL(f:[real-> real],xo,yo:real):
-    derivable?[real](f) AND
-    (FORALL(x:real): deriv[real](f)(x) >= 0) AND 
-    (EXISTS (x : real) :
-    ((-x + xo + 2 >= 0) AND
-     (-x + xo - 2 <= 0) AND
-     (yo - f(x) + 1 >= 0) AND
-     (yo - f(x) - 1 <= 0)) AND
-    xo + 2 >= x AND xo - 2 <= x) 
-    IMPLIES
- %   ((yo - f(xo - 2) - 1 >= 0) AND
- %   (yo - f(xo + 2) + 1 <= 0)) OR
-    % this is the correct goal
-    ((yo - f(xo - 2) + 1 >= 0) AND
-     (yo - f(xo + 2) - 1 <= 0))
-%    ((yo - f(xo + 2) - 1 >= 0) AND
-%     (yo - f(xo - 2) + 1 <= 0)) OR
-%    ((yo - f(xo + 2) + 1 >= 0) AND
-%     (yo - f(xo - 2) - 1 <= 0))
-
-bound14_rect_function_wrong_goal: LEMMA
-    FORALL(f:[real-> real],xo,yo:real):
-    derivable?[real](f) AND
-    (FORALL(x:real): deriv[real](f)(x) >= 0) AND 
-    (EXISTS (x : real) :
-    ((-x + xo + 2 >= 0) AND
-     (-x + xo - 2 <= 0) AND
-     (yo - f(x) + 1 >= 0) AND
-     (yo - f(x) - 1 <= 0)) AND
-    xo + 2 >= x AND xo - 2 <= x) 
-    IMPLIES
-    % cannot prove either branch of this conjunction with strategy above
-    ((yo - f(xo - 2) - 1 >= 0) AND
-    (yo - f(xo + 2) + 1 <= 0))
-    % this is the correct goal
-%    ((yo - f(xo - 2) + 1 >= 0) AND
-%     (yo - f(xo + 2) - 1 <= 0))
-%    ((yo - f(xo + 2) - 1 >= 0) AND
-%     (yo - f(xo - 2) + 1 <= 0)) OR
-%    ((yo - f(xo + 2) + 1 >= 0) AND
-%     (yo - f(xo - 2) - 1 <= 0))
-
-
   % add a bound x >= 0 to domain, see how to handle this?
   bound14_rect_function_bounded: LEMMA
     FORALL(f:[real-> real],xo,yo:real):
@@ -332,40 +296,330 @@ bound14_rect_function_wrong_goal: LEMMA
     ((yo - f(xo + 2) - 1 >= 0) AND
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
-     (yo - f(xo - 2) - 1 <= 0))  
+     (yo - f(xo - 2) - 1 <= 0))
+     % top left y0 = f(x0+2) + 1 -> y0 - f(x0+2) - 1
+     % bottom right y0 = f(x0-2) -1 -> y - f(x0-2) + 1
+      %%% cut them out so it just active. how far we can get.
+      
+
+  bound15_rect_function_bounded: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    ((((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0)))
+     OR
+    ((xo + 2 >= 0) AND
+     ( xo - 2 <= 0) AND
+     (yo + 1 >= 0) AND
+     (yo - 1 <= 0) ))
+     %%% Maybe this lemma is true. 
+
+  bound16_rect_function_counter: LEMMA
+    LET f = LAMBDA(x:real): IF x < 0 THEN 10000*x^2 ELSE 10000*x^2 ENDIF,
+    	xo = -1,
+	yo = 1
+    IN
+    (derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND 
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x))
+    AND NOT(
+    ((((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0)))))
+%%% So this is not true, perhaps there isn't a notch
+%  (this negates boundex14)
 
 
+  bound17_rect_function_bounded: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND
+    (FORALL(x:real): x <= 0 IMPLIES deriv[real](f)(x) <= 0) AND 
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    ((((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
 
-%|- bound11_rect_function : PROOF
-%|- (THEN (SKEEP*) (LEMMA "mvt_gen_ge") (INST?) (ASSERT)
-%|-  (SPREAD (SPLIT -1)
-%|-   ((THEN (ASSERT) (INST -1 "xo + 2" "x") (ASSERT) (LEMMA "mvt_gen_ge") (INST?)
-%|-     (ASSERT)
-%|-     (SPREAD (SPLIT -1) ((THEN (INST -1 "x" "xo - 2") (ASSERT)) (PROPAX))))
-%|-    (PROPAX))))
-%|- QED bound11_rect_function
+%%% Maybe this lemma is true.
 
-%|- bound13_rect_function : PROOF
-%|- (THEN
-%|-  (SKEEP*)
-%|-  (LEMMA "mvt_gen_ge")
-%|-  (INST?)
-%|-  (ASSERT)
-%|-  (SPREAD
-%|-      (SPLIT -1)
-%|-      ((THEN
-%|-          (ASSERT)
-%|-          (INST -1 "xo + 2" "x")
-%|-          (ASSERT)
-%|-          (LEMMA "mvt_gen_ge")
-%|-          (INST?)
-%|-          (ASSERT)
-%|-          (SPREAD
-%|-              (SPLIT -1)
-%|-              ((THEN
-%|-                  (INST -1 "x" "xo - 2")
-%|-                  (ASSERT)) (PROPAX)))) (PROPAX))))
-%|- QED bound13_rect_function
+  deriv_shift_f: LEMMA
+  FORALL(f:{ff:[real -> real]| derivable?[real](ff)},a,c,xmin:real):
+  (FORALL(x:real): x >= xmin AND  deriv[real](f)(x) >= a)
+  IMPLIES
+  (FORALL(x:real): x >= xmin-c AND deriv[real](f)(x+c) >= a)
 
+  bound18_rect_function_bounded: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND
+    (FORALL(x:real): x <= 0 IMPLIES deriv[real](f)(x) <= 0) AND 
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    ((((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
+     %%% Maybe this lemma is true.
+     %%% Can we prove this with f(x) = alpha * x?
+     %%% 
+
+%bound14_rect_function_one_goal: LEMMA
+ %   FORALL(f:[real-> real],xo,yo:real):
+ %   derivable?[real](f) AND
+ %   (FORALL(x:real): deriv[real](f)(x) >= 0) AND
+ %   (EXISTS (x : real) :
+ %   ((-x + xo + 2 >= 0) AND
+ %    (-x + xo - 2 <= 0) AND
+ %    (yo - f(x) + 1 >= 0) AND
+ %    (yo - f(x) - 1 <= 0)) AND
+ %   xo + 2 >= x AND xo - 2 <= x)
+ %   IMPLIES
+ %   ((yo - f(xo - 2) - 1 >= 0) AND
+ %   (yo - f(xo + 2) + 1 <= 0)) OR
+    % this is the correct goal
+%    ((yo - f(xo - 2) + 1 >= 0) AND
+%     (yo - f(xo + 2) - 1 <= 0))
+%    ((yo - f(xo + 2) - 1 >= 0) AND
+%     (yo - f(xo - 2) + 1 <= 0)) OR
+%    ((yo - f(xo + 2) + 1 >= 0) AND
+%     (yo - f(xo - 2) - 1 <= 0))
+
+bound19_rect_function_bounded: LEMMA
+    FORALL(f:[real-> real],xo,yo:real):
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND
+    (FORALL(x:real): x <= 0 IMPLIES deriv[real](f)(x) <= 0) AND 
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    ((((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
+     %%% Maybe this lemma is true.
+
+bound20_rect_function_bounded: LEMMA
+    FORALL(xo,yo:real):
+    LET   f = LAMBDA(x:real): x^2 IN
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND
+    (FORALL(x:real): x <= 0 IMPLIES deriv[real](f)(x) <= 0) AND
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    %((((yo - f(xo - 2) + 1 >= 0) AND
+    % (yo - f(xo + 2) - 1 <= 0)))
+ (       (  ((yo - f(xo - 2) - 1 >= 0) AND
+         (yo - f(xo + 2) + 1 <= 0)) OR
+    % this is the correct goal
+        ((yo - f(xo - 2) + 1 >= 0) AND
+         (yo - f(xo + 2) - 1 <= 0)) OR
+        ((yo - f(xo + 2) - 1 >= 0) AND	
+         (yo - f(xo - 2) + 1 <= 0)) OR
+        ((yo - f(xo + 2) + 1 >= 0) AND
+         (yo - f(xo - 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
+     %%% Maybe this lemma is true.
+     %%% lets plut in x = 1, x0 = -1, y0 = 2
+     %%2 - 9 + 1 >= 0 =>  -6 >= 0
+     %% 2 - 1- 1  = 0 <= 0 -> TRUE
+     %% also fails last clause
+     %%% let put in x = 1, x0 = -.99 yo = (-.98^2)
+
+bound21_rect_function_bounded: LEMMA
+    FORALL(xo,yo:real):
+    LET   f = LAMBDA(x:real):
+		  COND
+                    x>=0 -> x^2,
+		    x<0 -> 0
+                  ENDCOND
+    IN
+    derivable?[real](f) AND
+    (FORALL(x:real): x >= 0 IMPLIES deriv[real](f)(x) >= 0) AND
+    (FORALL(x:real): x <= 0 IMPLIES deriv[real](f)(x) <= 0) AND
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    %((((yo - f(xo - 2) + 1 >= 0) AND
+    % (yo - f(xo + 2) - 1 <= 0)))
+ (       (  ((yo - f(xo - 2) - 1 >= 0) AND
+         (yo - f(xo + 2) + 1 <= 0)) OR
+    % this is the correct goal
+        ((yo - f(xo - 2) + 1 >= 0) AND
+         (yo - f(xo + 2) - 1 <= 0)) OR
+        ((yo - f(xo + 2) - 1 >= 0) AND	
+         (yo - f(xo - 2) + 1 <= 0)) OR
+        ((yo - f(xo + 2) + 1 >= 0) AND
+         (yo - f(xo - 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
+
+% TODO we could prove differentiability of g where it is f for a differentiable f in a lemma
+% TODO make MVT bound more general to include differentiable on a smaller domain than real (connected) 
+% TODO not using posreal -> changing interval to have 1 or two bounds
+
+bound22_rect_function_bounded: LEMMA
+    FORALL(xo,yo:real,g:[real -> real]):
+    LET   f = LAMBDA(x:real):
+		  COND
+                    x>0 -> g(x),
+		    x <= 0 -> 0
+                  ENDCOND
+    IN
+    derivable?[real](f) AND
+    (FORALL(x:real): x > 0 IMPLIES deriv[real](f)(x) >= 0) AND
+    (f(0)=0) AND
+    (EXISTS (x : real) :
+     x >= 0 AND
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    %((((yo - f(xo - 2) + 1 >= 0) AND
+    % (yo - f(xo + 2) - 1 <= 0)))
+ (       (  ((yo - f(xo - 2) - 1 >= 0) AND
+         (yo - f(xo + 2) + 1 <= 0)) OR
+    % this is the correct goal
+        ((yo - f(xo - 2) + 1 >= 0) AND
+         (yo - f(xo + 2) - 1 <= 0)) OR
+        ((yo - f(xo + 2) - 1 >= 0) AND	
+         (yo - f(xo - 2) + 1 <= 0)) OR
+        ((yo - f(xo + 2) + 1 >= 0) AND
+         (yo - f(xo - 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
+
+%|- bound22_rect_function_bounded : PROOF
+%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "xo-2 >=0")
+%|-   ((THEN (LEMMA "mvt_gen_ge_bound") (INST -1 "f" "xo+2" "x" "0")
+%|-     (SPREAD (SPLIT -1)
+%|-      ((THEN (ASSERT) (LEMMA "mvt_gen_ge_bound") (INST -1 "f" "x" "xo-2" "0")
+%|-        (ASSERT) (SKEEP) (INST? :WHERE 1) (ASSERT))
+%|-       (PROPAX) (PROPAX) (THEN (SKEEP) (INST? :WHERE 1) (ASSERT)))))
+%|-    (THEN (LEMMA "mvt_gen_ge_bound") (INST -1 "f" "xo+2" "x" "0")
+%|-     (SPREAD (SPLIT -1)
+%|-      ((THEN (ASSERT) (EXPAND "f") (LEMMA "mvt_gen_ge_bound")
+%|-        (INST -1 "f" "x" "0" "0") (ASSERT) (SKEEP) (INST? :WHERE 1) (ASSERT))
+%|-       (PROPAX) (PROPAX) (THEN (SKEEP) (INST? :WHERE 1) (ASSERT))))))))
+%|- QED bound22_rect_function_bounded
+
+bound23_rect_function_bounded: LEMMA
+    FORALL(xo,yo:real,g:[real -> real]):
+    LET f = LAMBDA(x:real):
+		  COND
+        x<0 -> g(x),
+		    x >= 0 -> 0
+      ENDCOND
+    IN
+      derivable?[real](f) AND
+      (FORALL(x:real): x < 0 IMPLIES deriv[real](f)(x) <= 0) AND
+      (f(0)=0) AND
+      (EXISTS (x : real) :
+      x <= 0 AND
+      ((-x + xo + 2 >= 0) AND
+      (-x + xo - 2 <= 0) AND
+      (yo - f(x) + 1 >= 0) AND
+      (yo - f(x) - 1 <= 0)) AND
+      xo + 2 >= x AND xo - 2 <= x)
+    IMPLIES
+    %((((yo - f(xo - 2) + 1 >= 0) AND
+    % (yo - f(xo + 2) - 1 <= 0)))
+  ((((yo - f(xo - 2) - 1 >= 0) AND
+         (yo - f(xo + 2) + 1 <= 0)) OR
+    % this is the correct goal
+        ((yo - f(xo - 2) + 1 >= 0) AND
+         (yo - f(xo + 2) - 1 <= 0)) OR
+        ((yo - f(xo + 2) - 1 >= 0) AND	
+         (yo - f(xo - 2) + 1 <= 0)) OR
+        ((yo - f(xo + 2) + 1 >= 0) AND
+         (yo - f(xo - 2) - 1 <= 0)))
+     OR
+    (((xo  >= -2 ) AND
+     ( xo  <= 2 ) AND
+     (yo  >= -1 + f(0)) AND
+     (yo  <= 1 + f(0)) )))
 
 END bound_ex
