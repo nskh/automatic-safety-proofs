@@ -580,11 +580,8 @@ bound22_rect_function_bounded: LEMMA
      (yo - f(x) - 1 <= 0)) AND
     xo + 2 >= x AND xo - 2 <= x)
     IMPLIES
-    %((((yo - f(xo - 2) + 1 >= 0) AND
-    % (yo - f(xo + 2) - 1 <= 0)))
  (       (  ((yo - f(xo - 2) - 1 >= 0) AND
          (yo - f(xo + 2) + 1 <= 0)) OR
-    % this is the correct goal
         ((yo - f(xo - 2) + 1 >= 0) AND
          (yo - f(xo + 2) - 1 <= 0)) OR
         ((yo - f(xo + 2) - 1 >= 0) AND	
@@ -616,11 +613,8 @@ bound22_rect_function_bounded_2: LEMMA
      (yo - f(x) - 1 <= 0)) AND
     xo + 2 >= x AND xo - 2 <= x)
     IMPLIES
-    %((((yo - f(xo - 2) + 1 >= 0) AND
-    % (yo - f(xo + 2) - 1 <= 0)))
  (       (  ((yo - f(xo - 2) - 1 >= 0) AND
          (yo - f(xo + 2) + 1 <= 0)) OR
-    % this is the correct goal
         ((yo - f(xo - 2) + 1 >= 0) AND
          (yo - f(xo + 2) - 1 <= 0)) OR
         ((yo - f(xo + 2) - 1 >= 0) AND	
@@ -633,6 +627,31 @@ bound22_rect_function_bounded_2: LEMMA
      (yo  >= -1 + f(0)) AND
      (yo  <= 1 + f(0)) )))
 
+%|- bound22_rect_function_bounded_2 : PROOF
+%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "xo-2 >= 0")
+%|-   ((THEN (LEMMA "mvt_gen_ge_ro_2")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo+2" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro_2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo-2")
+%|-           ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+%|-            (THEN (EXPAND "right_open") (ASSERT)))))
+%|-         (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "right_open") (ASSERT))
+%|-       (THEN (EXPAND "right_open") (ASSERT)))))
+%|-    (THEN (LEMMA "mvt_gen_ge_ro_2")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo+2" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro_2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "0")
+%|-           ((THEN (EXPAND "f") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-            (THEN (ASSERT) (EXPAND "right_open") (ASSERT))
+%|-            (THEN (EXPAND "right_open") (ASSERT)))))
+%|-         (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (ASSERT) (EXPAND "right_open") (ASSERT))
+%|-       (THEN (ASSERT) (EXPAND "right_open") (ASSERT))))))))
+%|- QED bound22_rect_function_bounded_2
 
 
 bound22_rect_function_bounded_2_le: LEMMA
@@ -669,6 +688,32 @@ bound22_rect_function_bounded_2_le: LEMMA
      ( xo  <= 2 ) AND
      (yo  >= -1 + f(0)) AND
      (yo  <= 1 + f(0)) )))
+
+%|- bound22_rect_function_bounded_2_le : PROOF
+%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "xo+2 <= 0")
+%|-   ((THEN (LEMMA "mvt_gen_le_lo_2")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo+2" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo_2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo-2")
+%|-           ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
+%|-            (THEN (EXPAND "left_open") (ASSERT)))))
+%|-         (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "left_open") (ASSERT))
+%|-       (THEN (EXPAND "left_open") (ASSERT)))))
+%|-    (THEN (LEMMA "mvt_gen_le_lo_2")
+%|-     (SPREAD (INST -1 "f" "0" "0" "0" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo_2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo-2")
+%|-           ((THEN (EXPAND "f") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-            (THEN (EXPAND "left_open") (ASSERT))
+%|-            (THEN (EXPAND "left_open") (ASSERT)))))
+%|-         (ASSERT) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "left_open") (ASSERT))
+%|-       (THEN (EXPAND "left_open") (ASSERT))))))))
+%|- QED bound22_rect_function_bounded_2_le
 
 bound22_rect_function_bounded_2_le_unify: LEMMA
     FORALL(xo,yo:real,g:[real -> real]):

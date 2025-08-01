@@ -298,7 +298,7 @@ def compute_unsafe_cond(
     set_of_transitions = set()
     if type(trajectory) == Piecewise:
         # For piecewise trajectories, we need to find transitions for each piece
-        for (subtraj, subcond) in trajectory.as_expr_set_pairs():
+        for subtraj, subcond in trajectory.as_expr_set_pairs():
             # trim domain by computing intersection, so we don't find transitions
             # outside of the domain for each piece of the trajectory
             subdomain = subcond.intersect(domain)
