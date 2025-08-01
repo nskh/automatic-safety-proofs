@@ -272,99 +272,31 @@ def unbounded_one_side_proof_script(
     - max_right_clipped: The maximum right value after clipping, e.g. xo+half_width but maybe 0
     - min_left_clipped: The minimum left value after clipping, e.g. xo-half_width
     """
+
     return f"""%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
-    %|-  (SPREAD (CASE "{case_label}")
-    %|-   ((THEN (LEMMA "{deriv_lemma}")
-    %|-     (SPREAD (INST -1 "f" "0" "0" "{max_right}" "x")
-    %|-      ((SPREAD (SPLIT -1)
-    %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
-    %|-          (SPREAD (INST -1 "f" "0" "0" "x" "{min_left}")
-    %|-           ((ASSERT) (THEN (EXPAND "{domain_definition}") (ASSERT))
-    %|-            (THEN (EXPAND "{domain_definition}") (ASSERT)))))
-    %|-         (PROPAX) (PROPAX) (PROPAX)))
-    %|-       (THEN (EXPAND "{domain_definition}") (ASSERT))
-    %|-       (THEN (EXPAND "{domain_definition}") (ASSERT)))))
-    %|-    (THEN (LEMMA "{deriv_lemma}")
-    %|-     (SPREAD (INST -1 "f" "0" "0" "{max_right_clipped}" "x")
-    %|-      ((SPREAD (SPLIT -1)
-    %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
-    %|-          (SPREAD (INST -1 "f" "0" "0" "x" "{min_left_clipped}")
-    %|-           ((THEN (EXPAND "f") (EXPAND "{domain_definition}") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
-    %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
-    %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT)))))
-    %|-         (ASSERT) (PROPAX) (PROPAX)))
-    %|-       (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
-    %|-       (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))))))))
-    """
-
-
-class ProofNode:
-    """Represents a node in a PVS proof tree."""
-
-    def __init__(self, command, args=None, kwargs=None, children=None):
-        self.command = command
-        self.args = args if args else []
-        self.kwargs = kwargs if kwargs else {}
-        self.children = children if children is not None else []
-
-    def __repr__(self):
-        args_str = f" {self.args}" if self.args else ""
-        kwargs_str = f" {self.kwargs}" if self.kwargs else ""
-        children_str = f" children={len(self.children)}" if self.children else ""
-        return f"ProofNode({self.command}{args_str}{kwargs_str}{children_str})"
-
-    def add_child(self, node):
-        """Add a child node."""
-        self.children.append(node)
-        return node
-
-    def add_children(self, nodes):
-        """Add multiple child nodes."""
-        self.children.extend(nodes)
-        return nodes
-
-    def generate(self, indent="%|- ", depth=0, n_spaces=4):
-        """Generate PVS proof script from the node tree."""
-        base_indent = indent + " " * depth * n_spaces
-        # Compose argument string
-        arg_str = " ".join(str(arg) for arg in self.args) if self.args else ""
-        kwarg_str = (
-            " ".join(f":{k} {v}" for k, v in self.kwargs.items()) if self.kwargs else ""
-        )
-        all_args = " ".join(filter(None, [arg_str, kwarg_str]))
-        # Special handling for wrapper nodes
-        if self.command == "()":
-            child_proofs = [c.generate(indent, depth) for c in self.children]
-            return f"({' '.join(child_proofs)})"
-        # Base case - no children
-        if not self.children:
-            return f"({self.command}{' ' + all_args if all_args else ''})"
-        # Multiple children or nested structures
-        result = f"({self.command}{' ' + all_args if all_args else ''}"
-        child_proofs = [c.generate(indent, depth + 1) for c in self.children]
-        child_str = f"\n{base_indent} ".join(child_proofs)
-        return f"{result}\n{base_indent} {child_str})"
-
-
-class ProofScript:
-    """Represents a complete PVS proof script."""
-
-    def __init__(self, lemma_name):
-        self.lemma_name = lemma_name
-        self.root = None
-
-    def generate(self):
-        """Generate the complete proof script."""
-        try:
-            lines = []
-            lines.append(f"%|- {self.lemma_name} : PROOF")
-            lines.append(f"%|- {self.root.generate()}")
-            lines.append(f"%|- QED {self.lemma_name}")
-            return "\n".join(lines)
-        except Exception as e:
-            print(self.lemma_name)
-            print(self.root)
-            print(e)
+%|-  (SPREAD (CASE "{case_label}")
+%|-   ((THEN (LEMMA "{deriv_lemma}")
+%|-     (SPREAD (INST -1 "f" "0" "0" "{max_right}" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "{min_left}")
+%|-           ((ASSERT) (THEN (EXPAND "{domain_definition}") (ASSERT))
+%|-            (THEN (EXPAND "{domain_definition}") (ASSERT)))))
+%|-         (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "{domain_definition}") (ASSERT))
+%|-       (THEN (EXPAND "{domain_definition}") (ASSERT)))))
+%|-    (THEN (LEMMA "{deriv_lemma}")
+%|-     (SPREAD (INST -1 "f" "0" "0" "{max_right_clipped}" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "{min_left_clipped}")
+%|-           ((THEN (EXPAND "f") (EXPAND "{domain_definition}") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
+%|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT)))))
+%|-         (ASSERT) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
+%|-       (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))))))))
+"""
 
 
 # =============================================================================
@@ -420,7 +352,7 @@ def generate_unbounded_proof_calls(
     half_width = (max_offset - min_offset) / 2
 
     # Get polygon angles and find transitions
-    angles, vertex_pairs = compute_polygon_angles(poly)
+    angles, _ = compute_polygon_angles(poly)
     set_of_transitions = set()
 
     if isinstance(trajectory, Piecewise):
@@ -537,11 +469,13 @@ def generate_unbounded_proof_calls(
 
         # Generate case label for unbounded domains
         if left_unbounded:  # Interval unbounded on left
-            case_label = f"xo + {half_width} >= {interval_end}"
+            case_label = f"xo + {half_width} <= {interval_end}"
         else:  # right_unbounded: Interval unbounded on right
-            case_label = f"xo - {half_width} <= {interval_start}"
+            case_label = f"xo - {half_width} >= {interval_start}"
 
         # Determine derivative lemma based on derivative sign at midpoint
+        # For left_unbounded domains: use left_open lemmas
+        # For right_unbounded domains: use right_open lemmas
         deriv_sign = "ge" if deriv_at_midpoint >= 0 else "le"
         domain_type = "lo" if left_unbounded else "ro"
         deriv_lemma = f"mvt_gen_{deriv_sign}_{domain_type}_2"
@@ -555,11 +489,11 @@ def generate_unbounded_proof_calls(
 
         # Clipped bounds
         if left_unbounded:
-            max_right_clipped = f"min(xo + {half_width}, {interval_end})"
-            min_left_clipped = f"max(xo - {half_width}, {interval_start})"
+            max_right_clipped = interval_end
+            min_left_clipped = min_left
         else:  # right_unbounded
-            max_right_clipped = f"min(xo + {half_width}, {interval_end})"
-            min_left_clipped = f"max(xo - {half_width}, {interval_start})"
+            max_right_clipped = max_right
+            min_left_clipped = interval_start
 
         proof_call = {
             "case_label": case_label,

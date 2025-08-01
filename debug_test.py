@@ -5,7 +5,7 @@ Debug test for automatic proof generation.
 """
 
 from sympy import *
-from pvs_utils import generate_unbounded_proof_calls
+from pvs_utils import generate_unbounded_proof_calls, generate_proof_scripts_from_calls
 
 # Define symbols
 x, y = symbols("x y")
@@ -42,6 +42,21 @@ try:
         print(f"  Domain definition: {call['domain_definition']}")
         print(f"  Interval: {call['interval']}")
         print(f"  Active corner: {call['active_corner']}")
+
+    # Generate proof scripts
+    print(f"\n{'='*60}")
+    print("GENERATING PROOF SCRIPTS:")
+    print(f"{'='*60}")
+
+    proof_scripts = generate_proof_scripts_from_calls(proof_calls)
+    print(f"\nGenerated {len(proof_scripts)} proof scripts:")
+
+    for i, script in enumerate(proof_scripts):
+        print(f"\n{'='*60}")
+        print(f"PROOF SCRIPT {i+1}:")
+        print(f"{'='*60}")
+        print(script)
+        print(f"{'='*60}")
 
 except Exception as e:
     print(f"Error: {e}")
