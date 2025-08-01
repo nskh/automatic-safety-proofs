@@ -201,6 +201,8 @@ def construct_lemma(
     lemma_name,
     deriv_clause1=" >= 0)",
     deriv_clause2=None,
+    domain_start=None,
+    domain_end=None,
 ):
     """
     Produces a lemma string of the form:
@@ -215,6 +217,39 @@ def construct_lemma(
         IMPLIES
         active_corner_condition
     """
+    # closed interval: [domain_start, domain_end]
+    if domain_start is not None and domain_end is not None:
+        function_statement = f"""LET f = LAMBDA(x:real):
+        COND
+            x < {domain_start} -> g({domain_start}),
+            x >= {domain_start} AND x < {domain_end} -> g(x),
+            x >= {domain_end} -> g({domain_end})
+        ENDCOND"""
+
+        deriv_domain = f"(ci({domain_start}, {domain_end}))"
+        exists_domain = f"x >= {domain_start} AND x <= {domain_end}"
+    # right open interval: [domain_start, oo)
+    elif domain_start is not None:
+        function_statement = f"""LET f = LAMBDA(x:real):
+        COND
+            x < {domain_start} -> g({domain_start}),
+            x >= {domain_start} -> g(x)
+        ENDCOND"""
+
+        deriv_domain = f"(right_open({domain_start}))"
+        exists_domain = f"x >= {domain_start}"
+    # left open interval: (-oo, domain_end)
+    elif domain_end is not None:
+        function_statement = f"""LET f = LAMBDA(x:real):
+        COND
+            x <= {domain_end} -> g(x),
+            x > {domain_end} -> g({domain_end})
+        ENDCOND"""
+        deriv_domain = f"(left_open({domain_end}))"
+        exists_domain = f"x <= {domain_end}"
+    else:
+        raise ValueError("No domain specified")
+
     # Build the exists clause from the main exists-premise and the two bounds.
     max_offset = max([v.x for v in verts.values()])
     exists_upper = f"xo + {max_offset}"
@@ -223,21 +258,26 @@ def construct_lemma(
     exists_lower = f"xo + {min_offset}"
     exists_clause = f"""(EXISTS (x : real) :
     ({sympy_to_pvs(str(active_exists_premise))}) AND
+    {exists_domain} AND
     {exists_upper} >= x AND {exists_lower} <= x)"""
 
-    differentiable_statement = "derivable?[real](f)"
+    deriv_statement = f"derivable?[{deriv_domain}](f)"
     if deriv_clause2:
-        full_preamble = f"""{differentiable_statement} AND
-    (FORALL(x:real): deriv[real](f)(x) {deriv_clause1}) AND
-    (FORALL(x:real): deriv[real](f)(x) {deriv_clause2}) AND
+        full_preamble = f"""    {function_statement}
+    IN 
+    {deriv_statement} AND
+    (FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause1}) AND
+    (FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause2}) AND
     {exists_clause}"""
     else:
-        full_preamble = f"""{differentiable_statement} AND
-    (FORALL(x:real): deriv[real](f)(x) {deriv_clause1}) AND
+        full_preamble = f"""    {function_statement}
+    IN 
+    {deriv_statement} AND
+    (FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause1}) AND
     {exists_clause}"""
 
     lemma_str = f"""{lemma_name}: LEMMA
-    FORALL(f:[real-> real],xo,yo:real):
+    FORALL(xo,yo:real, g:[real-> real]):
     {full_preamble}
     IMPLIES
     {sympy_to_pvs(str(active_corner_condition))}
@@ -302,17 +342,15 @@ def unbounded_one_side_proof_script(
 # =============================================================================
 # AUTOMATIC PROOF SCRIPT GENERATION
 # =============================================================================
-
-
 def generate_unbounded_proof_calls(
-    trajectory, poly, domain, x=symbols("x"), y=symbols("y")
+    trajectory_expr, poly, domain, x=symbols("x"), y=symbols("y")
 ):
     """
     Automatically generate calls to unbounded_one_side_proof_script based on
     trajectory, polygon, and domain analysis.
 
     Args:
-        trajectory: Sympy expression or Piecewise for trajectory
+        trajectory_expr: Single-variable Sympy *expression* for trajectory. May be Piecewise.
         poly: Sympy Polygon object
         domain: Sympy Interval domain
         x, y: Sympy symbols for variables
@@ -355,9 +393,9 @@ def generate_unbounded_proof_calls(
     angles, _ = compute_polygon_angles(poly)
     set_of_transitions = set()
 
-    if isinstance(trajectory, Piecewise):
+    if isinstance(trajectory_expr, Piecewise):
         # Handle piecewise trajectories
-        for subtraj, subcond in trajectory.as_expr_set_pairs():
+        for subtraj, subcond in trajectory_expr.as_expr_set_pairs():
             subdomain = subcond.intersect(domain)
 
             # Trajectory is y = f(x)
@@ -376,11 +414,11 @@ def generate_unbounded_proof_calls(
     else:
         # Handle single trajectory (y = f(x))
         _, subset_of_transitions = find_transitions(
-            -y + trajectory, angles, x, y, domain=domain
+            -y + trajectory_expr, angles, x, y, domain=domain
         )
         # Add left and right boundaries to check for notch there too
-        left_bound = Point(domain.inf, trajectory.subs(func_var, domain.inf))
-        right_bound = Point(domain.sup, trajectory.subs(func_var, domain.sup))
+        left_bound = Point(domain.inf, trajectory_expr.subs(func_var, domain.inf))
+        right_bound = Point(domain.sup, trajectory_expr.subs(func_var, domain.sup))
 
         set_of_transitions.update(subset_of_transitions)
         if left_bound.x.is_finite and left_bound.y.is_finite:
@@ -394,11 +432,11 @@ def generate_unbounded_proof_calls(
     midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
 
     # Compute derivative and angles at midpoints
-    if isinstance(trajectory, Piecewise):
+    if isinstance(trajectory_expr, Piecewise):
         # For piecewise, we need to handle each piece separately
-        deriv_traj = trajectory.diff(x)
+        deriv_traj = trajectory_expr.diff(x)
     else:
-        deriv_traj = diff(trajectory, x)
+        deriv_traj = diff(trajectory_expr, x)
 
     dydx_midpoints = []
     for val in midpoints:
@@ -495,6 +533,51 @@ def generate_unbounded_proof_calls(
             max_right_clipped = max_right
             min_left_clipped = interval_start
 
+        # Generate lemma information for this interval
+        # Get polygon information for lemma generation
+        import string
+
+        labels = list(string.ascii_lowercase[: len(poly.vertices)])
+        labels = list(labels[1:] + labels[:1])
+        verts, lines = verts_and_lines(labels, poly)
+
+        # Generate premise and explicit conditions
+        # Treat trajectory as a function f(x) rather than substituting the actual expression
+        from sympy import Function
+
+        f = Function("f")(x)
+        traj = y - f
+        premise = generate_premise(lines, f)
+        corner_pairs = [("a", "c"), ("b", "d")]  # Default corner pairs
+        explicit = generate_explicit_disjunction(corner_pairs, traj, verts)
+
+        # Compute domain bounds for lemma generation
+        if left_unbounded:
+            domain_start = None
+            domain_end = interval_end
+        else:  # right_unbounded
+            domain_start = interval_start
+            domain_end = None
+
+        # Determine deriv_clause1 based on derivative sign
+        # TODO generalize
+        deriv_clause1 = ">= 0" if deriv_at_midpoint >= 0 else "<= 0"
+
+        # Generate lemma name for this interval
+        lemma_name = f"{deriv_sign}_{domain_type}_case_{i}"
+
+        # Generate the lemma
+        lemma_text = construct_lemma(
+            verts,
+            premise,
+            explicit,
+            lemma_name,
+            deriv_clause1=deriv_clause1,
+            deriv_clause2=None,
+            domain_start=domain_start,
+            domain_end=domain_end,
+        )
+
         proof_call = {
             "case_label": case_label,
             "deriv_lemma": deriv_lemma,
@@ -505,11 +588,80 @@ def generate_unbounded_proof_calls(
             "min_left_clipped": min_left_clipped,
             "interval": var_interval,
             "active_corner": active_corner_offset,
+            "lemma_text": lemma_text,
         }
 
         proof_calls.append(proof_call)
 
     return proof_calls
+
+
+def generate_lemmas_from_calls(proof_calls):
+    """
+    Generate lemma strings from proof call parameters.
+
+    Args:
+        proof_calls: List of dictionaries from generate_unbounded_proof_calls
+
+    Returns:
+        list: List of lemma strings
+    """
+    lemmas = []
+
+    for call_params in proof_calls:
+        lemma_text = call_params.get("lemma_text", "")
+        if lemma_text:
+            lemmas.append(lemma_text)
+
+    return lemmas
+
+
+def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testlemma"):
+    """
+    Generate a complete proof package including lemmas and proof scripts.
+
+    This function demonstrates how to use the new lemma generation functionality
+    similar to the notebook example pattern.
+
+    Args:
+        trajectory: The trajectory expression (e.g., Function('f')(x))
+        poly: The polygon object
+        domain: The domain intervals
+        lemma_name: Base name for the lemma
+
+    Returns:
+        dict: Dictionary containing lemmas and proof scripts
+    """
+    from sympy import symbols, Function
+
+    # Create trajectory expression similar to notebook example
+    x, y = symbols("x y")
+    if isinstance(trajectory, str):
+        # If trajectory is a string, assume it's a function name
+        traj_expr = Function(trajectory)(x)
+    else:
+        traj_expr = trajectory
+
+    # Generate proof calls
+    proof_calls = generate_unbounded_proof_calls(traj_expr, poly, domain, x, y)
+
+    # Generate lemmas
+    lemmas = generate_lemmas_from_calls(proof_calls)
+
+    # Generate proof scripts
+    proof_scripts = generate_proof_scripts_from_calls(proof_calls)
+
+    # Create a complete package
+    package = {
+        "proof_calls": proof_calls,
+        "lemmas": lemmas,
+        "proof_scripts": proof_scripts,
+        "trajectory": traj_expr,
+        "polygon": poly,
+        "domain": domain,
+    }
+
+    return package
 
 
 def generate_proof_scripts_from_calls(proof_calls):
