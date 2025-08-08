@@ -2,6 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import expand, Line, Polygon, symbols, Point, Function, diff, atan2, pi, oo
 from sympy.functions.elementary.piecewise import Piecewise
+import string
+from safe_region_utils import (
+    compute_polygon_angles,
+    find_transitions,
+    compute_corners_to_angles,
+)
 
 
 # =============================================================================
@@ -358,27 +364,6 @@ def generate_unbounded_proof_calls(
     Returns:
         list: List of dictionaries containing parameters for unbounded_one_side_proof_script calls
     """
-    # Import required functions
-    try:
-        from safe_region_utils import (
-            compute_polygon_angles,
-            find_transitions,
-            compute_corners_to_angles,
-        )
-    except ImportError:
-        # Fallback if direct import fails
-        import sys
-        import os
-
-        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-        from safe_region_utils import (
-            compute_polygon_angles,
-            find_transitions,
-            compute_corners_to_angles,
-        )
-
-    import numpy as np
-
     # Trajectory is assumed to be function of x only
     func_var = x
 
@@ -535,15 +520,12 @@ def generate_unbounded_proof_calls(
 
         # Generate lemma information for this interval
         # Get polygon information for lemma generation
-        import string
-
         labels = list(string.ascii_lowercase[: len(poly.vertices)])
         labels = list(labels[1:] + labels[:1])
         verts, lines = verts_and_lines(labels, poly)
 
         # Generate premise and explicit conditions
         # Treat trajectory as a function f(x) rather than substituting the actual expression
-        from sympy import Function
 
         f = Function("f")(x)
         traj = y - f
@@ -632,7 +614,6 @@ def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testle
     Returns:
         dict: Dictionary containing lemmas and proof scripts
     """
-    from sympy import symbols, Function
 
     # Create trajectory expression similar to notebook example
     x, y = symbols("x y")
