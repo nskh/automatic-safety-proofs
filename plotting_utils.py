@@ -48,7 +48,6 @@ def plot_condition(
     for x0 in np.arange(xbounds[0], xbounds[1], resolution):
         for y0 in np.arange(ybounds[0], ybounds[1], resolution):
             # count += 1
-            # TODO: use is_safe
             is_safe = (~cond).subs([(x, x0), (y, y0)])
             if is_safe:
                 xpoints_safe.append(x0)
@@ -84,7 +83,7 @@ def plot_polygon(poly: sympy.Polygon):
         ax.scatter(p.x, p.y, c="r")
         plt.text(p.x + 0.05, p.y + 0.05, f"({p.x},{p.y})")
 
-    for (p, nextp) in zip(verts, verts[1:] + verts[:1]):
+    for p, nextp in zip(verts, verts[1:] + verts[:1]):
         x = np.linspace(float(p.x), float(nextp.x), 100, dtype=float)
         y = np.linspace(float(p.y), float(nextp.y), 100, dtype=float)
         ax.plot(x, y, c="b")

@@ -4,16 +4,15 @@
 Debug test for automatic proof generation with lemma generation.
 """
 
-from sympy import *
+from sympy import symbols, Point, Polygon, Interval, oo, Piecewise
 from pvs_utils import (
-    generate_unbounded_proof_calls,
-    generate_proof_scripts_from_calls,
     generate_complete_proof_package,
-    generate_lemmas_from_calls,
+    print_proof_package,
+    log_proof_to_file,
 )
 
 # Define symbols
-x, y = symbols("x y")
+x = symbols("x")
 
 # Create a square polygon with width 2 (half-width 1)
 w = 1.0
@@ -21,10 +20,12 @@ square_points = [Point(val) for val in [[w, -w], [w, w], [-w, w], [-w, -w]]]
 square = Polygon(*square_points)
 
 # Use y = x^2 trajectory which should have transition point at (0,0)
-trajectory_expr = x**2  # This should have transition point at x=0 where derivative is 0
+# trajectory_expr = x**2  # This should have transition point at x=0 where derivative is 0
+trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
 
 # Domain (infinite)
 domain = Interval(-oo, oo)
+# domain = Interval(-oo, 10)
 
 print("Debug test with y = x^2 trajectory and lemma generation...")
 print(f"Trajectory: {trajectory_expr}")
@@ -55,7 +56,7 @@ try:
 
     for i, call in enumerate(package["proof_calls"]):
         print(f"\nProof call {i+1}:")
-        print(f"  Case label: {call['case_label']}")
+        print(f"  Case labels: {call['case_labels']}")
         print(f"  Deriv lemma: {call['deriv_lemma']}")
         print(f"  Max right: {call['max_right']}")
         print(f"  Min left: {call['min_left']}")
@@ -72,29 +73,33 @@ try:
     print("LEMMAS AND PROOF SCRIPTS TOGETHER:")
     print(f"{'='*60}")
 
-    print(f"Debug: Number of lemmas: {len(package['lemmas'])}")
-    print(f"Debug: Number of proof scripts: {len(package['proof_scripts'])}")
-    print(f"Debug: Lemmas type: {type(package['lemmas'])}")
-    print(
-        f"Debug: First lemma: {package['lemmas'][0] if package['lemmas'] else 'None'}"
-    )
+    print(print_proof_package(package))
 
-    for i in range(len(package["lemmas"])):
-        print(f"\n{'='*60}")
-        print(f"CASE {i+1}:")
-        print(f"{'='*60}")
+    log_proof_to_file(package, "debug_proof.pvs")
 
-        # Print the lemma
-        print(f"\nLEMMA {i+1}:")
-        print(f"{'='*40}")
-        print(package["lemmas"][i])
-        print(f"{'='*40}")
+    # print(f"Debug: Number of lemmas: {len(package['lemmas'])}")
+    # print(f"Debug: Number of proof scripts: {len(package['proof_scripts'])}")
+    # print(f"Debug: Lemmas type: {type(package['lemmas'])}")
+    # print(
+    #     f"Debug: First lemma: {package['lemmas'][0] if package['lemmas'] else 'None'}"
+    # )
 
-        # Print the corresponding proof script
-        print(f"\nPROOF SCRIPT {i+1}:")
-        print(f"{'='*40}")
-        print(package["proof_scripts"][i])
-        print(f"{'='*40}")
+    # for i in range(len(package["lemmas"])):
+    #     print(f"\n{'='*60}")
+    #     print(f"CASE {i+1}:")
+    #     print(f"{'='*60}")
+
+    #     # Print the lemma
+    #     print(f"\nLEMMA {i+1}:")
+    #     print(f"{'='*40}")
+    #     print(package["lemmas"][i])
+    #     print(f"{'='*40}")
+
+    #     # Print the corresponding proof script
+    #     print(f"\nPROOF SCRIPT {i+1}:")
+    #     print(f"{'='*40}")
+    #     print(package["proof_scripts"][i])
+    #     print(f"{'='*40}")
 except Exception as e:
     print(f"Error: {e}")
     import traceback

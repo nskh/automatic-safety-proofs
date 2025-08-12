@@ -228,7 +228,7 @@ def construct_lemma(
         function_statement = f"""LET f = LAMBDA(x:real):
         COND
             x < {domain_start} -> g({domain_start}),
-            x >= {domain_start} AND x < {domain_end} -> g(x),
+            x >= {domain_start} AND x <= {domain_end} -> g(x),
             x >= {domain_end} -> g({domain_end})
         ENDCOND"""
 
@@ -283,7 +283,7 @@ def construct_lemma(
     {exists_clause}"""
 
     lemma_str = f"""{lemma_name}: LEMMA
-    FORALL(xo,yo:real, g:[real-> real]):
+    FORALL(xo,yo:real, g:[real -> real]):
     {full_preamble}
     IMPLIES
     {sympy_to_pvs(str(active_corner_condition))}
@@ -345,6 +345,84 @@ def unbounded_one_side_proof_script(
 """
 
 
+def bounded_proof_script(
+    case_label1,
+    case_label2,
+    case_label3,
+    case_label4,
+    deriv_lemma,
+    max_right,
+    min_left,
+    max_right_clipped,
+    min_left_clipped,
+):
+    """For bounded domains, we need to handle four cases:
+    - Case 1: Main case, in between lower and upper bounds of domain
+    - Case 2: Outside domain, below lower bound
+    - Case 3: Outside domain, above upper bound
+    - Case 4: Odd placeholder case, below left but above right, we just assert out of this
+
+    Inputs:
+    - case_label1
+    - case_label2
+    - case_label3
+    - case_label4
+    - deriv_lemma: The name of the derivative lemma to use: mvt_gen_ge_ci, mvt_gen_le_ci
+    - max_right: The maximum right value inside polygon, e.g. xo+half_width
+    - min_left: The minimum left value inside polygon, e.g. xo-half_width
+    - max_right_clipped: The maximum right value after clipping, e.g. xo+half_width but maybe 0
+    - min_left_clipped: The minimum left value after clipping, e.g. xo-half_width
+
+    Note that domain_definition is not passed in as we always use "ci".
+    """
+    return f"""%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "{case_label1}")
+%|-   ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
+%|-     (SPREAD (INST -1 "f" "0" "10" "0" "{max_right}" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
+%|-          (SPREAD (INST -1 "f" "0" "10" "0" "x" "{min_left}")
+%|-           ((ASSERT) (THEN (EXPAND "ci" 1) (PROPAX))
+%|-            (THEN (ASSERT) (EXPAND "ci" 1) (PROPAX)))))
+%|-         (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "ci" 1) (ASSERT)) (THEN (EXPAND "ci" 1) (ASSERT)))))
+%|-    (SPREAD (CASE "{case_label2}")
+%|-     ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
+%|-       (SPREAD (INST -1 "f" "0" "10" "0" "{max_right}" "x")
+%|-        ((SPREAD (SPLIT -1)
+%|-          ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
+%|-            (SPREAD (INST -1 "f" "0" "10" "0" "x" "{min_left_clipped}")
+%|-             ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci" 1) (PROPAX))
+%|-              (THEN (ASSERT) (EXPAND "ci" 1) (PROPAX)))))
+%|-           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+%|-         (THEN (EXPAND "ci" 1) (ASSERT)) (THEN (EXPAND "ci" 1) (ASSERT)))))
+%|-      (THEN (ASSERT)
+%|-       (SPREAD (CASE "{case_label3}")
+%|-        ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
+%|-          (SPREAD (INST -1 "f" "0" "10" "0" "{max_right_clipped}" "x")
+%|-           ((SPREAD (SPLIT -1)
+%|-             ((THEN (LEMMA "{deriv_lemma}")
+%|-               (SPREAD (INST -1 "f" "0" "10" "0" "x" "{min_left}")
+%|-                ((SPREAD (SPLIT -1)
+%|-                  ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+%|-                   (ASSERT) (PROPAX)))
+%|-                 (THEN (EXPAND "ci" 1) (ASSERT))
+%|-                 (THEN (EXPAND "ci" 1) (PROPAX)))))
+%|-              (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-            (THEN (EXPAND "ci" 1) (PROPAX))
+%|-            (THEN (ASSERT) (EXPAND "ci" 1) (PROPAX)))))
+%|-         (THEN (ASSERT)
+%|-          (SPREAD (CASE "{case_label4}")
+%|-           ((THEN (FLATTEN) (ASSERT))
+%|-            (SPREAD (SPLIT 1)
+%|-             ((SPREAD (SPLIT 2)
+%|-               ((ASSERT)
+%|-                (SPREAD (SPLIT 4)
+%|-                 ((ASSERT) (SPREAD (SPLIT 4) ((ASSERT) (ASSERT)))))))
+%|-              (ASSERT))))))))))))))
+"""
+
+
 # =============================================================================
 # AUTOMATIC PROOF SCRIPT GENERATION
 # =============================================================================
@@ -366,6 +444,19 @@ def generate_unbounded_proof_calls(
     """
     # Trajectory is assumed to be function of x only
     func_var = x
+
+    labels = list(string.ascii_lowercase[: len(poly.vertices)])
+    labels = list(labels[1:] + labels[:1])
+    verts, lines = verts_and_lines(labels, poly)
+
+    # Generate premise and explicit conditions
+    # Treat trajectory as a function f(x) rather than substituting the actual expression
+
+    f = Function("f")(x)
+    traj = y - f
+    premise = generate_premise(lines, f)
+    corner_pairs = generate_corner_pairs(labels)
+    explicit = generate_explicit_disjunction(corner_pairs, traj, verts)
 
     # Compute polygon width using same method as construct_lemma
     max_offset = max([v.x for v in poly.vertices])
@@ -406,14 +497,16 @@ def generate_unbounded_proof_calls(
         right_bound = Point(domain.sup, trajectory_expr.subs(func_var, domain.sup))
 
         set_of_transitions.update(subset_of_transitions)
+        # only add if finite
         if left_bound.x.is_finite and left_bound.y.is_finite:
             set_of_transitions.add(left_bound)
         if right_bound.x.is_finite and right_bound.y.is_finite:
             set_of_transitions.add(right_bound)
 
-    # Sort transitions and compute midpoints
+    # Sort transitions by x coordinate and compute midpoints
     sorted_transitions = sorted(set_of_transitions, key=lambda point: point.x)
     func_var_transitions = [p.x for p in sorted_transitions]
+    print(f"func_var_transitions: {func_var_transitions}")
     midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
 
     # Compute derivative and angles at midpoints
@@ -430,6 +523,7 @@ def generate_unbounded_proof_calls(
             dydx_midpoints.append(deriv_val)
         except:
             # Handle cases where derivative evaluation fails
+            print(f"Derivative evaluation failed at {val}")
             dydx_midpoints.append(0)  # Default to 0 if evaluation fails
     midpoint_angles = [atan2(d, 1) for d in dydx_midpoints]
 
@@ -447,6 +541,7 @@ def generate_unbounded_proof_calls(
     domain_max = domain.sup
 
     # Add domain boundaries to transition points
+    # TODO maybe we add duplicates here? but maybe it doesn't matter.
     all_transition_points = func_var_transitions.copy()
     if domain_min.is_finite:
         all_transition_points.insert(0, domain_min)
@@ -456,9 +551,11 @@ def generate_unbounded_proof_calls(
         all_transition_points.append(domain_max)
     elif domain_max == oo:
         all_transition_points.append(oo)
+    print(f"all_transition_points: {all_transition_points}")
 
     # Create intervals between all transition points
     var_intervals = list(zip(all_transition_points[:-1], all_transition_points[1:]))
+    print(f"var_intervals: {var_intervals}")
 
     proof_calls = []
 
@@ -473,11 +570,6 @@ def generate_unbounded_proof_calls(
         left_unbounded = not interval_start.is_finite
         right_unbounded = not interval_end.is_finite
 
-        if not (left_unbounded or right_unbounded):
-            # For bounded intervals, we'll treat them as left-unbounded for now
-            left_unbounded = True
-            right_unbounded = False
-
         # Find the active corner for this interval
         # Use the midpoint of this interval
         interval_midpoint = (interval_start + interval_end) / 2
@@ -490,17 +582,38 @@ def generate_unbounded_proof_calls(
         )
         active_corner_offset = active_corners[midpoint_angles[closest_midpoint_idx]]
 
+        case_labels = []
         # Generate case label for unbounded domains
         if left_unbounded:  # Interval unbounded on left
-            case_label = f"xo + {half_width} <= {interval_end}"
-        else:  # right_unbounded: Interval unbounded on right
-            case_label = f"xo - {half_width} >= {interval_start}"
+            case_labels.append(f"xo + {half_width} <= {interval_end}")
+        elif right_unbounded:  # right_unbounded: Interval unbounded on right
+            case_labels.append(f"xo - {half_width} >= {interval_start}")
+        else:
+            # Closed interval case
+            case_labels.append(
+                f"xo - {half_width} >= {interval_start} AND xo + {half_width} <= {interval_end}"
+            )
+            case_labels.append(
+                f"xo - {half_width} < {interval_start} AND xo + {half_width} <= {interval_end}"
+            )
+            case_labels.append(
+                f"xo - {half_width} >= {interval_start} AND xo + {half_width} > {interval_end}"
+            )
+            case_labels.append(
+                f"xo - {half_width} < {interval_start} AND xo + {half_width} > {interval_end}"
+            )
 
         # Determine derivative lemma based on derivative sign at midpoint
         # For left_unbounded domains: use left_open lemmas
         # For right_unbounded domains: use right_open lemmas
         deriv_sign = "ge" if deriv_at_midpoint >= 0 else "le"
-        domain_type = "lo" if left_unbounded else "ro"
+        if left_unbounded:
+            domain_type = "lo"
+        elif right_unbounded:
+            domain_type = "ro"
+        else:
+            domain_type = "ci"
+        # TODO maybe we don't need "2" here?
         deriv_lemma = f"mvt_gen_{deriv_sign}_{domain_type}_2"
 
         # Polygon bounds
@@ -508,41 +621,37 @@ def generate_unbounded_proof_calls(
         min_left = f"xo - {half_width}"
 
         # Domain definition
-        domain_definition = "left_open" if left_unbounded else "right_open"
-
-        # Clipped bounds
         if left_unbounded:
-            max_right_clipped = interval_end
+            domain_definition = "left_open"
+        elif right_unbounded:
+            domain_definition = "right_open"
+        else:
+            domain_definition = "ci"
+
+        # bounds on "xo" for the case where we clip the trajectory
+        if left_unbounded:
             min_left_clipped = min_left
-        else:  # right_unbounded
-            max_right_clipped = max_right
+            max_right_clipped = interval_end
+        elif right_unbounded:
             min_left_clipped = interval_start
-
-        # Generate lemma information for this interval
-        # Get polygon information for lemma generation
-        labels = list(string.ascii_lowercase[: len(poly.vertices)])
-        labels = list(labels[1:] + labels[:1])
-        verts, lines = verts_and_lines(labels, poly)
-
-        # Generate premise and explicit conditions
-        # Treat trajectory as a function f(x) rather than substituting the actual expression
-
-        f = Function("f")(x)
-        traj = y - f
-        premise = generate_premise(lines, f)
-        corner_pairs = [("a", "c"), ("b", "d")]  # Default corner pairs
-        explicit = generate_explicit_disjunction(corner_pairs, traj, verts)
+            max_right_clipped = max_right
+        else:  # closed interval
+            min_left_clipped = interval_start
+            max_right_clipped = interval_end
 
         # Compute domain bounds for lemma generation
         if left_unbounded:
             domain_start = None
             domain_end = interval_end
-        else:  # right_unbounded
+        elif right_unbounded:
             domain_start = interval_start
             domain_end = None
+        else:
+            domain_start = interval_start
+            domain_end = interval_end
 
         # Determine deriv_clause1 based on derivative sign
-        # TODO generalize
+        # TODO generalize to other polygons
         deriv_clause1 = ">= 0" if deriv_at_midpoint >= 0 else "<= 0"
 
         # Generate lemma name for this interval
@@ -561,7 +670,7 @@ def generate_unbounded_proof_calls(
         )
 
         proof_call = {
-            "case_label": case_label,
+            "case_labels": case_labels,
             "deriv_lemma": deriv_lemma,
             "max_right": max_right,
             "min_left": min_left,
@@ -596,6 +705,38 @@ def generate_lemmas_from_calls(proof_calls):
             lemmas.append(lemma_text)
 
     return lemmas
+
+
+def generate_corner_pairs(labels):
+    """
+    Generate corner pairs for a regular polygon.
+
+    Only supports even-numbered polygons since only they have true opposite vertices.
+    For odd-numbered polygons, returns an empty list.
+
+    Args:
+        labels: List of vertex labels (e.g., ['a', 'b', 'c', 'd'])
+
+    Returns:
+        list: List of tuples representing opposite vertex pairs, or empty list for odd polygons
+    """
+    n = len(labels)
+    # Only generate corner pairs for even-numbered polygons
+    # Odd-numbered polygons don't have true opposite vertices
+    if n < 4 or n % 2 != 0:
+        return []
+
+    pairs = []
+    # For even n, vertices are exactly opposite
+    offset = n // 2
+
+    for i in range(n):
+        opposite_idx = (i + offset) % n
+        # Only add each pair once (avoid duplicates)
+        if i < opposite_idx:
+            pairs.append((labels[i], labels[opposite_idx]))
+
+    return pairs
 
 
 def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testlemma"):
@@ -645,6 +786,32 @@ def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testle
     return package
 
 
+def print_proof_package(package) -> str:
+    """
+    Print the proof package in a readable format.
+    """
+    lemmas = package["lemmas"]
+    proof_scripts = package["proof_scripts"]
+    lemma_names = [lemma.split(":")[0] for lemma in lemmas]
+
+    s = ""
+    for i in range(len(lemmas)):
+        s += lemmas[i] + "\n"
+        s += f"%|- {lemma_names[i]} : PROOF\n"
+        s += proof_scripts[i]
+        s += f"%|- QED {lemma_names[i]}\n\n\n"
+
+    return s.strip()
+
+
+def log_proof_to_file(package, filename):
+    """
+    Log the proof package to a file.
+    """
+    with open(filename, "w") as f:
+        f.write(print_proof_package(package))
+
+
 def generate_proof_scripts_from_calls(proof_calls):
     """
     Generate actual proof script strings from proof call parameters.
@@ -658,15 +825,30 @@ def generate_proof_scripts_from_calls(proof_calls):
     proof_scripts = []
 
     for call_params in proof_calls:
-        script = unbounded_one_side_proof_script(
-            case_label=call_params["case_label"],
-            deriv_lemma=call_params["deriv_lemma"],
-            max_right=call_params["max_right"],
-            min_left=call_params["min_left"],
-            domain_definition=call_params["domain_definition"],
-            max_right_clipped=call_params["max_right_clipped"],
-            min_left_clipped=call_params["min_left_clipped"],
-        )
+        if call_params["domain_definition"] == "ci":
+            assert len(call_params["case_labels"]) == 4
+            script = bounded_proof_script(
+                case_label1=call_params["case_labels"][0],
+                case_label2=call_params["case_labels"][1],
+                case_label3=call_params["case_labels"][2],
+                case_label4=call_params["case_labels"][3],
+                deriv_lemma=call_params["deriv_lemma"],
+                max_right=call_params["max_right"],
+                min_left=call_params["min_left"],
+                max_right_clipped=call_params["max_right_clipped"],
+                min_left_clipped=call_params["min_left_clipped"],
+            )
+        else:
+            assert len(call_params["case_labels"]) == 1
+            script = unbounded_one_side_proof_script(
+                case_label=call_params["case_labels"][0],
+                deriv_lemma=call_params["deriv_lemma"],
+                max_right=call_params["max_right"],
+                min_left=call_params["min_left"],
+                domain_definition=call_params["domain_definition"],
+                max_right_clipped=call_params["max_right_clipped"],
+                min_left_clipped=call_params["min_left_clipped"],
+            )
         proof_scripts.append(script)
 
     return proof_scripts
