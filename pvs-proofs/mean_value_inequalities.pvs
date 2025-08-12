@@ -42,90 +42,59 @@ mean_value_inequalities  % [ parameters ]
   d1 /= d2 IMPLIES  deriv_domain?[(ci(d1, d2))]
 
   mvt_gen_ge: LEMMA
-  FORALL(f:[real-> real],D:{DD:[real -> bool] | connected?[(DD)] AND not_one_element?[(DD)] }, c:real):
-  (derivable?[(D)](f) AND
+  FORALL(f:[real-> real],D:{DD:[real -> bool] | connected?[(DD)] AND not_one_element?[(DD)] }, c:real,a,b:(D)):
+  (derivable?[(D)](f) AND a >= b AND
   FORALL(x:(D)): deriv[(D)](f)(x) >= c)
   IMPLIES
-  FORALL(a,b:(D)): a>=b IMPLIES
   f(a) - f(b) >= c*(a-b)
 
   mvt_gen_le: LEMMA
-  FORALL(f:[real-> real],D:{DD:[real -> bool] | connected?[(DD)] AND not_one_element?[(DD)] }, c:real):
-  (derivable?[(D)](f) AND
-  FORALL(x:(D)): deriv[(D)](f)(x) <= c)
-  IMPLIES
-  FORALL(a,b:(D)): a>=b IMPLIES
+  FORALL(f:[real-> real],D:{DD:[real -> bool] | connected?[(DD)] AND not_one_element?[(DD)] }, c:real,a,b:(D)):
+  (derivable?[(D)](f)  AND a >= b AND
+  FORALL(x:(D)): deriv[(D)](f)(x) <= c) IMPLIES
   f(a) - f(b) <= c*(a-b)
-
 
 %% left open
 
   mvt_gen_ge_lo: LEMMA
-  FORALL(f:[real-> real], C, c:real):
-  (derivable?[(left_open(C))](f) AND
-  FORALL(x:(left_open(C))): deriv[(left_open(C))](f)(x) >= c)
-  IMPLIES
-  FORALL(a,b:(left_open(C))): a>=b IMPLIES
+  FORALL(f:[real-> real], C, c:real,a,b:(left_open(C))):
+  (derivable?[(left_open(C))](f)  AND a >= b  AND
+  FORALL(x:(left_open(C))): deriv[(left_open(C))](f)(x) >= c) IMPLIES
   f(a) - f(b) >= c*(a-b)
 
   mvt_gen_le_lo: LEMMA
-  FORALL(f:[real-> real], C, c:real):
-  (derivable?[(left_open(C))](f) AND
-  FORALL(x:(left_open(C))): deriv[(left_open(C))](f)(x) <= c)
-  IMPLIES
-  FORALL(a,b:(left_open(C))): a>=b IMPLIES
-  f(a) - f(b) <= c*(a-b)
-
-  mvt_gen_le_lo_2: LEMMA
   FORALL(f:[real-> real], C, c:real,a,b:(left_open(C))):
-  (derivable?[(left_open(C))](f) AND
+  (derivable?[(left_open(C))](f)  AND a >= b  AND
   FORALL(x:(left_open(C))): deriv[(left_open(C))](f)(x) <= c)
   IMPLIES
-  (a>=b IMPLIES
-  f(a) - f(b) <= c*(a-b))
+  f(a) - f(b) <= c*(a-b)
 
 %% right open
 
   mvt_gen_ge_ro: LEMMA
-  FORALL(f:[real-> real],C, c:real):
-  (derivable?[(right_open(C))](f) AND
-  FORALL(x:(right_open(C))): deriv[(right_open(C))](f)(x) >= c)
-  IMPLIES
-  FORALL(a,b:(right_open(C))): a>=b IMPLIES
+  FORALL(f:[real-> real],C, c:real,a,b:(right_open(C))):
+  (derivable?[(right_open(C))](f)  AND a >= b  AND
+  FORALL(x:(right_open(C))): deriv[(right_open(C))](f)(x) >= c) IMPLIES
   f(a) - f(b) >= c*(a-b)
 
-  mvt_gen_ge_ro_2: LEMMA
-  FORALL(f:[real-> real],C, c:real,a,b:(right_open(C))):
-  (derivable?[(right_open(C))](f) AND
-  FORALL(x:(right_open(C))): deriv[(right_open(C))](f)(x) >= c)
-  IMPLIES
-  ( a>=b IMPLIES
-  f(a) - f(b) >= c*(a-b))
-
   mvt_gen_le_ro: LEMMA
-  FORALL(f:[real-> real],C, c:real):
-  (derivable?[(right_open(C))](f) AND
-  FORALL(x:[(right_open(C))]): deriv[(right_open(C))](f)(x) <= c)
-  IMPLIES
-  FORALL(a,b:[(right_open(C))]): a>=b IMPLIES
+  FORALL(f:[real-> real],C, c:real,a,b:[(right_open(C))]):
+  (derivable?[(right_open(C))](f)  AND a >= b  AND
+  FORALL(x:[(right_open(C))]): deriv[(right_open(C))](f)(x) <= c) IMPLIES
   f(a) - f(b) <= c*(a-b)
 
 %% closed_interval
 
   mvt_gen_ge_ci: LEMMA
-  FORALL(f:[real-> real], d1,d2,c:real):
-  d1 < d2 AND (derivable?[(ci(d1,d2))](f) AND
-  FORALL(x:(ci(d1,d2))): deriv[(ci(d1,d2))](f)(x) >= c)
-  IMPLIES
-  FORALL(a,b:(ci(d1,d2))): a>=b IMPLIES
+  FORALL(f:[real-> real], d1,d2,c:real,a,b:(ci(d1,d2))):
+  (d1 < d2 AND derivable?[(ci(d1,d2))](f)  AND a >= b  AND
+  FORALL(x:(ci(d1,d2))): deriv[(ci(d1,d2))](f)(x) >= c) IMPLIES
   f(a) - f(b) >= c*(a-b)
 
   mvt_gen_le_ci: LEMMA
-  FORALL(f:[real-> real], d1,d2,c:real):
-  d1 < d2 AND (derivable?[(ci(d1,d2))](f) AND
-  FORALL(x:(ci(d1,d2))): deriv[(ci(d1,d2))](f)(x) <= c)
-  IMPLIES
-  FORALL(a,b:(ci(d1,d2))): a>=b IMPLIES
+  FORALL(f:[real-> real], d1,d2,c:real,a,b:(ci(d1,d2))):
+  (d1 < d2 AND derivable?[(ci(d1,d2))](f)  AND a >= b  AND
+  FORALL(x:(ci(d1,d2))): deriv[(ci(d1,d2))](f)(x) <= c) IMPLIES
   f(a) - f(b) <= c*(a-b)
 
 
