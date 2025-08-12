@@ -339,7 +339,7 @@ def unbounded_one_side_proof_script(
 %|-           ((THEN (EXPAND "f") (EXPAND "{domain_definition}") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT)))))
-%|-         (ASSERT) (PROPAX) (PROPAX)))
+%|-         (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))))
 %|-       (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
 %|-       (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))))))))
 """

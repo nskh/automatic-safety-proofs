@@ -256,10 +256,10 @@ le_lo_case_0: LEMMA
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
 %|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
-%|-           ((THEN (EXPAND "f") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-           ((THEN (EXPAND "f") (EXPAND "left_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
-%|-         (PROPAX) (ASSERT) (PROPAX)))
+%|-         (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))))
 %|-       (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
 %|-       (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))))))))
 %|- QED le_lo_case_0
@@ -313,7 +313,7 @@ ge_ro_case_1: LEMMA
 %|-           ((THEN (EXPAND "f") (EXPAND "right_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
-%|-         (ASSERT) (PROPAX) (PROPAX)))
+%|-         (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))))
 %|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
 %|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
 %|- QED ge_ro_case_1
