@@ -382,20 +382,20 @@ def bounded_proof_script(
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
 %|-          (SPREAD (INST -1 "f" "0" "10" "0" "x" "{min_left}")
-%|-           ((ASSERT) (THEN (EXPAND "ci" 1) (PROPAX))
-%|-            (THEN (ASSERT) (EXPAND "ci" 1) (PROPAX)))))
+%|-           ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+%|-            (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
 %|-         (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
-%|-       (THEN (EXPAND "ci" 1) (ASSERT)) (THEN (EXPAND "ci" 1) (ASSERT)))))
+%|-       (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
 %|-    (SPREAD (CASE "{case_label2}")
 %|-     ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
 %|-       (SPREAD (INST -1 "f" "0" "10" "0" "{max_right}" "x")
 %|-        ((SPREAD (SPLIT -1)
 %|-          ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
 %|-            (SPREAD (INST -1 "f" "0" "10" "0" "x" "{min_left_clipped}")
-%|-             ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci" 1) (PROPAX))
-%|-              (THEN (ASSERT) (EXPAND "ci" 1) (PROPAX)))))
+%|-             ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+%|-              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
 %|-           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
-%|-         (THEN (EXPAND "ci" 1) (ASSERT)) (THEN (EXPAND "ci" 1) (ASSERT)))))
+%|-         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
 %|-      (THEN (ASSERT)
 %|-       (SPREAD (CASE "{case_label3}")
 %|-        ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
@@ -406,20 +406,13 @@ def bounded_proof_script(
 %|-                ((SPREAD (SPLIT -1)
 %|-                  ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
 %|-                   (ASSERT) (PROPAX)))
-%|-                 (THEN (EXPAND "ci" 1) (ASSERT))
-%|-                 (THEN (EXPAND "ci" 1) (PROPAX)))))
+%|-                 (THEN (EXPAND "ci") (ASSERT))
+%|-                 (THEN (EXPAND "ci") (PROPAX)))))
 %|-              (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
-%|-            (THEN (EXPAND "ci" 1) (PROPAX))
-%|-            (THEN (ASSERT) (EXPAND "ci" 1) (PROPAX)))))
+%|-            (THEN (EXPAND "ci") (PROPAX))
+%|-            (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
 %|-         (THEN (ASSERT)
-%|-          (SPREAD (CASE "{case_label4}")
-%|-           ((THEN (FLATTEN) (ASSERT))
-%|-            (SPREAD (SPLIT 1)
-%|-             ((SPREAD (SPLIT 2)
-%|-               ((ASSERT)
-%|-                (SPREAD (SPLIT 4)
-%|-                 ((ASSERT) (SPREAD (SPLIT 4) ((ASSERT) (ASSERT)))))))
-%|-              (ASSERT))))))))))))))
+%|-          (SPREAD (CASE "{case_label4}") ((GRIND) (GRIND))))))))))))
 """
 
 
@@ -613,8 +606,7 @@ def generate_unbounded_proof_calls(
             domain_type = "ro"
         else:
             domain_type = "ci"
-        # TODO maybe we don't need "2" here?
-        deriv_lemma = f"mvt_gen_{deriv_sign}_{domain_type}_2"
+        deriv_lemma = f"mvt_gen_{deriv_sign}_{domain_type}"
 
         # Polygon bounds
         max_right = f"xo + {half_width}"

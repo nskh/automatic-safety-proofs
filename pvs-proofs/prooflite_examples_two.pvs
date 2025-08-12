@@ -1,14 +1,9 @@
-mean_value_inequalities  % [ parameters ]
+prooflite_examples_two  % [ parameters ]
 		: THEORY
 
   BEGIN
 
-  % ASSUMING
-   % assuming declarations
-  % ENDASSUMING
-
   IMPORTING analysis@derivative_props, analysis@deriv_domain
-
 
   left_open(c:real)(x:real): bool =  c >= x
   right_open(c:real)(x:real): bool = c <= x
@@ -216,10 +211,113 @@ mean_value_inequalities  % [ parameters ]
 %|- QED mvt_gen_le_ci
 
 
+le_lo_case_0: LEMMA
+    FORALL(xo,yo:real, g:[real -> real]):
+        LET f = LAMBDA(x:real):
+        COND
+            x <= 0 -> g(x),
+            x > 0 -> g(0)
+        ENDCOND
+    IN
+    derivable?[(left_open(0))](f) AND
+    (FORALL(x:(left_open(0))): deriv[(left_open(0))](f)(x) <= 0) AND
+    (EXISTS (x : real) :
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    x <= 0 AND
+    xo + 2 >= x AND xo + -2 <= x)
+    IMPLIES
+    ((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0))
+
+%|- le_lo_case_0 : PROOF
+%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "xo + 2 <= 0")
+%|-   ((THEN (LEMMA "mvt_gen_le_lo")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+%|-           ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
+%|-            (THEN (EXPAND "left_open") (ASSERT)))))
+%|-         (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "left_open") (ASSERT))
+%|-       (THEN (EXPAND "left_open") (ASSERT)))))
+%|-    (THEN (LEMMA "mvt_gen_le_lo")
+%|-     (SPREAD (INST -1 "f" "0" "0" "0" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+%|-           ((THEN (EXPAND "f") (EXPAND "left_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-            (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+%|-            (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
+%|-         (ASSERT) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+%|-       (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))))))))
+%|- QED le_lo_case_0
 
 
+ge_ro_case_1: LEMMA
+    FORALL(xo,yo:real, g:[real -> real]):
+        LET f = LAMBDA(x:real):
+        COND
+            x < 0 -> g(0),
+            x >= 0 -> g(x)
+        ENDCOND
+    IN
+    derivable?[(right_open(0))](f) AND
+    (FORALL(x:(right_open(0))): deriv[(right_open(0))](f)(x) >= 0) AND
+    (EXISTS (x : real) :
+    ((-x + xo + 2 >= 0) AND
+     (-x + xo - 2 <= 0) AND
+     (yo - f(x) + 1 >= 0) AND
+     (yo - f(x) - 1 <= 0)) AND
+    x >= 0 AND
+    xo + 2 >= x AND xo + -2 <= x)
+    IMPLIES
+    ((yo - f(xo - 2) - 1 >= 0) AND
+     (yo - f(xo + 2) + 1 <= 0)) OR
+    ((yo - f(xo - 2) + 1 >= 0) AND
+     (yo - f(xo + 2) - 1 <= 0)) OR
+    ((yo - f(xo + 2) - 1 >= 0) AND
+     (yo - f(xo - 2) + 1 <= 0)) OR
+    ((yo - f(xo + 2) + 1 >= 0) AND
+     (yo - f(xo - 2) - 1 <= 0))
+
+%|- ge_ro_case_1 : PROOF
+%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "xo - 2 >= 0")
+%|-   ((THEN (LEMMA "mvt_gen_ge_ro")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+%|-           ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+%|-            (THEN (EXPAND "right_open") (ASSERT)))))
+%|-         (PROPAX) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "right_open") (ASSERT))
+%|-       (THEN (EXPAND "right_open") (ASSERT)))))
+%|-    (THEN (LEMMA "mvt_gen_ge_ro")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
+%|-      ((SPREAD (SPLIT -1)
+%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "0")
+%|-           ((THEN (EXPAND "f") (EXPAND "right_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+%|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+%|-         (ASSERT) (PROPAX) (PROPAX)))
+%|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+%|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+%|- QED ge_ro_case_1
 
 
-
-
-  END mean_value_inequalities
+%|- *TCC* : PROOF (assert) QED
+end prooflite_examples_two

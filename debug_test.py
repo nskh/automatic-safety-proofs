@@ -14,18 +14,21 @@ from pvs_utils import (
 # Define symbols
 x = symbols("x")
 
-# Create a square polygon with width 2 (half-width 1)
+# Create a rectangle polygon with width 4 (half-width 2)
 w = 1.0
-square_points = [Point(val) for val in [[w, -w], [w, w], [-w, w], [-w, -w]]]
-square = Polygon(*square_points)
+rect_points = [
+    Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
+]
+rect = Polygon(*rect_points)
 
 # Use y = x^2 trajectory which should have transition point at (0,0)
-# trajectory_expr = x**2  # This should have transition point at x=0 where derivative is 0
-trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
+trajectory_expr = x**2  # This should have transition point at x=0 where derivative is 0
+# trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
 
 # Domain (infinite)
 domain = Interval(-oo, oo)
 # domain = Interval(-oo, 10)
+# domain = Interval(0, 10)
 
 print("Debug test with y = x^2 trajectory and lemma generation...")
 print(f"Trajectory: {trajectory_expr}")
@@ -41,7 +44,7 @@ try:
     print(f"{'='*60}")
 
     package = generate_complete_proof_package(
-        trajectory_expr, square, domain, "debug_lemma"
+        trajectory_expr, rect, domain, "debug_lemma"
     )
 
     print(f"Package keys: {list(package.keys())}")

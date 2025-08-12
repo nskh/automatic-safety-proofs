@@ -1,72 +1,32 @@
 (|active_corners_examples|
  (|right_open_ex1_TCC1| 0
-  (|right_open_ex1_TCC1-1| NIL 3962871100 ("" (COND-DISJOINT-TCC) NIL NIL)
-   ((|real_lt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL))
+  (|right_open_ex1_TCC1-1| NIL 3962871100 ("" (COND-DISJOINT-TCC) NIL NIL) NIL
    NIL
    (|right_open_ex1| DISJOINTNESS
     "COND reals.>=(active_corners_examples.x, 0) -> active_corners_examples.g(active_corners_examples.x), reals.<(active_corners_examples.x, 0) -> active_corners_examples.g(0) ENDCOND"
-    "NIL" (13 4 16 25))))
+    "NIL")))
  (|right_open_ex1_TCC2| 0
-  (|right_open_ex1_TCC2-1| NIL 3962871100 ("" (COND-COVERAGE-TCC) NIL NIL)
-   ((|real_lt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL))
+  (|right_open_ex1_TCC2-1| NIL 3962871100 ("" (COND-COVERAGE-TCC) NIL NIL) NIL
    NIL
    (|right_open_ex1| COVERAGE
     "COND reals.>=(active_corners_examples.x, 0) -> active_corners_examples.g(active_corners_examples.x), reals.<(active_corners_examples.x, 0) -> active_corners_examples.g(0) ENDCOND"
-    "NIL" (13 4 16 25))))
+    "NIL")))
  (|right_open_ex1_TCC3| 0
   (|right_open_ex1_TCC3-1| NIL 3962871100
    ("" (SKEEP) (("" (LEMMA "right_open_dd") (("" (INST -1 "0") NIL NIL)) NIL))
     NIL)
-   ((|right_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL))
-   NIL
+   ((|right_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|right_open_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.right_open(0))].derivatives"
-    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"
-    (18 4 18 31))))
+    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
  (|right_open_ex1_TCC4| 0
   (|right_open_ex1_TCC4-1| NIL 3962871100
    ("" (SKEEP) (("" (LEMMA "right_open_noe") (("" (INST -1 "0") NIL NIL)) NIL))
     NIL)
-   ((|right_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL))
-   NIL
+   ((|right_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|right_open_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.right_open(0))].derivatives"
-    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"
-    (18 4 18 31))))
+    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?")))
  (|right_open_ex1| 0
   (|right_open_ex1-1| NIL 3962871238
    ("" (SKEEP*)
@@ -121,121 +81,41 @@
         NIL))
       NIL))
     NIL)
-   ((|minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
+   ((|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
     (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
-    (|numfield| NONEMPTY-TYPE-EQ-DECL NIL |number_fields| NIL)
-    (+ CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
-    (- CONST-DECL "[numfield -> numfield]" |number_fields| NIL)
-    (<= CONST-DECL "bool" |reals| NIL)
-    (- CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
-    (OR CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (IFF CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (AND CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (IMPLIES CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (= CONST-DECL "[T, T -> boolean]" |equalities| NIL)
-    (IF CONST-DECL
-        "[boolean, T, T -> T]"
-        |if_def|
-        NIL)
-    (>= CONST-DECL "bool" |reals| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
     (|right_open| CONST-DECL "bool" |mean_value_inequalities| NIL)
     (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
     (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
     (|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
-    (|restrict| CONST-DECL "R" |restrict| NIL)
-    (|real_plus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|real_minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|minus_nzint_is_nzint| APPLICATION-JUDGEMENT "nzint" |integers| NIL)
-    (|bijective?| CONST-DECL "bool" |functions| NIL)
-    (|id| CONST-DECL "(bijective?[T, T])" |identity| NIL)
-    (|f| SKOLEM-CONST-DECL "[real -> real]" |active_corners_examples| NIL)
-    (|mvt_gen_ge_ro| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_times_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (NIL APPLICATION-JUDGEMENT "above(n)" |exp2| NIL)
-    (|x| SKOLEM-CONST-DECL "real" |active_corners_examples| NIL)
-    (|xo| SKOLEM-CONST-DECL "real" |active_corners_examples| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (TRUE CONST-DECL "bool" |booleans| NIL))
+    (|mvt_gen_ge_ro| FORMULA-DECL NIL |mean_value_inequalities| NIL))
    SHOSTAK))
  (|left_open_ex1_TCC1| 0
-  (|left_open_ex1_TCC1-1| NIL 3962871100 ("" (COND-DISJOINT-TCC) NIL NIL)
-   ((|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_gt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL))
+  (|left_open_ex1_TCC1-1| NIL 3962871100 ("" (COND-DISJOINT-TCC) NIL NIL) NIL
    NIL
    (|left_open_ex1| DISJOINTNESS
     "COND reals.>(active_corners_examples.x, 0) -> active_corners_examples.g(0), reals.<=(active_corners_examples.x, 0) -> active_corners_examples.g(active_corners_examples.x) ENDCOND"
-    "NIL" (45 4 48 25))))
+    "NIL")))
  (|left_open_ex1_TCC2| 0
-  (|left_open_ex1_TCC2-1| NIL 3962871100 ("" (COND-COVERAGE-TCC) NIL NIL)
-   ((|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_gt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL))
+  (|left_open_ex1_TCC2-1| NIL 3962871100 ("" (COND-COVERAGE-TCC) NIL NIL) NIL
    NIL
    (|left_open_ex1| COVERAGE
     "COND reals.>(active_corners_examples.x, 0) -> active_corners_examples.g(0), reals.<=(active_corners_examples.x, 0) -> active_corners_examples.g(active_corners_examples.x) ENDCOND"
-    "NIL" (45 4 48 25))))
+    "NIL")))
  (|left_open_ex1_TCC3| 0
   (|left_open_ex1_TCC3-1| NIL 3962871100
    ("" (SKEEP) (("" (LEMMA "left_open_dd") (("" (INST -1 "0") NIL NIL)) NIL))
     NIL)
-   ((|left_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL))
-   NIL
+   ((|left_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|left_open_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.left_open(0))].derivatives"
-    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"
-    (50 4 50 30))))
+    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
  (|left_open_ex1_TCC4| 0
   (|left_open_ex1_TCC4-1| NIL 3962871100
    ("" (SKEEP) (("" (LEMMA "left_open_noe") (("" (INST?) NIL NIL)) NIL)) NIL)
-   ((|left_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL))
-   NIL
+   ((|left_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|left_open_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.left_open(0))].derivatives"
-    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"
-    (50 4 50 30))))
+    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?")))
  (|left_open_ex1| 0
   (|left_open_ex1-1| NIL 3962871433
    ("" (SKEEP*)
@@ -294,115 +174,42 @@
         NIL))
       NIL))
     NIL)
-   ((|minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|minus_nzint_is_nzint| APPLICATION-JUDGEMENT "nzint" |integers| NIL)
-    (|real_plus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|real_minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (IMPLIES CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (AND CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (|left_open| CONST-DECL "bool" |mean_value_inequalities| NIL)
+   ((|left_open| CONST-DECL "bool" |mean_value_inequalities| NIL)
     (|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
-    (|restrict| CONST-DECL "R" |restrict| NIL)
-    (<= CONST-DECL "bool" |reals| NIL)
     (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
     (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
-    (>= CONST-DECL "bool" |reals| NIL)
-    (|numfield| NONEMPTY-TYPE-EQ-DECL NIL |number_fields| NIL)
-    (+ CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
-    (- CONST-DECL "[numfield -> numfield]" |number_fields| NIL)
-    (- CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
-    (OR CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (IFF CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (= CONST-DECL "[T, T -> boolean]" |equalities| NIL)
-    (IF CONST-DECL
-        "[boolean, T, T -> T]"
-        |if_def|
-        NIL)
-    (> CONST-DECL "bool" |reals| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bijective?| CONST-DECL "bool" |functions| NIL)
-    (|id| CONST-DECL "(bijective?[T, T])" |identity| NIL)
-    (|f| SKOLEM-CONST-DECL "[real -> real]" |active_corners_examples| NIL)
-    (|mvt_gen_le_lo| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_times_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (NIL APPLICATION-JUDGEMENT "above(n)" |exp2| NIL)
-    (|x| SKOLEM-CONST-DECL "real" |active_corners_examples| NIL)
-    (|xo| SKOLEM-CONST-DECL "real" |active_corners_examples| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (TRUE CONST-DECL "bool" |booleans| NIL))
+    (|mvt_gen_le_lo| FORMULA-DECL NIL |mean_value_inequalities| NIL))
    NIL))
  (|full_ex1_TCC1| 0
   (|full_ex1_TCC1-1| NIL 3962874514
    ("" (LEMMA "left_open_dd") (("" (INST -1 "0") NIL NIL)) NIL)
-   ((|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|left_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL))
-   NIL
+   ((|left_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|full_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.left_open(0))].derivatives"
-    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"
-    (79 4 79 30))))
+    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
  (|full_ex1_TCC2| 0
   (|full_ex1_TCC2-1| NIL 3962874514
    ("" (LEMMA "left_open_noe") (("" (INST -1 "0") NIL NIL)) NIL)
-   ((|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|left_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL))
-   NIL
+   ((|left_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|full_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.left_open(0))].derivatives"
-    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"
-    (79 4 79 30))))
+    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?")))
  (|full_ex1_TCC3| 0
   (|full_ex1_TCC3-1| NIL 3962874514
    ("" (SKEEP) (("" (LEMMA "right_open_dd") (("" (INST -1 "0") NIL NIL)) NIL))
     NIL)
-   ((|right_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL))
-   NIL
+   ((|right_open_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|full_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.right_open(0))].derivatives"
-    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"
-    (81 4 81 31))))
+    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
  (|full_ex1_TCC4| 0
   (|full_ex1_TCC4-1| NIL 3962874514
    ("" (SKEEP) (("" (LEMMA "right_open_noe") (("" (INST -1 "0") NIL NIL)) NIL))
     NIL)
-   ((|right_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL))
-   NIL
+   ((|right_open_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|full_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.right_open(0))].derivatives"
-    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"
-    (81 4 81 31))))
+    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?")))
  (|full_ex1| 0
   (|full_ex1-1| NIL 3962874602
    ("" (SKEEP)
@@ -435,46 +242,16 @@
    NIL SHOSTAK))
  (|closed_interval_ex1_TCC1| 0
   (|closed_interval_ex1_TCC1-1| NIL 3962871100 ("" (COND-DISJOINT-TCC) NIL NIL)
-   ((|real_lt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_gt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL))
-   NIL
+   NIL NIL
    (|closed_interval_ex1| DISJOINTNESS
     "COND reals.<(active_corners_examples.x, 0) -> active_corners_examples.g(0), booleans.AND(reals.<=(active_corners_examples.x, 10), reals.>=(active_corners_examples.x, 0)) -> active_corners_examples.g(active_corners_examples.x), reals.>(active_corners_examples.x, 10) -> active_corners_examples.g(10) ENDCOND"
-    "NIL" (110 4 114 25))))
+    "NIL")))
  (|closed_interval_ex1_TCC2| 0
   (|closed_interval_ex1_TCC2-1| NIL 3962871100 ("" (COND-COVERAGE-TCC) NIL NIL)
-   ((|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
-     |real_props| NIL)
-    (|real_gt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real_lt_is_strict_total_order| NAME-JUDGEMENT
-     "(strict_total_order?[real])" |real_props| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
-    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL))
-   NIL
+   NIL NIL
    (|closed_interval_ex1| COVERAGE
     "COND reals.<(active_corners_examples.x, 0) -> active_corners_examples.g(0), booleans.AND(reals.<=(active_corners_examples.x, 10), reals.>=(active_corners_examples.x, 0)) -> active_corners_examples.g(active_corners_examples.x), reals.>(active_corners_examples.x, 10) -> active_corners_examples.g(10) ENDCOND"
-    "NIL" (110 4 114 25))))
+    "NIL")))
  (|closed_interval_ex1_TCC3| 0
   (|closed_interval_ex1_TCC3-1| NIL 3962871100
    ("" (SKEEP)
@@ -485,18 +262,10 @@
         NIL))
       NIL))
     NIL)
-   ((|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|ci_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL))
-   NIL
+   ((|ci_dd| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|closed_interval_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.ci(0, 10))].derivatives"
-    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"
-    (116 4 116 26))))
+    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
  (|closed_interval_ex1_TCC4| 0
   (|closed_interval_ex1_TCC4-1| NIL 3962871100
    ("" (SKEEP)
@@ -505,18 +274,10 @@
         (("" (INST -1 "0" "10") (("" (ASSERT) NIL NIL)) NIL)) NIL))
       NIL))
     NIL)
-   ((|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
-    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
-    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
-    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
-    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
-    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
-    (|ci_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL))
-   NIL
+   ((|ci_noe| FORMULA-DECL NIL |mean_value_inequalities| NIL)) NIL
    (|closed_interval_ex1| ASSUMING
     "analysis@derivatives[(mean_value_inequalities.ci(0, 10))].derivatives"
-    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"
-    (116 4 116 26))))
+    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?")))
  (|closed_interval_ex1| 0
   (|closed_interval_ex1-1| NIL 3962871333
    ("" (SKEEP*)
@@ -532,10 +293,9 @@
                       (("1" (LEMMA "mvt_gen_ge_ci")
                         (("1" (INST -1 "f" "0" "10" "0" "x" "xo-2")
                           (("1" (ASSERT) NIL NIL)
-                           ("2" (EXPAND "ci" 1) (("2" (PROPAX) NIL NIL)) NIL)
+                           ("2" (EXPAND "ci") (("2" (PROPAX) NIL NIL)) NIL)
                            ("3" (ASSERT)
-                            (("3" (EXPAND "ci" 1) (("3" (PROPAX) NIL NIL))
-                              NIL))
+                            (("3" (EXPAND "ci") (("3" (PROPAX) NIL NIL)) NIL))
                             NIL))
                           NIL))
                         NIL))
@@ -544,7 +304,7 @@
                      ("4" (PROPAX) NIL NIL) ("5" (PROPAX) NIL NIL))
                     NIL)
                    ("2" (EXPAND "ci" 1) (("2" (ASSERT) NIL NIL)) NIL)
-                   ("3" (EXPAND "ci" 1) (("3" (ASSERT) NIL NIL)) NIL))
+                   ("3" (EXPAND "ci") (("3" (ASSERT) NIL NIL)) NIL))
                   NIL))
                 NIL))
               NIL)
@@ -557,9 +317,9 @@
                         (("1" (LEMMA "mvt_gen_ge_ci")
                           (("1" (INST -1 "f" "0" "10" "0" "x" "0")
                             (("1" (EXPAND "f") (("1" (ASSERT) NIL NIL)) NIL)
-                             ("2" (EXPAND "ci" 1) (("2" (PROPAX) NIL NIL)) NIL)
+                             ("2" (EXPAND "ci") (("2" (PROPAX) NIL NIL)) NIL)
                              ("3" (ASSERT)
-                              (("3" (EXPAND "ci" 1) (("3" (PROPAX) NIL NIL))
+                              (("3" (EXPAND "ci") (("3" (PROPAX) NIL NIL))
                                 NIL))
                               NIL))
                             NIL))
@@ -568,8 +328,8 @@
                        ("2" (ASSERT) NIL NIL) ("3" (PROPAX) NIL NIL)
                        ("4" (PROPAX) NIL NIL) ("5" (PROPAX) NIL NIL))
                       NIL)
-                     ("2" (EXPAND "ci" 1) (("2" (ASSERT) NIL NIL)) NIL)
-                     ("3" (EXPAND "ci" 1) (("3" (ASSERT) NIL NIL)) NIL))
+                     ("2" (EXPAND "ci") (("2" (ASSERT) NIL NIL)) NIL)
+                     ("3" (EXPAND "ci") (("3" (ASSERT) NIL NIL)) NIL))
                     NIL))
                   NIL))
                 NIL)
@@ -589,38 +349,24 @@
                                  ("2" (ASSERT) NIL NIL) ("3" (PROPAX) NIL NIL)
                                  ("4" (ASSERT) NIL NIL) ("5" (PROPAX) NIL NIL))
                                 NIL)
-                               ("2" (EXPAND "ci" 1) (("2" (ASSERT) NIL NIL))
-                                NIL)
-                               ("3" (EXPAND "ci" 1) (("3" (PROPAX) NIL NIL))
+                               ("2" (EXPAND "ci") (("2" (ASSERT) NIL NIL)) NIL)
+                               ("3" (EXPAND "ci") (("3" (PROPAX) NIL NIL))
                                 NIL))
                               NIL))
                             NIL)
                            ("2" (ASSERT) NIL NIL) ("3" (PROPAX) NIL NIL)
                            ("4" (ASSERT) NIL NIL) ("5" (PROPAX) NIL NIL))
                           NIL)
-                         ("2" (EXPAND "ci" 1) (("2" (PROPAX) NIL NIL)) NIL)
+                         ("2" (EXPAND "ci") (("2" (PROPAX) NIL NIL)) NIL)
                          ("3" (ASSERT)
-                          (("3" (EXPAND "ci" 1) (("3" (PROPAX) NIL NIL)) NIL))
+                          (("3" (EXPAND "ci") (("3" (PROPAX) NIL NIL)) NIL))
                           NIL))
                         NIL))
                       NIL))
                     NIL)
                    ("2" (ASSERT)
                     (("2" (CASE "xo - 2 < 0 AND 2+xo > 10")
-                      (("1" (FLATTEN) (("1" (ASSERT) NIL NIL)) NIL)
-                       ("2" (SPLIT 1)
-                        (("1" (SPLIT 2)
-                          (("1" (ASSERT) NIL NIL)
-                           ("2" (SPLIT 4)
-                            (("1" (ASSERT) NIL NIL)
-                             ("2" (SPLIT 4)
-                              (("1" (ASSERT) NIL NIL) ("2" (ASSERT) NIL NIL))
-                              NIL))
-                            NIL))
-                          NIL)
-                         ("2" (ASSERT) NIL NIL))
-                        NIL))
-                      NIL))
+                      (("1" (GRIND) NIL NIL) ("2" (GRIND) NIL NIL)) NIL))
                     NIL))
                   NIL))
                 NIL))
@@ -631,6 +377,7 @@
       NIL))
     NIL)
    ((|minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
+    (|minus_nzint_is_nzint| APPLICATION-JUDGEMENT "nzint" |integers| NIL)
     (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
     (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
     (|numfield| NONEMPTY-TYPE-EQ-DECL NIL |number_fields| NIL)
@@ -661,7 +408,6 @@
     (|restrict| CONST-DECL "R" |restrict| NIL)
     (|real_plus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
     (|real_minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
-    (|minus_nzint_is_nzint| APPLICATION-JUDGEMENT "nzint" |integers| NIL)
     (|bijective?| CONST-DECL "bool" |functions| NIL)
     (|id| CONST-DECL "(bijective?[T, T])" |identity| NIL)
     (|f| SKOLEM-CONST-DECL "[real -> real]" |active_corners_examples| NIL)
@@ -670,12 +416,12 @@
      "(strict_total_order?[real])" |real_props| NIL)
     (|xo| SKOLEM-CONST-DECL "real" |active_corners_examples| NIL)
     (|x| SKOLEM-CONST-DECL "real" |active_corners_examples| NIL)
-    (NIL APPLICATION-JUDGEMENT "above(n)" |exp2| NIL)
     (|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
      |real_props| NIL)
     (|real_times_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
     (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
      |real_props| NIL)
+    (NIL APPLICATION-JUDGEMENT "above(n)" |exp2| NIL)
     (|real_lt_is_strict_total_order| NAME-JUDGEMENT
      "(strict_total_order?[real])" |real_props| NIL)
     (|mvt_gen_ge_ci| FORMULA-DECL NIL |mean_value_inequalities| NIL)
