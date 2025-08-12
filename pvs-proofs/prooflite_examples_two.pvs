@@ -319,5 +319,5 @@ ge_ro_case_1: LEMMA
 %|- QED ge_ro_case_1
 
 
-%|- *TCC* : PROOF (assert) QED
+%|- *TCC* : PROOF (ASSERT) (GRIND) QED
 end prooflite_examples_two
