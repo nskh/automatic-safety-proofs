@@ -307,6 +307,7 @@ def unbounded_one_side_proof_script(
     max_right_clipped,
     min_left_clipped,
     domain_bound,
+    deriv_bound,
 ):
     """For domains unbounded to the left/right, we need to handle two cases:
     - Case 1: Unclipped trajectory
@@ -320,25 +321,27 @@ def unbounded_one_side_proof_script(
     - domain_definition: The definition of the domain, e.g. "left_open" or "right_open"
     - max_right_clipped: The maximum right value after clipping, e.g. xo+half_width but maybe 0
     - min_left_clipped: The minimum left value after clipping, e.g. xo-half_width
+    - domain_bound: The domain bound for things like left_open, right_open, ci, e.g. "0"
+    - deriv_bound: The derivative bound, e.g. "0"
     """
 
     return f"""%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
 %|-  (SPREAD (CASE "{case_label}")
 %|-   ((THEN (LEMMA "{deriv_lemma}")
-%|-     (SPREAD (INST -1 "f" "{domain_bound}" "0" "{max_right}" "x")
+%|-     (SPREAD (INST -1 "f" "{domain_bound}" "{deriv_bound}" "{max_right}" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
-%|-          (SPREAD (INST -1 "f" "{domain_bound}" "0" "x" "{min_left}")
+%|-          (SPREAD (INST -1 "f" "{domain_bound}" "{deriv_bound}" "x" "{min_left}")
 %|-           ((ASSERT) (THEN (EXPAND "{domain_definition}") (ASSERT))
 %|-            (THEN (EXPAND "{domain_definition}") (ASSERT)))))
 %|-         (PROPAX) (PROPAX) (PROPAX)))
 %|-       (THEN (EXPAND "{domain_definition}") (ASSERT))
 %|-       (THEN (EXPAND "{domain_definition}") (ASSERT)))))
 %|-    (THEN (LEMMA "{deriv_lemma}")
-%|-     (SPREAD (INST -1 "f" "{domain_bound}" "0" "{max_right_clipped}" "x")
+%|-     (SPREAD (INST -1 "f" "{domain_bound}" "{deriv_bound}" "{max_right_clipped}" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
-%|-          (SPREAD (INST -1 "f" "{domain_bound}" "0" "x" "{min_left_clipped}")
+%|-          (SPREAD (INST -1 "f" "{domain_bound}" "{deriv_bound}" "x" "{min_left_clipped}")
 %|-           ((THEN (EXPAND "f") (EXPAND "{domain_definition}") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT)))))
@@ -360,6 +363,7 @@ def bounded_proof_script(
     min_left_clipped,
     domain_start,
     domain_end,
+    deriv_bound,
 ):
     """For bounded domains, we need to handle four cases:
     - Case 1: Main case, in between lower and upper bounds of domain
@@ -383,20 +387,20 @@ def bounded_proof_script(
     return f"""%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
 %|-  (SPREAD (CASE "{case_label1}")
 %|-   ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
-%|-     (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "0" "{max_right}" "x")
+%|-     (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "{deriv_bound}" "{max_right}" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
-%|-          (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "0" "x" "{min_left}")
+%|-          (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "{deriv_bound}" "x" "{min_left}")
 %|-           ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
 %|-            (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
 %|-         (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
 %|-       (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
 %|-    (SPREAD (CASE "{case_label2}")
 %|-     ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
-%|-       (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "0" "{max_right}" "x")
+%|-       (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "{deriv_bound}" "{max_right}" "x")
 %|-        ((SPREAD (SPLIT -1)
 %|-          ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
-%|-            (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "0" "x" "{min_left_clipped}")
+%|-            (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "{deriv_bound}" "x" "{min_left_clipped}")
 %|-             ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
 %|-              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
 %|-           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
@@ -404,10 +408,10 @@ def bounded_proof_script(
 %|-      (THEN (ASSERT)
 %|-       (SPREAD (CASE "{case_label3}")
 %|-        ((THEN (FLATTEN) (LEMMA "{deriv_lemma}")
-%|-          (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "0" "{max_right_clipped}" "x")
+%|-          (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "{deriv_bound}" "{max_right_clipped}" "x")
 %|-           ((SPREAD (SPLIT -1)
 %|-             ((THEN (LEMMA "{deriv_lemma}")
-%|-               (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "0" "x" "{min_left}")
+%|-               (SPREAD (INST -1 "f" "{domain_start}" "{domain_end}" "{deriv_bound}" "x" "{min_left}")
 %|-                ((SPREAD (SPLIT -1)
 %|-                  ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
 %|-                   (ASSERT) (PROPAX)))
@@ -656,7 +660,11 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             deriv_direction = ">=" if deriv_at_midpoint >= deriv_at_endpoint else "<="
             deriv_clause1 = f"{deriv_direction} {deriv_at_endpoint}"
             deriv_clause2 = None
+            deriv_bound1 = deriv_at_endpoint
+            deriv_bound2 = None
         else:
+            # TODO see if this still works for intervals with piecewise behavior i.e.
+            # parabola-then-straight
             deriv_at_beginning = deriv_traj.subs(x, interval_start)
             deriv_at_end = deriv_traj.subs(x, interval_end)
             deriv_direction_1 = (
@@ -665,7 +673,8 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             deriv_direction_2 = "<=" if deriv_direction_1 == ">=" else ">="
             deriv_clause1 = f"{deriv_direction_1} {deriv_at_beginning}"
             deriv_clause2 = f"{deriv_direction_2} {deriv_at_end}"
-
+            deriv_bound1 = deriv_at_beginning
+            deriv_bound2 = deriv_at_end
         print(f"deriv_clause1: {deriv_clause1}")
         print(f"deriv_clause2: {deriv_clause2}")
 
@@ -698,6 +707,8 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             "interval": var_interval,
             "active_corner": active_corner_offset,
             "lemma_text": lemma_text,
+            "deriv_bound1": deriv_bound1,
+            "deriv_bound2": deriv_bound2,
         }
 
         proof_calls.append(proof_call)
@@ -857,6 +868,7 @@ def generate_proof_scripts_from_calls(proof_calls):
                 min_left_clipped=call_params["min_left_clipped"],
                 domain_start=call_params["domain_start"],
                 domain_end=call_params["domain_end"],
+                deriv_bound=call_params["deriv_bound1"],
             )
         else:
             assert len(call_params["case_labels"]) == 1
@@ -880,6 +892,7 @@ def generate_proof_scripts_from_calls(proof_calls):
                 max_right_clipped=call_params["max_right_clipped"],
                 min_left_clipped=call_params["min_left_clipped"],
                 domain_bound=domain_bound,
+                deriv_bound=call_params["deriv_bound1"],
             )
         proof_scripts.append(script)
 
