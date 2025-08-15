@@ -180,4 +180,31 @@ closed_interval_ex1: LEMMA
 %|-          (SPREAD (CASE "xo - 2 < 0 AND 2+xo > 10") ((GRIND) (GRIND))))))))))))
 %|- QED closed_interval_ex1
 
+diamond_left_case: LEMMA
+    FORALL(xo,yo:real, g:[real -> real]):
+        LET f = LAMBDA(x:real):
+        COND
+            x <= -1 -> g(x),
+            x > -1 -> g(-1)
+        ENDCOND
+    IN
+    derivable?[(left_open(-1))](f) AND
+    (FORALL(x:(left_open(-1))): deriv[(left_open(-1))](f)(x) <= -1) AND
+    (EXISTS (x : real) :
+    ((-x + xo - yo + f(x) - 1 <= 0) AND
+     (-x + xo + yo - f(x) - 1 <= 0) AND
+     (x - xo - yo + f(x) - 1 <= 0) AND
+     (x - xo + yo - f(x) - 1 <= 0)) AND
+    x <= -1 AND
+    xo + 1 >= x AND xo + -1 <= x)
+    IMPLIES
+    ((yo - f(xo) - 1 >= 0) AND
+     (yo - f(xo) + 1 <= 0)) OR
+    ((yo - f(xo) + 1 >= 0) AND
+     (yo - f(xo) - 1 <= 0)) OR
+    ((yo - f(xo - 1) >= 0) AND
+     (yo - f(xo + 1) <= 0)) OR
+    ((yo - f(xo + 1) >= 0) AND
+     (yo - f(xo - 1) <= 0))
+
 END active_corners_examples
