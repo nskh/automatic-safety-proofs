@@ -1,4 +1,4 @@
-prooflite_examples_two  % [ parameters ]
+prooflite_with_tccs  % [ parameters ]
 		: THEORY
 
   BEGIN
@@ -236,11 +236,7 @@ le_lo_case_0: LEMMA
     ((yo - f(xo + 2) - 1 >= 0) AND
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
-     (yo - f(xo - 2) - 1 <= 0)) OR
-    (xo + 2 >= 0) AND
-     (xo - 2 <= 0) AND
-     (yo - f(0) + 1 >= 0) AND
-     (yo - f(0) - 1 <= 0)
+     (yo - f(xo - 2) - 1 <= 0))
 
 %|- le_lo_case_0 : PROOF
 %|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
@@ -280,7 +276,6 @@ ge_ci_case_1: LEMMA
     IN
     derivable?[(ci(0, 4))](f) AND
     (FORALL(x:(ci(0, 4))): deriv[(ci(0, 4))](f)(x) >= 0) AND
-    (FORALL(x:(ci(0, 4))): deriv[(ci(0, 4))](f)(x) <= 8) AND
     (EXISTS (x : real) :
     ((-x + xo + 2 >= 0) AND
      (-x + xo - 2 <= 0) AND
@@ -296,15 +291,7 @@ ge_ci_case_1: LEMMA
     ((yo - f(xo + 2) - 1 >= 0) AND
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
-     (yo - f(xo - 2) - 1 <= 0)) OR
-    ((xo - 2 >= 0) AND
-     (xo - 6 <= 0) AND
-     (yo - f(4) + 1 >= 0) AND
-     (yo - f(4) - 1 <= 0)) OR
-    ((xo + 2 >= 0) AND
-     (xo - 2 <= 0) AND
-     (yo - f(0) + 1 >= 0) AND
-     (yo - f(0) - 1 <= 0))
+     (yo - f(xo - 2) - 1 <= 0))
 
 %|- ge_ci_case_1 : PROOF
 %|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
@@ -357,7 +344,7 @@ ge_ro_case_2: LEMMA
         ENDCOND
     IN
     derivable?[(right_open(4))](f) AND
-    (FORALL(x:(right_open(4))): deriv[(right_open(4))](f)(x) >= 8) AND
+    (FORALL(x:(right_open(4))): deriv[(right_open(4))](f)(x) >= 0) AND
     (EXISTS (x : real) :
     ((-x + xo + 2 >= 0) AND
      (-x + xo - 2 <= 0) AND
@@ -373,30 +360,26 @@ ge_ro_case_2: LEMMA
     ((yo - f(xo + 2) - 1 >= 0) AND
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
-     (yo - f(xo - 2) - 1 <= 0)) OR
-    (xo - 2 >= 0) AND
-     (xo - 6 <= 0) AND
-     (yo - f(4) + 1 >= 0) AND
-     (yo - f(4) - 1 <= 0)
+     (yo - f(xo - 2) - 1 <= 0))
 
 %|- ge_ro_case_2 : PROOF
 %|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
 %|-  (SPREAD (CASE "xo - 2 >= 4")
 %|-   ((THEN (LEMMA "mvt_gen_ge_ro")
-%|-     (SPREAD (INST -1 "f" "4" "8" "xo + 2" "x")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
-%|-          (SPREAD (INST -1 "f" "4" "8" "x" "xo - 2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
 %|-           ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
 %|-            (THEN (EXPAND "right_open") (ASSERT)))))
 %|-         (PROPAX) (PROPAX) (PROPAX)))
 %|-       (THEN (EXPAND "right_open") (ASSERT))
 %|-       (THEN (EXPAND "right_open") (ASSERT)))))
 %|-    (THEN (LEMMA "mvt_gen_ge_ro")
-%|-     (SPREAD (INST -1 "f" "4" "8" "xo + 2" "x")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
-%|-          (SPREAD (INST -1 "f" "4" "8" "x" "4")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "4")
 %|-           ((THEN (EXPAND "f") (EXPAND "right_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
@@ -405,32 +388,6 @@ ge_ro_case_2: LEMMA
 %|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
 %|- QED ge_ro_case_2
 
-%|- *TCC* : PROOF (THEN (ASSERT) (GRIND)) QED
+%|- *TCC* : PROOF (EXPAND "right_open") (EXPAND "ci") (EXPAND "left_open") (EXPAND "f") (ASSERT) (GRIND) QED
 
-%|- mvt_gen_ge_TCC1 : PROOF (THEN (SKEEP) (LEMMA "connected_deriv_domain[(D)]") (ASSERT)) QED
-
-%|- mvt_gen_ge_lo_TCC1 : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "C") (ASSERT) (GRIND)) QED
-
-%|- mvt_gen_ge_lo_TCC2 : PROOF (THEN (SKEEP) (LEMMA "left_open_noe") (INST -1 "C") (ASSERT) (GRIND)) QED
-
-%|- mvt_gen_ge_ro_TCC1 : PROOF (THEN (SKEEP) (LEMMA "right_open_dd") (INST -1 "C") (ASSERT) (GRIND)) QED
-
-%|- mvt_gen_ge_ro_TCC2 : PROOF (THEN (SKEEP) (LEMMA "right_open_noe") (INST -1 "C") (ASSERT) (GRIND)) QED
-
-%|- mvt_gen_ge_ci_TCC1 : PROOF (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "d1" "d2") (ASSERT) (GRIND)) QED
-
-%|- mvt_gen_ge_ci_TCC2 : PROOF (THEN (SKEEP) (LEMMA "ci_noe") (INST -1 "d1" "d2") (ASSERT) (GRIND)) QED
-
-%|- le_lo_case_0_TCC3 : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "0") (ASSERT) (GRIND)) QED
-
-%|- le_lo_case_0_TCC4 : PROOF (THEN (SKEEP) (LEMMA "left_open_noe") (INST -1 "0") (ASSERT) (GRIND)) QED
-
-%|- ge_ci_case_1_TCC3 : PROOF (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "0" "4") (ASSERT) (GRIND)) QED
-
-%|- ge_ci_case_1_TCC4 : PROOF (THEN (SKEEP) (LEMMA "ci_noe") (INST -1 "0" "4") (ASSERT) (GRIND)) QED
-
-%|- ge_ro_case_2_TCC3 : PROOF (THEN (SKEEP) (LEMMA "right_open_dd") (INST -1 "4") (ASSERT) (GRIND)) QED
-
-%|- ge_ro_case_2_TCC4 : PROOF (THEN (SKEEP) (LEMMA "right_open_noe") (INST -1 "4") (ASSERT) (GRIND)) QED
-
-end prooflite_examples_two
+end prooflite_with_tccs

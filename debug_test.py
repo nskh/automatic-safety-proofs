@@ -16,19 +16,18 @@ x = symbols("x")
 
 # Create a rectangle polygon with width 4 (half-width 2)
 w = 1.0
-# rect_points = [
-#     Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
-# ]
-# polygon = Polygon(*rect_points)
-diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
-polygon = Polygon(*diamond_points)
+rect_points = [
+    Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
+]
+polygon = Polygon(*rect_points)
+# diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
+# polygon = Polygon(*diamond_points)
 # polygon = RegularPolygon((0, 0), 1, n=6)  # hexagon
 
-# Use y = x^2 trajectory which should have transition point at (0,0)
-trajectory_expr = (
-    x**2 / 2
-)  # This should have transition point at x=0 where derivative is 0
-# trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
+# trajectory_expr = (
+#     x**2 / 2
+# )
+trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
 
 # Domain (infinite)
 domain = Interval(-oo, oo)
