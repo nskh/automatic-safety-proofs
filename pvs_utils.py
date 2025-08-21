@@ -110,37 +110,9 @@ def sympy_to_pvs(clause: str):
     )
 
 
-def construct_lemma_old(premise, active_corner_condition, lemma_name):
-    """Legacy lemma construction function."""
-    return f"""{lemma_name}(xo, yo, alpha: real) : bool =
-    (EXISTS (x : real) :
-    ({sympy_to_pvs(str(premise))})
-    IMPLIES
-    {sympy_to_pvs(str(active_corner_condition))}
-    """
-
-
-def full_lemma(
-    poly,
-    vert_names,
-    corner_pairs,
-    traj,
-    traj_expr=None,
-    lemma_name="Soundness",
-    disjunction=False,
-):
-    """Generate a full lemma with polygon and trajectory information."""
-    if type(vert_names) is str:
-        vert_names = vert_names.split()
-    assert type(vert_names) is list
-    verts, lines = verts_and_lines(vert_names, poly)
-
-    premise = generate_premise(lines, traj_expr)
-    if disjunction:
-        explicit = generate_explicit_disjunction(corner_pairs, traj, verts)
-    else:
-        explicit = generate_explicit(corner_pairs, traj, verts)
-    return construct_lemma_old(premise, explicit, lemma_name)
+def clean_trajectory(trajectory: str):
+    """Clean trajectory COND so it's one line."""
+    return " ".join([term.strip() for term in trajectory.split("\n")])
 
 
 # =============================================================================
@@ -257,6 +229,8 @@ def construct_lemma(
     else:
         raise ValueError("No domain specified")
 
+    clipped_trajectory = function_statement[function_statement.find("LAMBDA") :]
+
     # Build the exists clause from the main exists-premise and the two bounds.
     max_offset = max([v.x for v in verts.values()])
     exists_upper = f"xo + {max_offset}"
@@ -268,19 +242,26 @@ def construct_lemma(
     {exists_domain} AND
     {exists_upper} >= x AND {exists_lower} <= x)"""
 
-    deriv_statement = f"derivable?[{deriv_domain}](f)"
     if deriv_clause2:
+        deriv_list = [
+            f"derivable?[{deriv_domain}](f)",
+            f"(FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause1})",
+            f"(FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause2})",
+        ]
+        deriv_statement = " AND ".join(deriv_list) + " AND"
         full_preamble = f"""    {function_statement}
     IN 
-    {deriv_statement} AND
-    (FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause1}) AND
-    (FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause2}) AND
+    {deriv_statement}
     {exists_clause}"""
     else:
+        deriv_list = [
+            f"derivable?[{deriv_domain}](f)",
+            f"(FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause1})",
+        ]
+        deriv_statement = " AND ".join(deriv_list) + " AND"
         full_preamble = f"""    {function_statement}
     IN 
-    {deriv_statement} AND
-    (FORALL(x:{deriv_domain}): deriv[{deriv_domain}](f)(x) {deriv_clause1}) AND
+    {deriv_statement}
     {exists_clause}"""
 
     lemma_str = f"""{lemma_name}: LEMMA
@@ -290,7 +271,61 @@ def construct_lemma(
     {sympy_to_pvs(str(active_corner_condition))} OR
     {sympy_to_pvs(str(notch))}
 """
-    return lemma_str
+    return lemma_str, deriv_list, clipped_trajectory
+
+
+def generate_unifying_lemma(
+    verts,
+    active_exists_premise,
+    active_corner_condition,
+    deriv_statements=[],
+    notches=[],
+    trajectories=[],
+):
+    max_offset = max([v.x for v in verts.values()])
+    exists_upper = f"xo + {max_offset}"
+
+    min_offset = min([v.x for v in verts.values()])
+    exists_lower = f"xo + {min_offset}"
+    exists_clause = f"""(EXISTS (x : real) :
+    ({sympy_to_pvs(str(active_exists_premise))}) AND
+    {exists_upper} >= x AND {exists_lower} <= x)"""
+
+    notch_string = (
+        " OR\n".join([f"    ({sympy_to_pvs(str(notch))})" for notch in notches])
+        .replace("(f)", "(g)")
+        .replace("f(", "g(")
+    )
+
+    deriv_premise = " AND\n    ".join(deriv_statements)
+    # Stitch all the trajectories together and also represent the active corner condition with each of the clipped functions `f{i}`
+    trajectory_statement = "LET\n"
+    conditions = ""
+    for i, trajectory in enumerate(trajectories):
+        # do not add trailing "," for last case
+        if i < len(trajectories) - 1:
+            trajectory_statement += f"        f{i} = {trajectory},\n"
+        else:
+            trajectory_statement += f"        f{i} = {trajectory}\n"
+        explicit_condition = sympy_to_pvs(str(active_corner_condition)).replace(
+            "f(", f"f{i}("
+        )
+        conditions += explicit_condition + " OR\n"
+
+    print(trajectory_statement)
+
+    full_preamble = f"""{trajectory_statement}
+    IN
+    {deriv_premise} AND
+    {exists_clause}"""
+
+    lemma_text = f"""full_domain_soundness_lemma: LEMMA
+    FORALL(xo,yo:real, g:[real -> real]):
+    {full_preamble.replace("(f)", "(g)").replace("f(", "g(")}
+    IMPLIES
+    {conditions}{notch_string}
+"""
+    return lemma_text
 
 
 # =============================================================================
@@ -423,6 +458,78 @@ def bounded_proof_script(
 %|-         (THEN (ASSERT)
 %|-          (SPREAD (CASE "{case_label4}") ((GRIND) (GRIND))))))))))))
 """
+
+
+def generate_two_case_unifying_lemma_proof(
+    domain_split,
+    lemma_1,
+    lemma_2,
+    domain_type_1,
+    domain_type_2,
+    trajectory_function_1,
+    trajectory_function_2,
+):
+    """
+    Input Examples:
+    - domain_split: 0
+    - lemma_1: le_lo_case_0
+    - lemma_2: ge_ro_case_1
+    - domain_type_1: left_open(0)
+    - domain_type_2: right_open(0)
+    - trajectory_function_1: LAMBDA (x: real): COND x > 0 -> g(0), ELSE -> g(x) ENDCOND)
+    - trajectory_function_2: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
+    """
+
+    return f"""%|- full_domain_soundness_lemma : PROOF
+%|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
+%|-  (SPREAD (CASE "x<={domain_split}")
+%|-   ((THEN (LEMMA "{lemma_1}") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "t0")
+%|-     (ASSERT)
+%|-     (SPREAD
+%|-      (CASE
+%|-          "restrict[real, ({domain_type_1}), real](g) = (restrict[real, ({domain_type_1}), real]
+%|-                 ({trajectory_function_1}))")
+%|-      ((SPREAD (SPLIT -2)
+%|-        ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (ASSERT) (ASSERT)
+%|-         (THEN (INST 1 "x") (ASSERT))))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE-ALL-BUT 1) (TYPEPRED "x!1")
+%|-        (GRIND)))))
+%|-    (THEN (LEMMA "{lemma_2}") (INST -1 "xo" "yo" "g") (ASSERT)
+%|-     (EXPAND "t1")
+%|-     (SPREAD
+%|-      (CASE "(restrict[real, ({domain_type_2}), real]
+%|-                     ({trajectory_function_2})) = (restrict[real, ({domain_type_2}), real](g))")
+%|-      ((SPREAD (SPLIT -2)
+%|-        ((ASSERT) (THEN (FLATTEN) (ASSERT)) (THEN (EXPAND "t0") (ASSERT))
+%|-         (THEN (FLATTEN) (ASSERT)) (ASSERT) (ASSERT)
+%|-         (THEN (INST 1 "x") (ASSERT))))
+%|-       (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (GRIND))))))))
+%|- QED full_domain_soundness_lemma"""
+
+
+def generate_tcc_postamble(case_tccs):
+    all_tccs = "\n\n".join(case_tccs)
+    return f"""
+%|- *TCC* : PROOF (THEN (ASSERT) (GRIND)) QED
+
+%|- mvt_gen_ge_TCC1 : PROOF (THEN (SKEEP) (LEMMA "connected_deriv_domain[(D)]") (ASSERT)) QED
+
+%|- mvt_gen_ge_lo_TCC1 : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "C") (ASSERT) (GRIND)) QED
+
+%|- mvt_gen_ge_lo_TCC2 : PROOF (THEN (SKEEP) (LEMMA "left_open_noe") (INST -1 "C") (ASSERT) (GRIND)) QED
+
+%|- mvt_gen_ge_ro_TCC1 : PROOF (THEN (SKEEP) (LEMMA "right_open_dd") (INST -1 "C") (ASSERT) (GRIND)) QED
+
+%|- mvt_gen_ge_ro_TCC2 : PROOF (THEN (SKEEP) (LEMMA "right_open_noe") (INST -1 "C") (ASSERT) (GRIND)) QED
+
+%|- mvt_gen_ge_ci_TCC1 : PROOF (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "d1" "d2") (ASSERT) (GRIND)) QED
+
+%|- mvt_gen_ge_ci_TCC2 : PROOF (THEN (SKEEP) (LEMMA "ci_noe") (INST -1 "d1" "d2") (ASSERT) (GRIND)) QED
+
+{all_tccs}
+
+end active_corner_certificate"""
 
 
 # =============================================================================
@@ -559,6 +666,10 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
     print(f"var_intervals: {var_intervals}")
 
     proof_calls = []
+    deriv_statements = []
+    notches = []
+    trajectories = []
+    num_cases = 0
 
     for i, var_interval in enumerate(var_intervals):
         interval_start, interval_end = var_interval
@@ -566,6 +677,8 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         # Skip if this interval is outside the domain
         if interval_end <= domain_min or interval_start >= domain_max:
             continue
+
+        num_cases += 1
 
         # Determine if this interval is unbounded on left or right
         left_unbounded = not interval_start.is_finite
@@ -682,7 +795,7 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         lemma_name = f"{deriv_sign}_{domain_type}_case_{i}"
 
         # Generate the lemma
-        lemma_text = construct_lemma(
+        lemma_text, deriv_list, clipped_trajectory = construct_lemma(
             verts,
             premise,
             explicit,
@@ -695,6 +808,7 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         )
 
         proof_call = {
+            "lemma_name": lemma_name,
             "case_labels": case_labels,
             "deriv_lemma": deriv_lemma,
             "max_right": max_right,
@@ -712,8 +826,41 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         }
 
         proof_calls.append(proof_call)
+        deriv_statements.extend(deriv_list)
+        notches.append(notch)
+        trajectories.append(clean_trajectory(clipped_trajectory))
 
-    return proof_calls
+    domain_splits = []
+    for i in range(len(var_intervals) - 1):
+        if var_intervals[i][1] == var_intervals[i + 1][0]:
+            domain_splits.append(var_intervals[i][1])
+
+    # Only generate unifying lemma if we can handle creating the proof too
+    if num_cases == 2:
+        unifying_lemma_statement = generate_unifying_lemma(
+            verts, premise, explicit, deriv_statements, notches, trajectories
+        )
+        lemma_1 = proof_calls[0]["lemma_name"]
+        lemma_2 = proof_calls[1]["lemma_name"]
+        domain_split = domain_splits[0]
+        domain_type_1 = proof_calls[0]["domain_definition"] + f"({domain_split})"
+        domain_type_2 = proof_calls[1]["domain_definition"] + f"({domain_split})"
+        trajectory_function_1 = trajectories[0]
+        trajectory_function_2 = trajectories[1]
+        unifying_proof = generate_two_case_unifying_lemma_proof(
+            domain_split,
+            lemma_1,
+            lemma_2,
+            domain_type_1,
+            domain_type_2,
+            trajectory_function_1,
+            trajectory_function_2,
+        )
+        unifying_lemma_and_proof = unifying_lemma_statement + "\n\n" + unifying_proof
+    else:
+        unifying_lemma_and_proof = None
+
+    return proof_calls, unifying_lemma_and_proof
 
 
 def generate_lemmas_from_calls(proof_calls):
@@ -734,6 +881,35 @@ def generate_lemmas_from_calls(proof_calls):
             lemmas.append(lemma_text)
 
     return lemmas
+
+
+def generate_tcc_from_call(proof_call):
+    """
+    Generate a TCC from a proof call.
+    """
+    tcc_name = f"{proof_call['lemma_name']}_TCC"
+
+    if proof_call["domain_definition"] == "left_open":
+        assert proof_call["domain_start"] is None
+        lemma_name = "left_open"
+        inst_call = f"(INST -1 \"{proof_call['domain_end']}\")"
+    elif proof_call["domain_definition"] == "right_open":
+        assert proof_call["domain_end"] is None
+        lemma_name = "right_open"
+        inst_call = f"(INST -1 \"{proof_call['domain_start']}\")"
+    elif proof_call["domain_definition"] == "ci":
+        lemma_name = "ci"
+        inst_call = (
+            f"(INST -1 \"{proof_call['domain_start']}\" \"{proof_call['domain_end']}\")"
+        )
+    else:
+        raise ValueError(
+            f"Unknown domain definition: {proof_call['domain_definition']}"
+        )
+
+    return f"""%|- {tcc_name}3 : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_dd") {inst_call} (ASSERT) (GRIND)) QED
+
+%|- {tcc_name}4 : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_noe") {inst_call} (ASSERT) (GRIND)) QED"""
 
 
 def generate_corner_pairs(labels):
@@ -794,13 +970,16 @@ def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testle
         traj_expr = trajectory
 
     # Generate proof calls
-    proof_calls = generate_proof_calls(traj_expr, poly, domain, x, y)
+    proof_calls, unifying_lemma = generate_proof_calls(traj_expr, poly, domain, x, y)
 
     # Generate lemmas
     lemmas = generate_lemmas_from_calls(proof_calls)
 
     # Generate proof scripts
     proof_scripts = generate_proof_scripts_from_calls(proof_calls)
+
+    # Generate TCCs
+    tccs = [generate_tcc_from_call(call) for call in proof_calls]
 
     # Create a complete package
     package = {
@@ -810,12 +989,14 @@ def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testle
         "trajectory": traj_expr,
         "polygon": poly,
         "domain": domain,
+        "tccs": tccs,
+        "unifying_lemma": unifying_lemma,
     }
 
     return package
 
 
-def print_proof_package(package) -> str:
+def print_prooflite(package) -> str:
     """
     Print the proof package in a readable format.
     """
@@ -823,12 +1004,19 @@ def print_proof_package(package) -> str:
     proof_scripts = package["proof_scripts"]
     lemma_names = [lemma.split(":")[0] for lemma in lemmas]
 
-    s = ""
+    with open("certificate_preamble.txt") as file:
+        s = file.read()
     for i in range(len(lemmas)):
         s += lemmas[i] + "\n"
         s += f"%|- {lemma_names[i]} : PROOF\n"
         s += proof_scripts[i]
         s += f"%|- QED {lemma_names[i]}\n\n\n"
+
+    # only print unifying lemma if we can handle creating the proof too
+    if package["unifying_lemma"] is not None:
+        s += package["unifying_lemma"] + "\n\n"
+
+    s += generate_tcc_postamble(package["tccs"])
 
     return s.strip()
 
@@ -838,7 +1026,7 @@ def log_proof_to_file(package, filename):
     Log the proof package to a file.
     """
     with open(filename, "w") as f:
-        f.write(print_proof_package(package))
+        f.write(print_prooflite(package))
 
 
 def generate_proof_scripts_from_calls(proof_calls):
