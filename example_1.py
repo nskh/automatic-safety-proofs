@@ -8,7 +8,7 @@ init_printing()
 
 x, y = symbols("x y")
 ## Short Example ##
-w = 0.5
+w = 0.1
 square_points: list = [
     geometry.Point(val) for val in [[w, -w], [w, w], [-w, w], [-w, -w]]
 ]
