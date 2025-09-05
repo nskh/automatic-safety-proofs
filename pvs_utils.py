@@ -492,18 +492,16 @@ def generate_two_case_unifying_lemma_proof(
 %|-          "restrict[real, ({domain_type_1}), real](g) = (restrict[real, ({domain_type_1}), real]
 %|-                 ({trajectory_function_1}))")
 %|-      ((SPREAD (SPLIT -2)
-%|-        ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (ASSERT) (ASSERT)
+%|-        ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (ASSERT) (ASSERT)
 %|-         (THEN (INST 1 "x") (ASSERT))))
 %|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE-ALL-BUT 1) (TYPEPRED "x!1")
 %|-        (GRIND)))))
-%|-    (THEN (LEMMA "{lemma_2}") (INST -1 "xo" "yo" "g") (ASSERT)
-%|-     (EXPAND "f1")
+%|-    (THEN (LEMMA "{lemma_2}") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "f1")
 %|-     (SPREAD
 %|-      (CASE "(restrict[real, ({domain_type_2}), real]
 %|-                     ({trajectory_function_2})) = (restrict[real, ({domain_type_2}), real](g))")
 %|-      ((SPREAD (SPLIT -2)
-%|-        ((ASSERT) (THEN (FLATTEN) (ASSERT)) (THEN (EXPAND "f0") (ASSERT))
-%|-         (THEN (FLATTEN) (ASSERT)) (ASSERT) (ASSERT)
+%|-        ((ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT)
 %|-         (THEN (INST 1 "x") (ASSERT))))
 %|-       (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
 %|-        (GRIND))))))))
