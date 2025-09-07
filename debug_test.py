@@ -91,22 +91,22 @@ try:
     #     f"Debug: First lemma: {package['lemmas'][0] if package['lemmas'] else 'None'}"
     # )
 
-    # for i in range(len(package["lemmas"])):
-    #     print(f"\n{'='*60}")
-    #     print(f"CASE {i+1}:")
-    #     print(f"{'='*60}")
+    for i in range(len(package["lemmas"])):
+        print(f"\n{'='*60}")
+        print(f"CASE {i+1}:")
+        print(f"{'='*60}")
 
-    #     # Print the lemma
-    #     print(f"\nLEMMA {i+1}:")
-    #     print(f"{'='*40}")
-    #     print(package["lemmas"][i])
-    #     print(f"{'='*40}")
+        # Print the lemma
+        print(f"\nLEMMA {i+1}:")
+        print(f"{'='*40}")
+        print(package["lemmas"][i])
+        print(f"{'='*40}")
 
-    #     # Print the corresponding proof script
-    #     print(f"\nPROOF SCRIPT {i+1}:")
-    #     print(f"{'='*40}")
-    #     print(package["proof_scripts"][i])
-    #     print(f"{'='*40}")
+        # Print the corresponding proof script
+        print(f"\nPROOF SCRIPT {i+1}:")
+        print(f"{'='*40}")
+        print(package["proof_scripts"][i])
+        print(f"{'='*40}")
 except Exception as e:
     print(f"Error: {e}")
     import traceback

@@ -41,27 +41,28 @@ def piecewise_from_rel_df(rel_df, axis="east", var_symbol="x", closed_right=True
     rel_df columns expected: t, rel_east_m, rel_north_m, rel_up_m
     axis ∈ {"east","north","up"}
     Returns a SymPy Piecewise for the chosen component.
+    relative_lat,relative_lon,relative_alt_ft
     """
-    colmap = {"east": "rel_east_m", "north": "rel_north_m", "up": "rel_up_m"}
+    colmap = {"east": "relative_lat", "north": "relative_lon", "up": "relative_alt_ft"}
     if axis not in colmap:
         raise ValueError("axis must be one of {'east','north','up'}")
-    df = (rel_df[["x", colmap[axis]]]
+    df = (rel_df[["t", colmap[axis]]]
           .dropna()
-          .sort_values("x"))
-    return _piecewise_linear_sympy(df["x"].to_numpy(),
+          .sort_values("t"))
+    return _piecewise_linear_sympy(df["t"].to_numpy(),
                                    df[colmap[axis]].to_numpy(),
                                    var_symbol=var_symbol,
                                    closed_right=closed_right,
                                    digits=digits)
 
 
-rel = pd.read_csv("rel.csv")
+rel = pd.read_csv("relative_trajectories.csv")
 
-# E_pw = piecewise_from_rel_df(rel, axis="east")
+E_pw = piecewise_from_rel_df(rel, axis="east", var_symbol="x")
 # N_pw = piecewise_from_rel_df(rel, axis="north")
-U_pw = piecewise_from_rel_df(rel, axis="up")
+# U_pw = piecewise_from_rel_df(rel, axis="up")
 
-print(U_pw)
+print(E_pw)
 
 
 #U_pw
