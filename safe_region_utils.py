@@ -3,6 +3,7 @@ import numpy as np
 import sympy
 from sympy import *
 from typing import Tuple, List, Dict, Set
+import math
 
 from mathematica_utils import *
 from plotting_utils import *
@@ -12,6 +13,14 @@ init_printing(use_unicode=True)
 # global debug if printing
 PRINTS = False
 
+
+def is_infinite_solution_set(soln):
+    # Treat "everywhere true" / non-finite sets as no discrete transitions
+    return (
+        soln in (S.Complexes, S.Reals, S.UniversalSet)
+        or isinstance(soln, ConditionSet)
+        or (hasattr(soln, "is_FiniteSet") and soln.is_FiniteSet is False)
+    )
 
 def compute_polygon_angles(poly: sympy.Polygon) -> list:
     """Return angles corresponding to each vertex of a polygon.
@@ -163,11 +172,19 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
         # parallel iff y1*x2 = x1*y2
         # use vectors <dfdx, dfdy> <cos(theta), sin(theta)>
         soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
+        if is_infinite_solution_set(soln):
+            # print("here", soln)
+            # slope is parallel for the entire domain at this angle; skip
+            continue
         print(f"solveset solution: {soln.doit()}")
         if soln is S.EmptySet:
             soln = solveset(
                 Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
             )
+            if is_infinite_solution_set(soln):
+                # print("here", soln)
+                continue
+
             if soln != S.EmptySet and type(soln) != list:
                 # In this case, type(soln): S.FiniteSet
                 soln = [{y: soln_elem} for soln_elem in list(soln)]
@@ -230,7 +247,13 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                     if PRINTS:
                         print("x-coord:", solved_eqn.rhs)
                         print("y-coord:", single_var_soln)
-                    transition_point = Point(solved_eqn.rhs, single_var_soln)
+                    try:
+                        transition_point = Point(solved_eqn.rhs, single_var_soln)
+                    except: 
+                        print(solved_eqn)
+                        print(single_var_solns)
+                        print(single_var_soln)
+                        print(pair)
                 elif soln_var == y:
                     transition_point = Point(single_var_soln, solved_eqn.rhs)
                 set_of_transitions.add(transition_point)
@@ -296,6 +319,7 @@ def compute_unsafe_cond(
 
     # construct a large set of transitions
     set_of_transitions = set()
+    notch_points = set()
     if type(trajectory) == Piecewise:
         # For piecewise trajectories, we need to find transitions for each piece
         for subtraj, subcond in trajectory.as_expr_set_pairs():
@@ -322,6 +346,7 @@ def compute_unsafe_cond(
                     subtraj.subs(func_var, subdomain.sup), subdomain.sup
                 )
             set_of_transitions.update(subset_of_transitions)
+            notch_points.update(subset_of_transitions)
 
             if left_bound.x.is_finite and left_bound.y.is_finite:
                 set_of_transitions.add(left_bound)
@@ -408,12 +433,16 @@ def compute_unsafe_cond(
         active_corner_offset = active_corners[midpoint_angles[i]]
         line_left = Line(poly_center_left, poly_center_left + active_corner_offset)
         line_right = Line(poly_center_right, poly_center_right + active_corner_offset)
+        print(line_right)
         # using Line.equation() creates duplicate x,y variables and ruins .subs() call later
         # Ensure this check only applies between the active corners at the start and end of the interval
         left_a, left_b, left_c = line_left.coefficients
         right_a, right_b, right_c = line_right.coefficients
         left_eq = left_a * x + left_b * y + left_c
-        right_eq = right_a * x + right_b * y + right_c
+        # right_eq = right_a * x + right_b * y + (0 if math.isnan(float(right_c)) else right_c)
+        right_eq = right_a *x + right_b * y + right_c
+        print(right_a, x, right_b, y, right_c)
+        # print(right_eq, left_eq)
         corner_cond = left_eq * right_eq <= 0
 
         # Ensure this check only applies between the transition points (plus/minus width)
@@ -435,7 +464,10 @@ def compute_unsafe_cond(
                     print(
                         f"Warning! more than one piecewise segment detected over interval ({y_left}, {y_right}). Results may be erroneous due to mis-specified piecewise functions."
                     )
-                current_fn = current_piece[0][0]
+                try:
+                    current_fn = current_piece[0][0]
+                except:
+                    print("current_piece", current_piece)
                 g = y - Piecewise(
                     (y_left, x < x_left),
                     (current_fn, x <= x_right),
@@ -481,7 +513,7 @@ def compute_unsafe_cond(
 
     if add_notches:
         # adding notches
-        for transition_point in set_of_transitions:
+        for transition_point in notch_points:
             # neg for left side, 0 for on edge, pos for on right side
             # inside polygon IF all neg or IF all pos
             shifted_vertex_pairs = [
