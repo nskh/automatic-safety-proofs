@@ -106,6 +106,35 @@ full_ex1: LEMMA
      (yo  >= -1 + g(0)) AND
      (yo  <= 1 + g(0)) )))
 
+%|- full_ex1 : PROOF
+%|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
+%|-  (SPREAD (CASE "x<=0")
+%|-   ((THEN (LEMMA "left_open_ex1") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "fl")
+%|-     (ASSERT)
+%|-     (SPREAD
+%|-      (CASE
+%|-          "restrict[real, (left_open(0)), real](g) = (restrict[real, (left_open(0)), real]
+%|-                 (LAMBDA (x: real):
+%|-                    COND x > 0 -> g(0), ELSE -> g(x) ENDCOND))")
+%|-      ((SPREAD (SPLIT -2)
+%|-        ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (ASSERT) (ASSERT)
+%|-         (THEN (INST 1 "x") (ASSERT))))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE-ALL-BUT 1) (TYPEPRED "x!1")
+%|-        (GRIND)))))
+%|-    (THEN (LEMMA "right_open_ex1") (INST -1 "xo" "yo" "g") (ASSERT)
+%|-     (EXPAND "fr")
+%|-     (SPREAD
+%|-      (CASE "(restrict[real, (right_open(0)), real]
+%|-                     (LAMBDA (x: real):
+%|-                        COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND)) = (restrict[real, (right_open(0)), real](g))")
+%|-      ((SPREAD (SPLIT -2)
+%|-        ((ASSERT) (THEN (FLATTEN) (ASSERT)) (THEN (EXPAND "fl") (ASSERT))
+%|-         (THEN (FLATTEN) (ASSERT)) (ASSERT) (ASSERT)
+%|-         (THEN (INST 1 "x") (ASSERT))))
+%|-       (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (GRIND))))))))
+%|- QED full_ex1
+
 closed_interval_ex1: LEMMA
     FORALL(xo,yo:real,g:[real -> real]):
     LET   f = LAMBDA(x:real):

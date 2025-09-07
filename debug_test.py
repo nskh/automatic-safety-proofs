@@ -7,7 +7,7 @@ Debug test for automatic proof generation with lemma generation.
 from sympy import symbols, Point, Polygon, RegularPolygon, Interval, oo, Piecewise
 from pvs_utils import (
     generate_complete_proof_package,
-    print_proof_package,
+    print_prooflite,
     log_proof_to_file,
 )
 
@@ -24,9 +24,7 @@ polygon = Polygon(*rect_points)
 # polygon = Polygon(*diamond_points)
 # polygon = RegularPolygon((0, 0), 1, n=6)  # hexagon
 
-# trajectory_expr = (
-#     x**2 / 2
-# )
+# trajectory_expr = x**2
 trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
 
 # Domain (infinite)
@@ -80,7 +78,7 @@ try:
     print("LEMMAS AND PROOF SCRIPTS TOGETHER:")
     print(f"{'='*60}")
 
-    print(print_proof_package(package))
+    print(print_prooflite(package))
 
     log_proof_to_file(package, "debug_proof.pvs")
 
