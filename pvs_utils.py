@@ -994,9 +994,7 @@ def generate_tcc_from_call(proof_call):
             f"Unknown domain definition: {proof_call['domain_definition']}"
         )
 
-    return f"""%|- {tcc_name}3 : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_dd") {inst_call} (ASSERT) (GRIND)) QED
-
-%|- {tcc_name}4 : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_noe") {inst_call} (ASSERT) (GRIND)) QED"""
+    return f'%|- {tcc_name}* : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_dd") {inst_call} (LEMMA "{lemma_name}_noe") {inst_call} (ASSERT) (GRIND)) QED'
 
 
 def generate_corner_pairs(labels):
