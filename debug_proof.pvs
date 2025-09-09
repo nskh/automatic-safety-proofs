@@ -521,10 +521,10 @@ full_domain_soundness_lemma: LEMMA
 
 %|- le_lo_case_0_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "0") (LEMMA "left_open_noe") (INST -1 "0") (ASSERT) (GRIND)) QED
 
-%|- ge_ci_case_1_TCC* : PROOF (THEN (SKEEP) (LEMMA "ci_noe") (INST -1 "0" "4") (LEMMA "ci_dd") (INST -1 "0" "4") (ASSERT) (GRIND)) QED
+%|- ge_ci_case_1_TCC* : PROOF (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "0" "4") (LEMMA "ci_noe") (INST -1 "0" "4") (ASSERT) (GRIND)) QED
 
 %|- ge_ro_case_2_TCC* : PROOF (THEN (SKEEP) (LEMMA "right_open_dd") (INST -1 "4") (LEMMA "right_open_noe") (INST -1 "4") (ASSERT) (GRIND)) QED
 
-%|- full_domain_soundness_lemma_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "0") (LEMMA "left_open_noe") (INST -1 "0") (LEMMA "ci_noe") (INST -1 "0" "4") (LEMMA "ci_dd") (INST -1 "0" "4") (LEMMA "right_open_dd") (INST -1 "4") (LEMMA "right_open_noe")(INST -1 "4") (ASSERT) (GRIND)) QED
+%|- full_domain_soundness_lemma_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "0") (LEMMA "left_open_noe") (INST -1 "0") (LEMMA "ci_dd") (INST -1 "0" "4") (LEMMA "ci_noe") (INST -1 "0" "4") (LEMMA "right_open_dd") (INST -1 "4") (LEMMA "right_open_noe") (INST -1 "4") (ASSERT) (GRIND)) QED
 
 end active_corner_certificate

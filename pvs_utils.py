@@ -574,7 +574,7 @@ def generate_three_case_unifying_lemma_proof(
 """
 
 
-def generate_tcc_postamble(case_tccs):
+def generate_tcc_postamble(case_tccs, case_lemma_calls):
     all_tccs = "\n\n".join(case_tccs)
     return f"""
 %|- *TCC* : PROOF (THEN (ASSERT) (GRIND)) QED
@@ -594,6 +594,8 @@ def generate_tcc_postamble(case_tccs):
 %|- mvt_gen_ge_ci_TCC2 : PROOF (THEN (SKEEP) (LEMMA "ci_noe") (INST -1 "d1" "d2") (ASSERT) (GRIND)) QED
 
 {all_tccs}
+
+%|- full_domain_soundness_lemma_TCC* : PROOF (THEN (SKEEP) {" ".join(case_lemma_calls)} (ASSERT) (GRIND)) QED
 
 end active_corner_certificate"""
 
@@ -994,7 +996,10 @@ def generate_tcc_from_call(proof_call):
             f"Unknown domain definition: {proof_call['domain_definition']}"
         )
 
-    return f'%|- {tcc_name}* : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_dd") {inst_call} (LEMMA "{lemma_name}_noe") {inst_call} (ASSERT) (GRIND)) QED'
+    return (
+        f'%|- {tcc_name}* : PROOF (THEN (SKEEP) (LEMMA "{lemma_name}_dd") {inst_call} (LEMMA "{lemma_name}_noe") {inst_call} (ASSERT) (GRIND)) QED',
+        f'(LEMMA "{lemma_name}_dd") {inst_call} (LEMMA "{lemma_name}_noe") {inst_call}',
+    )
 
 
 def generate_corner_pairs(labels):
@@ -1064,7 +1069,7 @@ def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testle
     proof_scripts = generate_proof_scripts_from_calls(proof_calls)
 
     # Generate TCCs
-    tccs = [generate_tcc_from_call(call) for call in proof_calls]
+    tccs, lemma_calls = zip(*[generate_tcc_from_call(call) for call in proof_calls])
 
     # Create a complete package
     package = {
@@ -1075,6 +1080,7 @@ def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testle
         "polygon": poly,
         "domain": domain,
         "tccs": tccs,
+        "lemma_calls": lemma_calls,
         "unifying_lemma": unifying_lemma,
     }
 
@@ -1101,7 +1107,7 @@ def print_prooflite(package) -> str:
     if package["unifying_lemma"] is not None:
         s += package["unifying_lemma"] + "\n\n"
 
-    s += generate_tcc_postamble(package["tccs"])
+    s += generate_tcc_postamble(package["tccs"], package["lemma_calls"])
 
     return s.strip()
 
