@@ -42,13 +42,15 @@ def main():
         Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
     ]
     polygon = Polygon(*rect_points)
+    # square_points = [Point(val) for val in [[w, w], [w, -w], [-w, -w], [-w, w]]]
+    # polygon = Polygon(*square_points)
     # diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
     # polygon = Polygon(*diamond_points)
     # polygon = RegularPolygon((0, 0), 1, n=6)  # hexagon
 
-    trajectory_expr = x
+    # trajectory_expr = x
     # trajectory_expr = -x
-    # trajectory_expr = x**2
+    trajectory_expr = x**2 + 2 * x + 1
     # trajectory_expr = -(x**2)
     # trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
     # trajectory_expr = Piecewise((-(x**2), x <= 4), (-8 * x + 16, x > 4))

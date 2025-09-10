@@ -720,30 +720,26 @@ def generate_two_case_unifying_proof(
 
     domain_type_1 = domain_1.split("(")[0]
     domain_type_2 = domain_2.split("(")[0]
+    domain_split = domain_splits[0]
 
     return f"""%|- full_domain_soundness_lemma : PROOF
-%|- (THEN (SKEEP) (SKOLETIN 1) (FLATTEN) (LEMMA "full_domain_soundness_lemma")
-%|-  (INST -1 "x" "xo" "yo" "g_1")
+%|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
+%|-  (LEMMA "full_domain_soundness_lemma_helper") (INST -1 "x" "xo" "yo" "g_1")
 %|-  (SPREAD (SPLIT -1)
 %|-   ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
-%|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
-%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict" 1)
-%|-     (WITH-TCCS (DERIVABLE 1)) (LEMMA "{domain_type_1}_dd") (INST -1 "0"))
-%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict" 1) (SKEEP)
+%|-    (PROPAX) (PROPAX)
+%|-    (THEN (ASSERT) (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict")
+%|-     (WITH-TCCS (DERIVABLE 1)) (LEMMA "{domain_type_1}_dd") (INST -1 "{domain_split}"))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (SKEEP)
 %|-     (SPREAD (DERIV)
-%|-      ((THEN (TYPEPRED "x!1") (EXPAND "left_open" -1) (ASSERT))
-%|-       (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "0")))))
-%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (HIDE -1) (EXPAND "restrict")
-%|-     (DERIVABLE))
-%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (HIDE -1)
-%|-     (SKEEP) (DERIV) (TYPEPRED "x!1") (EXPAND "{domain_type_1}" -1) (PROPAX))
-%|-    (THEN (HIDE-ALL-BUT (-7 1)) (SKEEP) (REPLACE -1) (EXPAND "restrict" 1)
-%|-     (DERIV) (TYPEPRED "x!1") (EXPAND "{domain_type_1}" -1) (PROPAX))
-%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1 1) (EXPAND "restrict") (DERIVABLE))
-%|-    (THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "g_1") (EXPAND "restrict" 1) (DERIV)
-%|-     (TYPEPRED "x!1") (EXPAND "right_open" -1) (ASSERT))
+%|-      ((THEN (TYPEPRED "x!1") (EXPAND "{domain_type_1}") (ASSERT))
+%|-       (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "{domain_split}")))))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (DERIVABLE))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (SKEEP) (DERIV)
+%|-     (TYPEPRED "x!1") (EXPAND "{domain_type_2}") (ASSERT))
 %|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX))))
-%|- QED full_domain_soundness_lemma"""
+%|- QED full_domain_soundness_lemma
+"""
 
 
 def generate_three_case_unifying_proof(
