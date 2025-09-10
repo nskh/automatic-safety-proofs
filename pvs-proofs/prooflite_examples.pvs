@@ -23,6 +23,7 @@ prooflite_examples  % [ parameters ]
   connected?[(right_open(c))]
 
   right_open_noe: LEMMA FORALL(c:real):
+
   not_one_element?[(right_open(c))]
 
   right_open_dd: LEMMA FORALL(c:real):
