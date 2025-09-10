@@ -3,7 +3,7 @@ active_corner_certificate  % [ parameters ]
 
   BEGIN
 
-  IMPORTING analysis@derivative_props, analysis@deriv_domain
+  IMPORTING analysis@strategies
 
   left_open(c:real)(x:real): bool =  c >= x
   right_open(c:real)(x:real): bool = c <= x
@@ -209,3 +209,33 @@ active_corner_certificate  % [ parameters ]
 %|-    (THEN (LEMMA "ci_noe") (LEMMA " ci_connected") (INST -1 "d1" "d2")
 %|-     (INST -2 "d1" "d2") (ASSERT)))))
 %|- QED mvt_gen_le_ci
+
+
+%% reals
+
+mvt_gen_ge_real: LEMMA
+  FORALL(f:[real-> real], c:real,a,b:real):
+  (derivable?[real](f)  AND a >= b  AND
+  FORALL(x:real): deriv[real](f)(x) >= c) IMPLIES
+  f(a) - f(b) >= c*(a-b)
+
+%|- mvt_gen_ge_real : PROOF
+%|- (SPREAD (LEMMA "mean_value[real]")
+%|-  ((THEN (SKEEP) (INST -1 "b" "a" "f") (ASSERT) (SKEEP) (INST -6 "c!1")
+%|-    (EXPAND "deriv" -6) (ASSERT) (MULT-BY -6 "a-b") (ASSERT))
+%|-   (THEN (ASSERT) (LEMMA "connected_real") (PROPAX))))
+%|- QED mvt_gen_ge_real
+
+mvt_gen_le_real: LEMMA
+  FORALL(f:[real-> real], c:real,a,b:real):
+  (derivable?[real](f)  AND a >= b  AND
+  FORALL(x:real): deriv[real](f)(x) <= c) IMPLIES
+  f(a) - f(b) <= c*(a-b)
+
+%|- mvt_gen_le_real : PROOF
+%|- (SPREAD (LEMMA "mean_value[real]")
+%|-  ((THEN (SKEEP) (INST -1 "b" "a" "f") (ASSERT) (SKEEP) (INST -6 "c!1")
+%|-    (EXPAND "deriv" -6) (ASSERT) (MULT-BY -6 "a-b") (ASSERT))
+%|-   (THEN (ASSERT) (LEMMA "connected_real") (PROPAX))))
+%|- QED mvt_gen_le_real
+

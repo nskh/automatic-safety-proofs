@@ -1,6 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import expand, Line, Polygon, symbols, Point, Function, diff, atan2, pi, oo
+from sympy import (
+    expand,
+    Line,
+    Polygon,
+    symbols,
+    Point,
+    Function,
+    diff,
+    atan2,
+    pi,
+    oo,
+    Interval,
+)
 from sympy.functions.elementary.piecewise import Piecewise
 import string
 from safe_region_utils import (
@@ -108,6 +120,31 @@ def sympy_to_pvs(clause: str):
         .replace("&", "AND\n    ")
         .replace("**", "^")
     )
+
+
+def piecewise_to_pvs(trajectory: Piecewise):
+    """Convert piecewise trajectory to PVS format."""
+    # Get the original conditions and expressions from Piecewise.args
+    args = trajectory.args
+
+    if not args:
+        return ""
+
+    cond_parts = []
+    for i, (expr, condition) in enumerate(args):
+        # Convert expression to PVS format
+        expr_pvs = sympy_to_pvs(str(expr))
+
+        # For the last condition, use ELSE
+        if i == len(args) - 1:
+            cond_parts.append(f"ELSE -> {expr_pvs}")
+        else:
+            # Convert condition to PVS format
+            cond_pvs = sympy_to_pvs(str(condition))
+            cond_parts.append(f"{cond_pvs} -> {expr_pvs}")
+
+    # Join all conditions with commas and wrap in COND...ENDCOND
+    return f"COND {', '.join(cond_parts)} ENDCOND"
 
 
 def clean_trajectory(trajectory: str):
@@ -227,7 +264,10 @@ def construct_lemma(
         deriv_domain = f"(left_open({domain_end}))"
         exists_domain = f"x <= {domain_end}"
     else:
-        raise ValueError("No domain specified")
+        # domain is all reals: no clipping, deriv domain is reals
+        function_statement = "LET f = LAMBDA(x:real): g(x)"
+        deriv_domain = "real"
+        exists_domain = None
 
     clipped_trajectory = function_statement[function_statement.find("LAMBDA") :]
 
@@ -237,9 +277,14 @@ def construct_lemma(
 
     min_offset = min([v.x for v in verts.values()])
     exists_lower = f"xo + {min_offset}"
-    exists_clause = f"""(EXISTS (x : real) :
+    if exists_domain is not None:
+        exists_clause = f"""(EXISTS (x : real) :
     ({sympy_to_pvs(str(active_exists_premise))}) AND
     {exists_domain} AND
+    {exists_upper} >= x AND {exists_lower} <= x)"""
+    else:
+        exists_clause = f"""(EXISTS (x : real) :
+    ({sympy_to_pvs(str(active_exists_premise))}) AND
     {exists_upper} >= x AND {exists_lower} <= x)"""
 
     if deriv_clause2:
@@ -264,17 +309,21 @@ def construct_lemma(
     {deriv_statement}
     {exists_clause}"""
 
+    if notch is not None:
+        notch_string = f"OR\n    ({sympy_to_pvs(str(notch))})"
+    else:
+        notch_string = ""
+
     lemma_str = f"""{lemma_name}: LEMMA
     FORALL(xo,yo:real, g:[real -> real]):
     {full_preamble}
     IMPLIES
-    {sympy_to_pvs(str(active_corner_condition))} OR
-    {sympy_to_pvs(str(notch))}
+    {sympy_to_pvs(str(active_corner_condition))}{notch_string}
 """
     return lemma_str, deriv_list, clipped_trajectory
 
 
-def generate_unifying_lemma(
+def generate_unifying_lemma_helper(
     verts,
     active_exists_premise,
     active_corner_condition,
@@ -290,37 +339,91 @@ def generate_unifying_lemma(
     exists_clause = f"""(({sympy_to_pvs(str(active_exists_premise))}) AND
     {exists_upper} >= x AND {exists_lower} <= x)"""
 
-    notch_string = (
-        " OR\n".join([f"    ({sympy_to_pvs(str(notch))})" for notch in notches])
-        .replace("(f)", "(g)")
-        .replace("f(", "g(")
-    )
+    if notches:
+        notch_string = (
+            " OR\n".join([f"    ({sympy_to_pvs(str(notch))})" for notch in notches])
+            .replace("(f)", "(g)")
+            .replace("f(", "g(")
+        )
+    else:
+        notch_string = ""
 
     deriv_premise = " AND\n    ".join(deriv_statements)
     # Stitch all the trajectories together and also represent the active corner condition with each of the clipped functions `f{i}`
-    trajectory_statement = "LET\n"
+    trajectory_statement = ""
     conditions = ""
     for i, trajectory in enumerate(trajectories):
-        # do not add trailing "," for last case
-        if i < len(trajectories) - 1:
-            trajectory_statement += f"        f{i} = {trajectory},\n"
-        else:
-            trajectory_statement += f"        f{i} = {trajectory}\n"
-        explicit_condition = sympy_to_pvs(str(active_corner_condition)).replace(
-            "f(", f"f{i}("
+        trajectory_statement += (
+            f"f{i}(g: [real -> real]): [real -> real] = {trajectory}\n"
         )
-        conditions += explicit_condition + " OR\n"
+        explicit_condition = sympy_to_pvs(str(active_corner_condition)).replace(
+            "f(", f"f{i}(g)("
+        )
+        conditions += explicit_condition + " OR\n    "
 
     print(trajectory_statement)
 
-    full_preamble = f"""{trajectory_statement}
-    IN
-    {deriv_premise} AND
-    {exists_clause}"""
+    full_preamble = f"{deriv_premise} AND\n    {exists_clause}"
 
-    lemma_text = f"""full_domain_soundness_lemma: LEMMA
+    lemma_text = f"""{trajectory_statement}
+
+full_domain_soundness_lemma_helper: LEMMA
     FORALL(x,xo,yo:real, g:[real -> real]):
     {full_preamble.replace("(f)", "(g)").replace("f(", "g(")}
+    IMPLIES
+    {conditions}{notch_string}
+"""
+    return lemma_text
+
+
+def generate_unifying_lemma_main(
+    verts,
+    active_exists_premise,
+    active_corner_condition,
+    full_trajectory,
+    notches=[],
+    num_trajectories=0,
+):
+    max_offset = max([v.x for v in verts.values()])
+    exists_upper = f"xo + {max_offset}"
+
+    min_offset = min([v.x for v in verts.values()])
+    exists_lower = f"xo + {min_offset}"
+    exists_clause = f"""(({sympy_to_pvs(str(active_exists_premise))}) AND
+    {exists_upper} >= x AND {exists_lower} <= x)"""
+
+    if notches and notches[0] is not None:
+        notch_string = (
+            " OR\n".join([f"    ({sympy_to_pvs(str(notch))})" for notch in notches])
+            .replace("(f)", "(g)")
+            .replace("f(", "g(")
+        )
+    else:
+        notch_string = ""
+
+    # Stitch all the trajectories together and also represent the active corner condition with each of the clipped functions `f{i}`
+    conditions = ""
+    if num_trajectories > 1:
+        for i in range(num_trajectories):
+            explicit_condition = sympy_to_pvs(str(active_corner_condition)).replace(
+                "f(", f"f{i}(g)("
+            )
+            if i == num_trajectories - 1:
+                conditions += explicit_condition
+            else:
+                conditions += explicit_condition + " OR\n"
+    else:
+        conditions = sympy_to_pvs(str(active_corner_condition)).replace("f(", "g(")
+
+    if notch_string:
+        conditions += " OR\n"
+
+    lemma_text = f"""full_domain_soundness_lemma: LEMMA
+    FORALL(x,xo,yo:real):
+    LET
+        g = LAMBDA(x:real): {full_trajectory}
+    IN
+    {exists_clause.replace("(f)", "(g)").replace("f(", "g(")}
     IMPLIES
     {conditions}{notch_string}
 """
@@ -330,6 +433,21 @@ def generate_unifying_lemma(
 # =============================================================================
 # PROOF NODE AND SCRIPT CLASSES
 # =============================================================================
+
+
+def all_reals_proof_script(
+    deriv_lemma,
+    max_right,
+    min_left,
+    deriv_bound,
+):
+    return f"""%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP) (LEMMA "{deriv_lemma}") (ASSERT)
+%|-  (INST -1 "f" "{deriv_bound}" "{max_right}" "x")
+%|-  (SPREAD (SPLIT -1)
+%|-   ((THEN (ASSERT) (LEMMA "{deriv_lemma}") (INST -1 "f" "{deriv_bound}" "x" "{min_left}")
+%|-     (SPREAD (SPLIT -1) ((ASSERT) (PROPAX) (ASSERT) (PROPAX))))
+%|-    (PROPAX) (ASSERT) (PROPAX))))
+"""
 
 
 def unbounded_one_side_proof_script(
@@ -462,7 +580,7 @@ def bounded_proof_script(
 """
 
 
-def generate_two_case_unifying_lemma_proof(
+def generate_two_case_unifying_lemma_helper(
     domain_split,
     lemma_1,
     lemma_2,
@@ -482,7 +600,7 @@ def generate_two_case_unifying_lemma_proof(
     - trajectory_function_2: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
     """
 
-    return f"""%|- full_domain_soundness_lemma : PROOF
+    return f"""%|- full_domain_soundness_lemma_helper : PROOF
 %|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
 %|-  (SPREAD (CASE "x<={domain_split}")
 %|-   ((THEN (LEMMA "{lemma_1}") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "f0")
@@ -505,10 +623,10 @@ def generate_two_case_unifying_lemma_proof(
 %|-         (THEN (INST 1 "x") (ASSERT))))
 %|-       (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
 %|-        (GRIND))))))))
-%|- QED full_domain_soundness_lemma"""
+%|- QED full_domain_soundness_lemma_helper"""
 
 
-def generate_three_case_unifying_lemma_proof(
+def generate_three_case_unifying_lemma_helper(
     domain_split_1,
     domain_split_2,
     lemma_1,
@@ -527,14 +645,15 @@ def generate_three_case_unifying_lemma_proof(
     - domain_split_2: 4
     - lemma_1: le_lo_case_0
     - lemma_2: ge_ro_case_1
-    - domain_type_1: left_open(0)
-    - domain_type_2: right_open(0)
-    - trajectory_function_1: LAMBDA (x: real): COND x > 0 -> g(0), ELSE -> g(x) ENDCOND)
+    - domain_type_1: left_open(0), note this includes the actual argument with parens
+    - domain_type_2: ci(0, 4)
+    - domain_type_3: right_open(4)
+    - trajectory_function_1: LAMBDA (x: real): COND x > 0 -> g(0), ELSE -> g(x) ENDCOND
     - trajectory_function_2: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
     - trajectory_function_3: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
     """
 
-    return f"""%|- full_domain_soundness_lemma : PROOF
+    return f"""%|- full_domain_soundness_lemma_helper : PROOF
 %|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
 %|-  (SPREAD (CASE "x <= {domain_split_1}")
 %|-   ((THEN (LEMMA "{lemma_1}") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "f0")
@@ -570,8 +689,160 @@ def generate_three_case_unifying_lemma_proof(
 %|-           (THEN (ASSERT) (INST 1 "x") (ASSERT))))
 %|-         (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
 %|-          (GRIND))))))))))
+%|- QED full_domain_soundness_lemma_helper
+"""
+
+
+def generate_one_case_unifying_proof(lemma_name: str):
+    return f"""%|- full_domain_soundness_lemma : PROOF
+%|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN) (EXPAND "g_1") (LEMMA "{lemma_name}")
+%|-  (ASSERT))
 %|- QED full_domain_soundness_lemma
 """
+
+
+def generate_two_case_unifying_proof(
+    domain_1,
+    domain_2,
+    trajectory_1,
+    trajectory_2,
+    full_traj,
+    piecewise_split_bools,
+    domain_splits,
+):
+    """
+    Input Examples:
+    - domain_1: left_open(0)
+    - domain_2: right_open(0)
+    - trajectory_1: LAMBDA (x: real): COND x > 0 -> g(0), ELSE -> g(x) ENDCOND
+    - trajectory_2: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
+    """
+
+    domain_type_1 = domain_1.split("(")[0]
+    domain_type_2 = domain_2.split("(")[0]
+
+    return f"""%|- full_domain_soundness_lemma : PROOF
+%|- (THEN (SKEEP) (SKOLETIN 1) (FLATTEN) (LEMMA "full_domain_soundness_lemma")
+%|-  (INST -1 "x" "xo" "yo" "g_1")
+%|-  (SPREAD (SPLIT -1)
+%|-   ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
+%|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict" 1)
+%|-     (WITH-TCCS (DERIVABLE 1)) (LEMMA "{domain_type_1}_dd") (INST -1 "0"))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict" 1) (SKEEP)
+%|-     (SPREAD (DERIV)
+%|-      ((THEN (TYPEPRED "x!1") (EXPAND "left_open" -1) (ASSERT))
+%|-       (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "0")))))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (HIDE -1) (EXPAND "restrict")
+%|-     (DERIVABLE))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (HIDE -1)
+%|-     (SKEEP) (DERIV) (TYPEPRED "x!1") (EXPAND "{domain_type_1}" -1) (PROPAX))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (SKEEP) (REPLACE -1) (EXPAND "restrict" 1)
+%|-     (DERIV) (TYPEPRED "x!1") (EXPAND "{domain_type_1}" -1) (PROPAX))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1 1) (EXPAND "restrict") (DERIVABLE))
+%|-    (THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "g_1") (EXPAND "restrict" 1) (DERIV)
+%|-     (TYPEPRED "x!1") (EXPAND "right_open" -1) (ASSERT))
+%|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX))))
+%|- QED full_domain_soundness_lemma"""
+
+
+def generate_three_case_unifying_proof(
+    domain_1,
+    domain_2,
+    domain_3,
+    trajectory_1,
+    trajectory_2,
+    trajectory_3,
+    full_traj,
+    piecewise_split_bools,
+    domain_splits,
+):
+    """
+    Input Examples:
+    - domain_1: left_open(0)
+    - domain_2: right_open(0)
+    - trajectory_1: LAMBDA (x: real): COND x > 0 -> g(0), ELSE -> g(x) ENDCOND
+    - trajectory_2: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
+    - trajectory_3: LAMBDA (x: real): COND x >= 0 -> g(x), ELSE -> g(0) ENDCOND
+    """
+
+    # TODO handle domain splits better!
+
+    # only the piecewise splits here
+    piecewise_splits = []
+    for i in range(len(domain_splits)):
+        if piecewise_split_bools[i]:
+            piecewise_splits.append(domain_splits[i])
+
+    domain_type_1 = domain_1.split("(")[0]
+    domain_type_2 = domain_2.split("(")[0]
+    domain_type_3 = domain_3.split("(")[0]
+
+    pvs_traj_1 = f"(LAMBDA(s: ({domain_1})): {full_traj.replace('x', 's')}) = (LAMBDA (s: ({domain_1})): {trajectory_1.replace('x', 's')})"
+    pvs_traj_2 = f"(LAMBDA(s: ({domain_2})): {full_traj.replace('x', 's')}) = (LAMBDA (s: ({domain_2})): {trajectory_2.replace('x', 's')})"
+    pvs_traj_3 = f"(LAMBDA(s: ({domain_3})): {full_traj.replace('x', 's')}) = (LAMBDA (s: ({domain_3})): {trajectory_3.replace('x', 's')})"
+
+    return f"""%|- full_domain_soundness_lemma : PROOF
+%|- (THEN (SKEEP) (SKOLETIN 1) (FLATTEN) (LEMMA "full_domain_soundness_lemma_helper")
+%|-  (INST -1 "x" "xo" "yo" "g_1")
+%|-  (SPREAD (SPLIT -1)
+%|-   ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
+%|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
+%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
+%|-     (SPREAD (DERIVABLE)
+%|-      ((SPREAD
+%|-        (CASE "{pvs_traj_1}")
+%|-        ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE) (LEMMA "{domain_type_1}_dd")
+%|-          (INST -1 "0"))
+%|-         (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
+%|-          (EXPAND "{domain_type_1}" -1) (ASSERT))))
+%|-       (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "0")))))
+%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
+%|-     (SPREAD
+%|-      (CASE "{pvs_traj_1}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (SKEEP)
+%|-        (SPREAD (DERIV)
+%|-         ((THEN (TYPEPRED "x!1") (EXPAND "{domain_type_1}" -1) (ASSERT))
+%|-          (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "0")))))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
+%|-        (EXPAND "{domain_type_1}" -1) (ASSERT)))))
+%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
+%|-     (SPREAD
+%|-      (CASE "{pvs_traj_2}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "{domain_type_2}" -1) (FLATTEN)
+%|-        (ASSERT)))))
+%|-    (THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "restrict" 1) (EXPAND "g_1")
+%|-     (SPREAD
+%|-      (CASE "{pvs_traj_2}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV) (TYPEPRED "x!1") (EXPAND "{domain_type_2}" -1)
+%|-        (PROPAX))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "{domain_type_2}" -1) (FLATTEN)
+%|-        (ASSERT)))))
+%|-    (THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "g_1") (EXPAND "restrict")
+%|-     (SPREAD
+%|-      (CASE "{pvs_traj_2}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV) (TYPEPRED "x!1") (EXPAND "{domain_type_2}" -1)
+%|-        (PROPAX))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "{domain_type_2}" -1) (ASSERT)
+%|-        (FLATTEN) (ASSERT)))))
+%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
+%|-     (SPREAD
+%|-      (CASE "{pvs_traj_3}")
+%|-      ((THEN (REPLACE -1) (DERIVABLE))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "{domain_type_3}" -1)
+%|-        (ASSERT) (HIDE 2)
+%|-        (SPREAD (CASE "x!1={piecewise_splits[0]}") ((THEN (ASSERT) (GRIND)) (ASSERT)))))))
+%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict") (SKEEP)
+%|-     (SPREAD
+%|-      (CASE "{pvs_traj_3}")
+%|-      ((THEN (REPLACE -1) (DERIV))
+%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "{domain_type_3}")
+%|-        (SPREAD (CASE "x!2={piecewise_splits[0]}")
+%|-         ((THEN (REPLACE -1) (ASSERT) (HIDE 2) (EVAL-EXPR 1) (ASSERT))
+%|-          (ASSERT)))))))
+%|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX))))
+%|- QED full_domain_soundness_lemma"""
 
 
 def generate_tcc_postamble(case_tccs, case_lemma_calls):
@@ -595,7 +866,7 @@ def generate_tcc_postamble(case_tccs, case_lemma_calls):
 
 {all_tccs}
 
-%|- full_domain_soundness_lemma_TCC* : PROOF (THEN (SKEEP) {" ".join(case_lemma_calls)} (ASSERT) (GRIND)) QED
+%|- full_domain_soundness_lemma_helper_TCC* : PROOF (THEN (SKEEP) {" ".join(case_lemma_calls)} (ASSERT) (GRIND)) QED
 
 end active_corner_certificate"""
 
@@ -682,7 +953,14 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
     sorted_transitions = sorted(set_of_transitions, key=lambda point: point.x)
     func_var_transitions = [p.x for p in sorted_transitions]
     print(f"func_var_transitions: {func_var_transitions}")
-    midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
+    if func_var_transitions:
+        midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
+    else:
+        # use the midpoint of the domain, if not finite
+        if domain.inf.is_finite and domain.sup.is_finite:
+            midpoints = [(domain.inf + domain.sup) / 2]
+        else:
+            midpoints = [0]
 
     # Compute derivative and angles at midpoints
     if isinstance(trajectory_expr, Piecewise):
@@ -757,13 +1035,6 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         interval_midpoint = (interval_start + interval_end) / 2
         deriv_at_midpoint = deriv_traj.subs(func_var, interval_midpoint)
 
-        # Map to active corner using existing logic
-        # Find which midpoint_angles is closest to our interval_midpoint
-        closest_midpoint_idx = min(
-            range(len(midpoints)), key=lambda j: abs(midpoints[j] - interval_midpoint)
-        )
-        active_corner_offset = active_corners[midpoint_angles[closest_midpoint_idx]]
-
         case_labels = []
         # Generate case label for unbounded domains
         if left_unbounded:  # Interval unbounded on left
@@ -785,24 +1056,15 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
                 f"xo - {half_width} < {interval_start} AND xo + {half_width} > {interval_end}"
             )
 
-        # Determine derivative lemma based on derivative sign at midpoint
-        # For left_unbounded domains: use left_open lemmas
-        # For right_unbounded domains: use right_open lemmas
-        deriv_sign = "ge" if deriv_at_midpoint >= 0 else "le"
-        if left_unbounded:
-            domain_type = "lo"
-        elif right_unbounded:
-            domain_type = "ro"
-        else:
-            domain_type = "ci"
-        deriv_lemma = f"mvt_gen_{deriv_sign}_{domain_type}"
-
         # Polygon bounds
         max_right = f"xo + {half_width}"
         min_left = f"xo - {half_width}"
 
         # bounds on "xo" for the case where we clip the trajectory
-        if left_unbounded:
+        if left_unbounded and right_unbounded:
+            min_left_clipped = None
+            max_right_clipped = None
+        elif left_unbounded:
             min_left_clipped = min_left
             max_right_clipped = interval_end
         elif right_unbounded:
@@ -813,7 +1075,12 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             max_right_clipped = interval_end
 
         # Compute domain bounds for lemma generation
-        if left_unbounded:
+        if left_unbounded and right_unbounded:
+            domain_start = None
+            domain_end = None
+            notch = None
+            domain_definition = "real"
+        elif left_unbounded:
             domain_start = None
             domain_end = interval_end
             notch = premise.subs(x, interval_end)
@@ -830,32 +1097,73 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             domain_definition = f"ci({domain_start}, {domain_end})"
 
         # Determine deriv_clause1 based on derivative sign
-        if left_unbounded or right_unbounded:
-            endpoint = interval_end if left_unbounded else interval_start
+        # if either interval_start or interval_end is a domain start/end, treat ci domain like 1-sided
+        # otherwise we introduce bad deriv bounds
+        if (
+            left_unbounded
+            or right_unbounded
+            or interval_start == domain_min
+            or interval_end == domain_max
+        ):
+            if left_unbounded:
+                endpoint = interval_end
+            elif right_unbounded:
+                endpoint = interval_start
+            elif interval_start == domain_min:
+                endpoint = interval_end
+            elif interval_end == domain_max:
+                endpoint = interval_start
             deriv_at_endpoint = deriv_traj.subs(x, endpoint)
-            deriv_direction = ">=" if deriv_at_midpoint >= deriv_at_endpoint else "<="
+
+            if deriv_at_midpoint > deriv_at_endpoint:
+                deriv_direction = ">="
+            elif deriv_at_midpoint < deriv_at_endpoint:
+                deriv_direction = "<="
+            else:
+                if deriv_at_midpoint <= 0:
+                    deriv_direction = "<="
+                else:
+                    deriv_direction = ">="
+            deriv_sign = "ge" if deriv_direction == ">=" else "le"
             deriv_clause1 = f"{deriv_direction} {deriv_at_endpoint}"
             deriv_clause2 = None
             deriv_bound1 = deriv_at_endpoint
             deriv_bound2 = None
         else:
-            # TODO see if this still works for intervals with piecewise behavior i.e.
-            # parabola-then-straight
             deriv_at_beginning = deriv_traj.subs(x, interval_start)
             deriv_at_end = deriv_traj.subs(x, interval_end)
-            deriv_direction_1 = (
-                ">=" if deriv_at_beginning <= deriv_at_midpoint else "<="
-            )
+            if deriv_at_beginning < deriv_at_midpoint:
+                deriv_direction_1 = ">="
+            elif deriv_at_beginning > deriv_at_midpoint:
+                deriv_direction_1 = "<="
+            else:
+                if deriv_at_midpoint <= 0:
+                    deriv_direction_1 = "<="
+                else:
+                    deriv_direction_1 = ">="
+            deriv_sign = "ge" if deriv_direction_1 == ">=" else "le"
             deriv_direction_2 = "<=" if deriv_direction_1 == ">=" else ">="
             deriv_clause1 = f"{deriv_direction_1} {deriv_at_beginning}"
             deriv_clause2 = f"{deriv_direction_2} {deriv_at_end}"
             deriv_bound1 = deriv_at_beginning
             deriv_bound2 = deriv_at_end
-        print(f"deriv_clause1: {deriv_clause1}")
-        print(f"deriv_clause2: {deriv_clause2}")
+
+        # Determine derivative lemma based on derivative sign at midpoint
+        # For left_unbounded domains: use left_open lemmas
+        # For right_unbounded domains: use right_open lemmas
+        if left_unbounded and right_unbounded:
+            domain_type = "real"
+        elif left_unbounded:
+            domain_type = "lo"
+        elif right_unbounded:
+            domain_type = "ro"
+        else:
+            domain_type = "ci"
+        deriv_lemma = f"mvt_gen_{deriv_sign}_{domain_type}"
 
         # Generate lemma name for this interval
-        lemma_name = f"{deriv_sign}_{domain_type}_case_{i}"
+        # num_cases-1 prevents numbering too high for singleton intervals
+        lemma_name = f"{deriv_sign}_{domain_type}_case_{num_cases-1}"
 
         # Generate the lemma
         lemma_text, deriv_list, clipped_trajectory = construct_lemma(
@@ -870,6 +1178,20 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             notch=notch,
         )
 
+        # generating trajectory information for unifying lemma
+        # Figure out which piecewise trajectory is active in this region
+        # If the trajectory is piecewise, determine which piece is active for this interval
+        active_piece = None
+        if isinstance(trajectory_expr, Piecewise):
+            # For each piece, check if the interval overlaps with the piece's condition
+            for subtraj, subcond in trajectory_expr.as_expr_set_pairs():
+                # cond is a set, check if it overlaps with var_interval
+                if subcond.intersect(Interval(*var_interval)).measure > 0:
+                    # If the intersection has nonzero measure, this piece is active in this region
+                    active_piece = subtraj
+        else:
+            active_piece = trajectory_expr
+
         proof_call = {
             "lemma_name": lemma_name,
             "case_labels": case_labels,
@@ -882,10 +1204,16 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             "max_right_clipped": max_right_clipped,
             "min_left_clipped": min_left_clipped,
             "interval": var_interval,
-            "active_corner": active_corner_offset,
             "lemma_text": lemma_text,
             "deriv_bound1": deriv_bound1,
             "deriv_bound2": deriv_bound2,
+            "is_piecewise": isinstance(trajectory_expr, Piecewise),
+            "traj_piece": sympy_to_pvs(str(active_piece)),
+            "full_traj": (
+                piecewise_to_pvs(trajectory_expr)
+                if isinstance(trajectory_expr, Piecewise)
+                else sympy_to_pvs(str(trajectory_expr))
+            ),
         }
 
         proof_calls.append(proof_call)
@@ -898,54 +1226,127 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         if var_intervals[i][1] == var_intervals[i + 1][0]:
             domain_splits.append(var_intervals[i][1])
 
-    # Only generate unifying lemma if we can handle creating the proof too
-    unifying_lemma_statement = generate_unifying_lemma(
+    # Identify, with booleans, which of the domain splits are from piecewise boundaries
+    piecewise_split_bools = []
+    if isinstance(trajectory_expr, Piecewise):
+        # Collect all piecewise boundary points from the Piecewise conditions
+        piecewise_boundaries = set()
+        for _, cond in trajectory_expr.as_expr_set_pairs():
+            # cond is a set, typically an Interval or Union of Intervals
+            if hasattr(cond, "start") and hasattr(cond, "end"):
+                # Single interval
+                if cond.start is not None and cond.start != -oo:
+                    piecewise_boundaries.add(cond.start)
+                if cond.end is not None and cond.end != oo:
+                    piecewise_boundaries.add(cond.end)
+            elif hasattr(cond, "args"):
+                # Possibly a Union of intervals
+                for subcond in cond.args:
+                    if (
+                        hasattr(subcond, "start")
+                        and subcond.start is not None
+                        and subcond.start != -oo
+                    ):
+                        piecewise_boundaries.add(subcond.start)
+                    if (
+                        hasattr(subcond, "end")
+                        and subcond.end is not None
+                        and subcond.end != oo
+                    ):
+                        piecewise_boundaries.add(subcond.end)
+        # Now, for each domain split, check if it matches a piecewise boundary
+        for split in domain_splits:
+            is_piecewise = any(
+                (split == b)
+                or (hasattr(split, "equals") and split.equals(b))
+                or (abs(float(split) - float(b)) < 1e-10)
+                for b in piecewise_boundaries
+            )
+            piecewise_split_bools.append(is_piecewise)
+    else:
+        # If not piecewise, none of the splits are from piecewise boundaries
+        piecewise_split_bools = [False for _ in domain_splits]
+
+    unifying_lemma_helper_statement = generate_unifying_lemma_helper(
         verts, premise, explicit, deriv_statements, notches, trajectories
     )
-    if num_cases == 2:
-        lemma_1 = proof_calls[0]["lemma_name"]
-        lemma_2 = proof_calls[1]["lemma_name"]
-        domain_split = domain_splits[0]
-        domain_type_1 = proof_calls[0]["domain_definition"]
-        domain_type_2 = proof_calls[1]["domain_definition"]
-        trajectory_function_1 = trajectories[0]
-        trajectory_function_2 = trajectories[1]
-        unifying_proof = generate_two_case_unifying_lemma_proof(
-            domain_split,
-            lemma_1,
-            lemma_2,
-            domain_type_1,
-            domain_type_2,
-            trajectory_function_1,
-            trajectory_function_2,
+
+    if isinstance(trajectory_expr, Piecewise):
+        trajectory_for_lemma = piecewise_to_pvs(trajectory_expr)
+    else:
+        trajectory_for_lemma = sympy_to_pvs(str(trajectory_expr))
+    unifying_lemma_statement = generate_unifying_lemma_main(
+        verts, premise, explicit, trajectory_for_lemma, notches, len(trajectories)
+    )
+    if num_cases == 1:
+        unifying_proof = generate_one_case_unifying_proof(
+            proof_calls[0]["lemma_name"],
         )
         unifying_lemma_and_proof = unifying_lemma_statement + "\n\n" + unifying_proof
+    elif num_cases == 2:
+        unifying_helper_proof = generate_two_case_unifying_lemma_helper(
+            domain_splits[0],
+            proof_calls[0]["lemma_name"],
+            proof_calls[1]["lemma_name"],
+            proof_calls[0]["domain_definition"],
+            proof_calls[1]["domain_definition"],
+            trajectories[0],
+            trajectories[1],
+        )
+
+        unifying_proof = generate_two_case_unifying_proof(
+            proof_calls[0]["domain_definition"],
+            proof_calls[1]["domain_definition"],
+            proof_calls[0]["traj_piece"],
+            proof_calls[1]["traj_piece"],
+            proof_calls[0]["full_traj"],
+            piecewise_split_bools,
+            domain_splits,
+        )
+
+        unifying_lemma_and_proof = (
+            unifying_lemma_helper_statement
+            + "\n\n"
+            + unifying_helper_proof
+            + "\n\n"
+            + unifying_lemma_statement
+            + "\n\n"
+            + unifying_proof
+        )
     elif num_cases == 3:
-        lemma_1 = proof_calls[0]["lemma_name"]
-        lemma_2 = proof_calls[1]["lemma_name"]
-        lemma_3 = proof_calls[2]["lemma_name"]
-        domain_split_1 = domain_splits[0]
-        domain_split_2 = domain_splits[1]
-        domain_type_1 = proof_calls[0]["domain_definition"]
-        domain_type_2 = proof_calls[1]["domain_definition"]
-        domain_type_3 = proof_calls[2]["domain_definition"]
-        trajectory_function_1 = trajectories[0]
-        trajectory_function_2 = trajectories[1]
-        trajectory_function_3 = trajectories[2]
-        unifying_proof = generate_three_case_unifying_lemma_proof(
-            domain_split_1,
-            domain_split_2,
-            lemma_1,
-            lemma_2,
-            lemma_3,
-            domain_type_1,
-            domain_type_2,
-            domain_type_3,
-            trajectory_function_1,
-            trajectory_function_2,
-            trajectory_function_3,
+        unifying_helper_proof = generate_three_case_unifying_lemma_helper(
+            domain_splits[0],
+            domain_splits[1],
+            proof_calls[0]["lemma_name"],
+            proof_calls[1]["lemma_name"],
+            proof_calls[2]["lemma_name"],
+            proof_calls[0]["domain_definition"],
+            proof_calls[1]["domain_definition"],
+            proof_calls[2]["domain_definition"],
+            trajectories[0],
+            trajectories[1],
+            trajectories[2],
         )
-        unifying_lemma_and_proof = unifying_lemma_statement + "\n\n" + unifying_proof
+        unifying_proof = generate_three_case_unifying_proof(
+            proof_calls[0]["domain_definition"],
+            proof_calls[1]["domain_definition"],
+            proof_calls[2]["domain_definition"],
+            proof_calls[0]["traj_piece"],
+            proof_calls[1]["traj_piece"],
+            proof_calls[2]["traj_piece"],
+            proof_calls[0]["full_traj"],
+            piecewise_split_bools,
+            domain_splits,
+        )
+        unifying_lemma_and_proof = (
+            unifying_lemma_helper_statement
+            + "\n\n"
+            + unifying_helper_proof
+            + "\n\n"
+            + unifying_lemma_statement
+            + "\n\n"
+            + unifying_proof
+        )
     else:
         unifying_lemma_and_proof = unifying_lemma_statement
 
@@ -991,6 +1392,8 @@ def generate_tcc_from_call(proof_call):
         inst_call = (
             f"(INST -1 \"{proof_call['domain_start']}\" \"{proof_call['domain_end']}\")"
         )
+    elif proof_call["domain_definition"].startswith("real"):
+        return "", ""
     else:
         raise ValueError(
             f"Unknown domain definition: {proof_call['domain_definition']}"
@@ -1156,23 +1559,35 @@ def generate_proof_scripts_from_calls(proof_calls):
                 domain_bound = call_params["domain_end"]
             elif call_params["domain_definition"].startswith("right_open"):
                 domain_bound = call_params["domain_start"]
+            elif call_params["domain_definition"].startswith("real"):
+                domain_bound = None
+                script = all_reals_proof_script(
+                    deriv_lemma=call_params["deriv_lemma"],
+                    max_right=call_params["max_right"],
+                    min_left=call_params["min_left"],
+                    deriv_bound=call_params["deriv_bound1"],
+                )
             else:
                 raise ValueError(
                     f"Unknown domain definition: {call_params['domain_definition']}"
                 )
-            assert domain_bound is not None, f"domain_bound is None for {call_params}"
 
-            script = unbounded_one_side_proof_script(
-                case_label=call_params["case_labels"][0],
-                deriv_lemma=call_params["deriv_lemma"],
-                max_right=call_params["max_right"],
-                min_left=call_params["min_left"],
-                domain_definition=call_params["domain_definition"],
-                max_right_clipped=call_params["max_right_clipped"],
-                min_left_clipped=call_params["min_left_clipped"],
-                domain_bound=domain_bound,
-                deriv_bound=call_params["deriv_bound1"],
-            )
+            if not call_params["domain_definition"].startswith("real"):
+                assert (
+                    domain_bound is not None
+                ), f"domain_bound is None for {call_params}"
+
+                script = unbounded_one_side_proof_script(
+                    case_label=call_params["case_labels"][0],
+                    deriv_lemma=call_params["deriv_lemma"],
+                    max_right=call_params["max_right"],
+                    min_left=call_params["min_left"],
+                    domain_definition=call_params["domain_definition"],
+                    max_right_clipped=call_params["max_right_clipped"],
+                    min_left_clipped=call_params["min_left_clipped"],
+                    domain_bound=domain_bound,
+                    deriv_bound=call_params["deriv_bound1"],
+                )
         proof_scripts.append(script)
 
     return proof_scripts
