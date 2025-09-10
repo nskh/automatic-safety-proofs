@@ -1,0 +1,1540 @@
+(("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2-1| NIL 3966252021
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 4")
+     ((THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "4" "8" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "4" "8" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "right_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "right_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "4" "8" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "4" "8" "x" "4")
+             ((THEN (EXPAND "f") (EXPAND "right_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+   NIL)
+  ((|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
+   (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
+   (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|))
+  SHOSTAK)
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2_TCC2-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |le_lo_case_0-1| NIL 3966252021
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo + 2 <= 0")
+     ((THEN (LEMMA "mvt_gen_le_lo")
+       (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
+            (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "left_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "left_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_le_lo")
+       (SPREAD (INST -1 "f" "0" "0" "0" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
+            (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+             ((THEN (EXPAND "f") (EXPAND "left_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))))))))
+   NIL)
+  ((|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
+   (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
+   (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|))
+  SHOSTAK)
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |le_lo_case_0_TCC2-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|le_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|le_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  . 0))(("debug_proof"
+  (|ge_ci_case_4_TCC1| 0
+   (|ge_ci_case_4_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_4| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4-1| NIL 3966265338
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 27")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 27")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 27")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "27" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "27" "0.0464082083333324" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 27")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_4_TCC1| 0
+   (|ge_ci_case_4_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_4| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4_TCC3-1| NIL 3966265337
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "27") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_4| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_4_TCC1| 0
+   (|ge_ci_case_4_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_4| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4_TCC2-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_4| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_4_TCC1| 0
+   (|ge_ci_case_4_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_4| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_4| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_4_TCC1| 0
+   (|ge_ci_case_4_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_4| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  . 0))(("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3-1| NIL 3966265338
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 27")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 27")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 27")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "27" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "27" "0.0464082083333324" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 27")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC3-1| NIL 3966265337
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "27") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC2-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_3| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2-1| NIL 3966265338
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 26")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 26")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 26")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "26" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "26" "0.0464082083333324" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 26")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC3-1| NIL 3966265337
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "26") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC2-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_2| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966265337 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  . 0))(("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2-1| NIL 3966266461
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26")
+     ((THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "26" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "right_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "right_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "26" "0.0464082083333324" "x" "26")
+             ((THEN (EXPAND "f") (EXPAND "right_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2_TCC2-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  . 0))(("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_3-1| NIL 3966266620
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26")
+     ((THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "26" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "right_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "right_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "26" "0.0464082083333324" "x" "26")
+             ((THEN (EXPAND "f") (EXPAND "right_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+   NIL)
+  ((|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
+   (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
+   (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|))
+  SHOSTAK)
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_3_TCC2-1| NIL 3966266619 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_3_TCC1-1| NIL 3966266619 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_lo_case_0-1| NIL 3966266461
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo + 2 <= 3")
+     ((THEN (LEMMA "mvt_gen_ge_lo")
+       (SPREAD (INST -1 "f" "3" "0.121268860507243" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_lo")
+            (SPREAD (INST -1 "f" "3" "0.121268860507243" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "left_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "left_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_lo")
+       (SPREAD (INST -1 "f" "3" "0.121268860507243" "3" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_lo")
+            (SPREAD (INST -1 "f" "3" "0.121268860507243" "x" "xo - 2")
+             ((THEN (EXPAND "f") (EXPAND "left_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_lo_case_0_TCC2-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966266460 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  . 0))(("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_5-1| NIL 3966269464
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 27")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "27" "0.121300000000000" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.121300000000000" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 27")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "27" "0.121300000000000" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "27" "0.121300000000000" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 27")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.121300000000000" "27" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "27" "0.121300000000000" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 27")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_5_TCC3-1| NIL 3966269463
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "27") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_5| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_5_TCC2-1| NIL 3966269463 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_5| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_5_TCC1-1| NIL 3966269463 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_5| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4-1| NIL 3966268998
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 26")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "26" "0.121300000000000" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "26" "0.121300000000000" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 26")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "26" "0.121300000000000" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "26" "0.121300000000000" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 26")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "26" "0.121300000000000" "26" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "26" "0.121300000000000" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 26")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4_TCC3-1| NIL 3966268997
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "26") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_4| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4_TCC2-1| NIL 3966268997 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_4| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_4_TCC1-1| NIL 3966268997 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_4| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3-1| NIL 3966268998
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 3 AND xo + 2 <= 26")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "3" "26" "0" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "3" "26" "0" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 3 AND xo + 2 <= 26")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "3" "26" "0" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "3" "26" "0" "x" "3")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 3 AND xo + 2 > 26")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "3" "26" "0" "26" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD (INST -1 "f" "3" "26" "0" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 3 AND xo + 2 > 26")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC3-1| NIL 3966268997
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "3" "26") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(3, 26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC2-1| NIL 3966268997 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(3, 26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC1-1| NIL 3966268997 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_3| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 3) -> active_corner_certificate.g(3), booleans.AND(reals.>=(active_corner_certificate.x, 3), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2-1| NIL 3966266620
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 3 AND xo + 2 <= 3")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "3" "3" "0" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "3" "3" "0" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 3 AND xo + 2 <= 3")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "3" "3" "0" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "3" "3" "0" "x" "3")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 3 AND xo + 2 > 3")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "3" "3" "0" "3" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD (INST -1 "f" "3" "3" "0" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 3 AND xo + 2 > 3")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  ((|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
+   (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
+   (|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
+   (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|))
+  SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC3-1| NIL 3966266619
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "3" "3") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(3, 3))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC2-1| NIL 3966266619 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(3, 3))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC1-1| NIL 3966266619 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_2| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 3) -> active_corner_certificate.g(3), booleans.AND(reals.>=(active_corner_certificate.x, 3), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_1-1| NIL 3966252021
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 0 AND xo + 2 <= 3")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "0" "3" "0" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "0" "3" "0" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 0 AND xo + 2 <= 3")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "0" "3" "0" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "0" "3" "0" "x" "0")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 0 AND xo + 2 > 3")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "0" "3" "0" "3" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD (INST -1 "f" "0" "3" "0" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 0 AND xo + 2 > 3")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  ((|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
+   (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
+   (|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
+   (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+   (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|))
+  SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_1_TCC3-1| NIL 3966252021
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "0" "3") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_1| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(0, 3))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_1_TCC2-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_1| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(0, 3))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  |ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_1| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_1_TCC1| 0
+   (|ge_ci_case_1_TCC1-1| NIL 3966252021 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_1| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 0) -> active_corner_certificate.g(0), booleans.AND(reals.>=(active_corner_certificate.x, 0), reals.<=(active_corner_certificate.x, 3)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(3) ENDCOND"
+     "NIL")))
+  . 0))(("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_1-1| NIL 3966271363
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 3")
+     ((THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "3" "0.121268860507243" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "3" "0.121268860507243" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "right_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "right_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "3" "0.121268860507243" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "3" "0.121268860507243" "x" "3")
+             ((THEN (EXPAND "f") (EXPAND "right_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_1_TCC2-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_1| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(3))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_1_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_1| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(3))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_lo_case_0-1| NIL 3966271363
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo + 2 <= 3")
+     ((THEN (LEMMA "mvt_gen_ge_lo")
+       (SPREAD (INST -1 "f" "3" "0.121268860507243" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_lo")
+            (SPREAD (INST -1 "f" "3" "0.121268860507243" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "left_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "left_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_lo")
+       (SPREAD (INST -1 "f" "3" "0.121268860507243" "3" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_lo")
+            (SPREAD (INST -1 "f" "3" "0.121268860507243" "x" "xo - 2")
+             ((THEN (EXPAND "f") (EXPAND "left_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_lo_case_0_TCC2-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_lo_case_0_TCC1| 0
+   (|ge_lo_case_0_TCC1-1| NIL 3966271363 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(3))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  . 0))(("debug_proof"
+  (|ge_ci_case_3_TCC1| 0
+   (|ge_ci_case_3_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_3| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3-1| NIL 3966271524
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 27")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 27")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 27")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "27" "0.0464082083333324" "27" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "27" "0.0464082083333324" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 27")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_3_TCC1| 0
+   (|ge_ci_case_3_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_3| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC3-1| NIL 3966271523
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "27") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_3_TCC1| 0
+   (|ge_ci_case_3_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_3| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC2-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 27))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_3_TCC1| 0
+   (|ge_ci_case_3_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_3| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  |ge_ci_case_3_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_3| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_3_TCC1| 0
+   (|ge_ci_case_3_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_3| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 27)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(27) ENDCOND"
+     "NIL")))
+  . 0))(("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ro_case_3-1| NIL 3966271790
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26")
+     ((THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "26" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "right_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "right_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "26" "0.0464082083333324" "x" "26")
+             ((THEN (EXPAND "f") (EXPAND "right_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ro_case_3_TCC2-1| NIL 3966271790 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ro_case_3_TCC1-1| NIL 3966271790 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_3| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2-1| NIL 3966271524
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 <= 26")
+     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+       (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+      (SPREAD (CASE "xo - 2 < 26 AND xo + 2 <= 26")
+       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+         (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "xo + 2" "x")
+          ((SPREAD (SPLIT -1)
+            ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+              (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "x" "26")
+               ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
+                (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+             (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+           (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
+        (THEN (ASSERT)
+         (SPREAD (CASE "xo - 2 >= 26 AND xo + 2 > 26")
+          ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+            (SPREAD (INST -1 "f" "26" "26" "0.0464082083333324" "26" "x")
+             ((SPREAD (SPLIT -1)
+               ((THEN (LEMMA "mvt_gen_ge_ci")
+                 (SPREAD
+                  (INST -1 "f" "26" "26" "0.0464082083333324" "x" "xo - 2")
+                  ((SPREAD (SPLIT -1)
+                    ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
+                     (ASSERT) (PROPAX)))
+                   (THEN (EXPAND "ci") (ASSERT))
+                   (THEN (EXPAND "ci") (PROPAX)))))
+                (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+              (THEN (EXPAND "ci") (PROPAX))
+              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
+           (THEN (ASSERT)
+            (SPREAD (CASE "xo - 2 < 26 AND xo + 2 > 26")
+             ((GRIND) (GRIND))))))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC3-1| NIL 3966271523
+  ("" (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "26" "26") (ASSERT) (GRIND)) NIL)
+  NIL NIL
+  (|ge_ci_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 26))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC2-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.ci(26, 26))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  |ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ci_case_2| DISJOINTNESS
+   "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+   "NIL"))
+ ("debug_proof"
+  (|ge_ci_case_2_TCC1| 0
+   (|ge_ci_case_2_TCC1-1| NIL 3966271523 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ci_case_2| DISJOINTNESS
+     "COND reals.<(active_corner_certificate.x, 26) -> active_corner_certificate.g(26), booleans.AND(reals.>=(active_corner_certificate.x, 26), reals.<=(active_corner_certificate.x, 26)) -> active_corner_certificate.g(active_corner_certificate.x), ELSE -> active_corner_certificate.g(26) ENDCOND"
+     "NIL")))
+  . 0))(("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |le_lo_case_0-1| NIL 3966333097
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo + 2 <= 0")
+     ((THEN (LEMMA "mvt_gen_le_lo")
+       (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
+            (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "left_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "left_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_le_lo")
+       (SPREAD (INST -1 "f" "0" "0" "0" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
+            (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
+             ((THEN (EXPAND "f") (EXPAND "left_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |le_lo_case_0_TCC2-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|le_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |le_lo_case_0_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|le_lo_case_0| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|le_lo_case_0_TCC1| 0
+   (|le_lo_case_0_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|le_lo_case_0| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.left_open(0))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  . 0))(("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2-1| NIL 3966333097
+  (""
+   (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+    (SPREAD (CASE "xo - 2 >= 4")
+     ((THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "4" "8" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "4" "8" "x" "xo - 2")
+             ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "right_open") (ASSERT)))))
+           (PROPAX) (PROPAX) (PROPAX)))
+         (THEN (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "right_open") (ASSERT)))))
+      (THEN (LEMMA "mvt_gen_ge_ro")
+       (SPREAD (INST -1 "f" "4" "8" "xo + 2" "x")
+        ((SPREAD (SPLIT -1)
+          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
+            (SPREAD (INST -1 "f" "4" "8" "x" "4")
+             ((THEN (EXPAND "f") (EXPAND "right_open")
+               (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+              (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
+           (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))
+           (THEN (ASSERT) (PROPAX))))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
+         (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
+   NIL)
+  NIL SHOSTAK)
+ ("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2_TCC2-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+   "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"))
+ ("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  |ge_ro_case_2_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL NIL
+  (|ge_ro_case_2| ASSUMING
+   "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+   "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"))
+ ("debug_proof"
+  (|ge_ro_case_2_TCC1| 0
+   (|ge_ro_case_2_TCC1-1| NIL 3966333097 ("" (THEN (ASSERT) (GRIND)) NIL) NIL
+    NIL
+    (|ge_ro_case_2| ASSUMING
+     "analysis@derivatives[(active_corner_certificate.right_open(4))].derivatives"
+     "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?")))
+  . 0))

@@ -439,8 +439,8 @@ def compute_unsafe_cond(
         left_a, left_b, left_c = line_left.coefficients
         right_a, right_b, right_c = line_right.coefficients
         left_eq = left_a * x + left_b * y + left_c
-        # right_eq = right_a * x + right_b * y + (0 if math.isnan(float(right_c)) else right_c)
-        right_eq = right_a *x + right_b * y + right_c
+        right_eq = right_a * x + right_b * y + (0 if math.isnan(float(right_c)) else right_c)
+        # right_eq = right_a *x + right_b * y + right_c
         print(right_a, x, right_b, y, right_c)
         # print(right_eq, left_eq)
         corner_cond = left_eq * right_eq <= 0

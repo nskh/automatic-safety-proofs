@@ -25,17 +25,10 @@ polygon = Polygon(*rect_points)
 # polygon = RegularPolygon((0, 0), 1, n=6)  # hexagon
 
 # trajectory_expr = x**2
-trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
-
-# trajectory_expr = Piecewise((-2.385292, (x < 3.0) & (x >= 0)), (0.121268860507243*x - 2.74909858152173, (x >= 3.0) & (x < 26.0)), (0.0464082083333324*x - 0.802721624999975, (x >= 26.0) & (x <= 27.0)))
-# trajectory_expr = Piecewise((-2.3853, (x < 3.0) & (x >= 0)), (0.1213*x - 2.7491, (x >= 3.0) & (x < 26.0)), (0.0464*x - 0.8027, (x >= 26.0) & (x <= 27.0)))
-trajectory_expr = Piecewise((0, x<= 3.0), (0.121268860507243*x - 2.74909858152173, (x > 3.0) & (x < 26.0)), (0.0464082083333324*x - 0.802721624999975, (x >= 26.0) ))
-# trajectory_expr = Piecewise((0.121268860507243*x - 2.74909858152173, (x < 26.0)), (0.0464082083333324*x - 0.802721624999975, (x >= 26.0)))
-# trajectory_expr = Piecewise((-2.385292, (x < 3.0)), (0.121268860507243*x - 2.74909858152173, (x >= 3.0)))
+trajectory_expr = Piecewise((-2.385292, (x < 3.0) & (x >= 0)), (0.121268860507243*x - 2.74909858152173, (x >= 3.0) & (x < 26.0)), (0.0464082083333324*x - 0.802721624999975, (x >= 26.0) & (x <= 27.0)))
 
 # Domain (infinite)
-domain = Interval(-oo, oo)
-# domain = Interval(3, oo)
+domain = Interval(0,27)
 # domain = Interval(-oo, 10)
 # domain = Interval(0, 10)
 
@@ -87,7 +80,7 @@ try:
 
     print(print_prooflite(package))
 
-    log_proof_to_file(package, "debug_proof.pvs")
+    log_proof_to_file(package, "debug_fast.pvs")
 
     # print(f"Debug: Number of lemmas: {len(package['lemmas'])}")
     # print(f"Debug: Number of proof scripts: {len(package['proof_scripts'])}")
