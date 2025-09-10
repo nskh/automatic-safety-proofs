@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 
+
+FEET_PER_DEG_LAT = 364000
+
 def calculate_relative_trajectory(input_file, output_file):
     """
     Calculates the relative trajectory between two objects from a CSV file.
@@ -24,18 +27,23 @@ def calculate_relative_trajectory(input_file, output_file):
     if not all(col in df.columns for col in required_columns):
         print(f"Error: The CSV file must contain the following columns: {required_columns}")
         return
-
+    df['min_abs_lat'] = np.minimum(np.abs(df['f1_lat']), np.abs(df['f2_lat']))
+    df['feet_per_deg_lon'] = FEET_PER_DEG_LAT * np.cos(np.deg2rad(df['min_abs_lat']))
     # 2. Select the coordinate columns for each object.
     f1_coords = df[['f1_lat', 'f1_lon', 'f1_alt_ft']].values
     f2_coords = df[['f2_lat', 'f2_lon', 'f2_alt_ft']].values
     time_points = df['t']
+    relative_df = pd.DataFrame()
+    relative_df['relative_lat_ft'] = (df['f1_lat'] - df['f2_lat']) * FEET_PER_DEG_LAT
+    relative_df['relative_lon_ft'] = (df['f1_lon'] - df['f2_lon']) * df['feet_per_deg_lon']
+    relative_df['relative_alt_ft'] = df['f1_alt_ft'] - df['f2_alt_ft']
 
     # 3. Calculate the relative position by subtracting the coordinates.
     # The result is a new array where each row represents the relative position (f2 - f1).
     relative_trajectory_coords = f2_coords - f1_coords
 
     # Create a new DataFrame for the relative trajectory
-    relative_df = pd.DataFrame(relative_trajectory_coords, columns=['relative_lat', 'relative_lon', 'relative_alt_ft'])
+    # relative_df = pd.DataFrame(relative_trajectory_coords, columns=['relative_lat', 'relative_lon', 'relative_alt_ft'])
     relative_df.insert(0, 't', time_points)
 
     # 4. Save the relative trajectory to a new CSV file.
