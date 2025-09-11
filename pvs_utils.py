@@ -789,17 +789,17 @@ def generate_three_case_unifying_proof(
 %|-      ((SPREAD
 %|-        (CASE "{pvs_traj_1}")
 %|-        ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE) (LEMMA "{domain_type_1}_dd")
-%|-          (INST -1 "0"))
+%|-          (INST -1 "{domain_splits[0]}"))
 %|-         (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
 %|-          (EXPAND "{domain_type_1}" -1) (ASSERT))))
-%|-       (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "0")))))
+%|-       (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "{domain_splits[0]}")))))
 %|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
 %|-     (SPREAD
 %|-      (CASE "{pvs_traj_1}")
 %|-      ((THEN (REPLACE -1) (HIDE -1) (SKEEP)
 %|-        (SPREAD (DERIV)
 %|-         ((THEN (TYPEPRED "x!1") (EXPAND "{domain_type_1}" -1) (ASSERT))
-%|-          (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "0")))))
+%|-          (THEN (LEMMA "{domain_type_1}_dd") (INST -1 "{domain_splits[0]}")))))
 %|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
 %|-        (EXPAND "{domain_type_1}" -1) (ASSERT)))))
 %|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
@@ -1433,7 +1433,7 @@ def generate_corner_pairs(labels):
     return pairs
 
 
-def generate_complete_proof_package(trajectory, poly, domain, lemma_name="testlemma"):
+def generate_complete_proof_package(trajectory, poly, domain):
     """
     Generate a complete proof package including lemmas and proof scripts.
 

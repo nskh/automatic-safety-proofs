@@ -50,9 +50,10 @@ def main():
 
     # trajectory_expr = x
     # trajectory_expr = -x
-    trajectory_expr = x**2 + 2 * x + 1
+    # trajectory_expr = x**2 + 2 * x + 1
     # trajectory_expr = -(x**2)
-    # trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
+    trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
+    # trajectory_expr = Piecewise((x**2 + 2 * x + 1, x <= 3), (8 * x - 8, x > 3))
     # trajectory_expr = Piecewise((-(x**2), x <= 4), (-8 * x + 16, x > 4))
 
     # Domain (infinite)
@@ -68,9 +69,7 @@ def main():
             print("GENERATING COMPLETE PROOF PACKAGE:")
             print(f"{'='*60}")
 
-        package = generate_complete_proof_package(
-            trajectory_expr, polygon, domain, "debug_lemma"
-        )
+        package = generate_complete_proof_package(trajectory_expr, polygon, domain)
 
         if args.verbose:
             print(f"Package keys: {list(package.keys())}")

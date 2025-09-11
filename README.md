@@ -1,3 +1,7 @@
+# Active Corners Certification
+
+Note that PVS caches theories and all active corner certificates are declared with the same theory name. To avoid this, move certificates into their own directory or remove PVS artifacts before checking another certificate.
+
 # Automated Geometric Safety Proofs
 
 ## You can view our FMCAD paper by clicking on [this link](fmcad22paper.pdf).
