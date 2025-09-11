@@ -34,9 +34,9 @@ def calculate_relative_trajectory(input_file, output_file):
     f2_coords = df[['f2_lat', 'f2_lon', 'f2_alt_ft']].values
     time_points = df['t']
     relative_df = pd.DataFrame()
-    relative_df['relative_lat_ft'] = (df['f1_lat'] - df['f2_lat']) * FEET_PER_DEG_LAT
-    relative_df['relative_lon_ft'] = (df['f1_lon'] - df['f2_lon']) * df['feet_per_deg_lon']
-    relative_df['relative_alt_ft'] = df['f1_alt_ft'] - df['f2_alt_ft']
+    relative_df['relative_lat_ft'] = ((df['f1_lat'] - df['f2_lat']) * FEET_PER_DEG_LAT)/500
+    relative_df['relative_lon_ft'] = ((df['f1_lon'] - df['f2_lon']) * df['feet_per_deg_lon'])/500
+    relative_df['relative_alt_ft'] = (df['f1_alt_ft'] - df['f2_alt_ft'])/500
 
     # 3. Calculate the relative position by subtracting the coordinates.
     # The result is a new array where each row represents the relative position (f2 - f1).

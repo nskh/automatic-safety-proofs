@@ -112,7 +112,7 @@ def piecewise_from_rel_df_merged(rel_df, axis="up", t_col="x", var_symbol="x",
                                    digits=digits)
 
 
-rel = pd.read_csv("relative_trajectories.csv")  # must have columns like: x, rel_east_m, rel_north_m, rel_up_m
+rel = pd.read_csv("relative_trajectories_alt.csv")  # must have columns like: x, rel_east_m, rel_north_m, rel_up_m
 E_pw = piecewise_from_rel_df_merged(rel, axis="east", t_col="t", var_symbol="x",
                                     atol=1e-10, rtol=1e-8, digits=None)
 U_pw = piecewise_from_rel_df_merged(rel, axis="up", t_col="t", var_symbol="x",
