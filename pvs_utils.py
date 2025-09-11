@@ -920,6 +920,8 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             _, subset_of_transitions = find_transitions(
                 -y + subtraj, angles, x, y, domain=subdomain
             )
+            if subdomain.is_EmptySet:
+                continue
             left_bound = Point(subdomain.inf, subtraj.subs(func_var, subdomain.inf))
             right_bound = Point(subdomain.sup, subtraj.subs(func_var, subdomain.sup))
 
