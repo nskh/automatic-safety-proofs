@@ -243,17 +243,17 @@ le_lo_case_0: LEMMA
     FORALL(xo,yo:real, g:[real -> real]):
         LET f = LAMBDA(x:real):
         COND
-            x <= -1 -> g(x),
-            ELSE -> g(-1)
+            x <= 0 -> g(x),
+            ELSE -> g(0)
         ENDCOND
     IN 
-    derivable?[(left_open(-1))](f) AND (FORALL(x:(left_open(-1))): deriv[(left_open(-1))](f)(x) <= 0) AND
+    derivable?[(left_open(0))](f) AND (FORALL(x:(left_open(0))): deriv[(left_open(0))](f)(x) <= 0) AND
     (EXISTS (x : real) :
     ((-x + xo + 2 >= 0) AND
      (-x + xo - 2 <= 0) AND
      (yo - f(x) + 1 >= 0) AND
      (yo - f(x) - 1 <= 0)) AND
-    x <= -1 AND
+    x <= 0 AND
     xo + 2 >= x AND xo + -2 <= x)
     IMPLIES
     ((yo - f(xo - 2) - 1 >= 0) AND
@@ -264,29 +264,29 @@ le_lo_case_0: LEMMA
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
      (yo - f(xo - 2) - 1 <= 0))OR
-    ((xo + 3 >= 0) AND
-     (xo - 1 <= 0) AND
-     (yo - f(-1) + 1 >= 0) AND
-     (yo - f(-1) - 1 <= 0))
+    ((xo + 2 >= 0) AND
+     (xo - 2 <= 0) AND
+     (yo - f(0) + 1 >= 0) AND
+     (yo - f(0) - 1 <= 0))
 
 %|- le_lo_case_0 : PROOF
 %|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
-%|-  (SPREAD (CASE "xo + 2 <= -1")
+%|-  (SPREAD (CASE "xo + 2 <= 0")
 %|-   ((THEN (LEMMA "mvt_gen_le_lo")
-%|-     (SPREAD (INST -1 "f" "-1" "0" "xo + 2" "x")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
-%|-          (SPREAD (INST -1 "f" "-1" "0" "x" "xo - 2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
 %|-           ((ASSERT) (THEN (EXPAND "left_open") (ASSERT))
 %|-            (THEN (EXPAND "left_open") (ASSERT)))))
 %|-         (PROPAX) (PROPAX) (PROPAX)))
 %|-       (THEN (EXPAND "left_open") (ASSERT))
 %|-       (THEN (EXPAND "left_open") (ASSERT)))))
 %|-    (THEN (LEMMA "mvt_gen_le_lo")
-%|-     (SPREAD (INST -1 "f" "-1" "0" "-1" "x")
+%|-     (SPREAD (INST -1 "f" "0" "0" "0" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_le_lo")
-%|-          (SPREAD (INST -1 "f" "-1" "0" "x" "xo - 2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
 %|-           ((THEN (EXPAND "f") (EXPAND "left_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "left_open") (ASSERT)))))
@@ -296,98 +296,21 @@ le_lo_case_0: LEMMA
 %|- QED le_lo_case_0
 
 
-ge_ci_case_1: LEMMA
+ge_ro_case_1: LEMMA
     FORALL(xo,yo:real, g:[real -> real]):
         LET f = LAMBDA(x:real):
         COND
-            x < -1 -> g(-1),
-            x >= -1 AND x <= 3 -> g(x),
-            ELSE -> g(3)
-        ENDCOND
-    IN 
-    derivable?[(ci(-1, 3))](f) AND (FORALL(x:(ci(-1, 3))): deriv[(ci(-1, 3))](f)(x) >= 0) AND (FORALL(x:(ci(-1, 3))): deriv[(ci(-1, 3))](f)(x) <= 8) AND
-    (EXISTS (x : real) :
-    ((-x + xo + 2 >= 0) AND
-     (-x + xo - 2 <= 0) AND
-     (yo - f(x) + 1 >= 0) AND
-     (yo - f(x) - 1 <= 0)) AND
-    x >= -1 AND x <= 3 AND
-    xo + 2 >= x AND xo + -2 <= x)
-    IMPLIES
-    ((yo - f(xo - 2) - 1 >= 0) AND
-     (yo - f(xo + 2) + 1 <= 0)) OR
-    ((yo - f(xo - 2) + 1 >= 0) AND
-     (yo - f(xo + 2) - 1 <= 0)) OR
-    ((yo - f(xo + 2) - 1 >= 0) AND
-     (yo - f(xo - 2) + 1 <= 0)) OR
-    ((yo - f(xo + 2) + 1 >= 0) AND
-     (yo - f(xo - 2) - 1 <= 0))OR
-    (((xo - 1 >= 0) AND
-     (xo - 5 <= 0) AND
-     (yo - f(3) + 1 >= 0) AND
-     (yo - f(3) - 1 <= 0)) OR
-    ((xo + 3 >= 0) AND
-     (xo - 1 <= 0) AND
-     (yo - f(-1) + 1 >= 0) AND
-     (yo - f(-1) - 1 <= 0)))
-
-%|- ge_ci_case_1 : PROOF
-%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
-%|-  (SPREAD (CASE "xo - 2 >= -1 AND xo + 2 <= 3")
-%|-   ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
-%|-     (SPREAD (INST -1 "f" "-1" "3" "0" "xo + 2" "x")
-%|-      ((SPREAD (SPLIT -1)
-%|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
-%|-          (SPREAD (INST -1 "f" "-1" "3" "0" "x" "xo - 2")
-%|-           ((ASSERT) (THEN (EXPAND "ci") (PROPAX))
-%|-            (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
-%|-         (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
-%|-       (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
-%|-    (SPREAD (CASE "xo - 2 < -1 AND xo + 2 <= 3")
-%|-     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
-%|-       (SPREAD (INST -1 "f" "-1" "3" "0" "xo + 2" "x")
-%|-        ((SPREAD (SPLIT -1)
-%|-          ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
-%|-            (SPREAD (INST -1 "f" "-1" "3" "0" "x" "-1")
-%|-             ((THEN (EXPAND "f") (ASSERT)) (THEN (EXPAND "ci") (PROPAX))
-%|-              (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
-%|-           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
-%|-         (THEN (EXPAND "ci") (ASSERT)) (THEN (EXPAND "ci") (ASSERT)))))
-%|-      (THEN (ASSERT)
-%|-       (SPREAD (CASE "xo - 2 >= -1 AND xo + 2 > 3")
-%|-        ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
-%|-          (SPREAD (INST -1 "f" "-1" "3" "0" "3" "x")
-%|-           ((SPREAD (SPLIT -1)
-%|-             ((THEN (LEMMA "mvt_gen_ge_ci")
-%|-               (SPREAD (INST -1 "f" "-1" "3" "0" "x" "xo - 2")
-%|-                ((SPREAD (SPLIT -1)
-%|-                  ((THEN (ASSERT) (EXPAND "f") (ASSERT)) (ASSERT) (PROPAX)
-%|-                   (ASSERT) (PROPAX)))
-%|-                 (THEN (EXPAND "ci") (ASSERT))
-%|-                 (THEN (EXPAND "ci") (PROPAX)))))
-%|-              (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
-%|-            (THEN (EXPAND "ci") (PROPAX))
-%|-            (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
-%|-         (THEN (ASSERT)
-%|-          (SPREAD (CASE "xo - 2 < -1 AND xo + 2 > 3") ((GRIND) (GRIND))))))))))))
-%|- QED ge_ci_case_1
-
-
-ge_ro_case_2: LEMMA
-    FORALL(xo,yo:real, g:[real -> real]):
-        LET f = LAMBDA(x:real):
-        COND
-            x < 3 -> g(3),
+            x < 0 -> g(0),
             ELSE -> g(x)
         ENDCOND
     IN 
-    derivable?[(right_open(3))](f) AND (FORALL(x:(right_open(3))): deriv[(right_open(3))](f)(x) >= 8) AND
+    derivable?[(right_open(0))](f) AND (FORALL(x:(right_open(0))): deriv[(right_open(0))](f)(x) >= 0) AND
     (EXISTS (x : real) :
     ((-x + xo + 2 >= 0) AND
      (-x + xo - 2 <= 0) AND
      (yo - f(x) + 1 >= 0) AND
      (yo - f(x) - 1 <= 0)) AND
-    x >= 3 AND
+    x >= 0 AND
     xo + 2 >= x AND xo + -2 <= x)
     IMPLIES
     ((yo - f(xo - 2) - 1 >= 0) AND
@@ -398,52 +321,48 @@ ge_ro_case_2: LEMMA
      (yo - f(xo - 2) + 1 <= 0)) OR
     ((yo - f(xo + 2) + 1 >= 0) AND
      (yo - f(xo - 2) - 1 <= 0))OR
-    ((xo - 1 >= 0) AND
-     (xo - 5 <= 0) AND
-     (yo - f(3) + 1 >= 0) AND
-     (yo - f(3) - 1 <= 0))
+    ((xo + 2 >= 0) AND
+     (xo - 2 <= 0) AND
+     (yo - f(0) + 1 >= 0) AND
+     (yo - f(0) - 1 <= 0))
 
-%|- ge_ro_case_2 : PROOF
+%|- ge_ro_case_1 : PROOF
 %|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
-%|-  (SPREAD (CASE "xo - 2 >= 3")
+%|-  (SPREAD (CASE "xo - 2 >= 0")
 %|-   ((THEN (LEMMA "mvt_gen_ge_ro")
-%|-     (SPREAD (INST -1 "f" "3" "8" "xo + 2" "x")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
-%|-          (SPREAD (INST -1 "f" "3" "8" "x" "xo - 2")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "xo - 2")
 %|-           ((ASSERT) (THEN (EXPAND "right_open") (ASSERT))
 %|-            (THEN (EXPAND "right_open") (ASSERT)))))
 %|-         (PROPAX) (PROPAX) (PROPAX)))
 %|-       (THEN (EXPAND "right_open") (ASSERT))
 %|-       (THEN (EXPAND "right_open") (ASSERT)))))
 %|-    (THEN (LEMMA "mvt_gen_ge_ro")
-%|-     (SPREAD (INST -1 "f" "3" "8" "xo + 2" "x")
+%|-     (SPREAD (INST -1 "f" "0" "0" "xo + 2" "x")
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ro")
-%|-          (SPREAD (INST -1 "f" "3" "8" "x" "3")
+%|-          (SPREAD (INST -1 "f" "0" "0" "x" "0")
 %|-           ((THEN (EXPAND "f") (EXPAND "right_open") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT)))))
 %|-         (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))))
 %|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))
 %|-       (THEN (EXPAND "f") (EXPAND "right_open") (ASSERT))))))))
-%|- QED ge_ro_case_2
+%|- QED ge_ro_case_1
 
 
-f0(g: [real -> real]): [real -> real] = LAMBDA(x:real): COND x <= -1 -> g(x), ELSE -> g(-1) ENDCOND
-f1(g: [real -> real]): [real -> real] = LAMBDA(x:real): COND x < -1 -> g(-1), x >= -1 AND x <= 3 -> g(x), ELSE -> g(3) ENDCOND
-f2(g: [real -> real]): [real -> real] = LAMBDA(x:real): COND x < 3 -> g(3), ELSE -> g(x) ENDCOND
+f0(g: [real -> real]): [real -> real] = LAMBDA(x:real): COND x <= 0 -> g(x), ELSE -> g(0) ENDCOND
+f1(g: [real -> real]): [real -> real] = LAMBDA(x:real): COND x < 0 -> g(0), ELSE -> g(x) ENDCOND
 
 
 full_domain_soundness_lemma_helper: LEMMA
     FORALL(x,xo,yo:real, g:[real -> real]):
-    derivable?[(left_open(-1))](g) AND
-    (FORALL(x:(left_open(-1))): deriv[(left_open(-1))](g)(x) <= 0) AND
-    derivable?[(ci(-1, 3))](g) AND
-    (FORALL(x:(ci(-1, 3))): deriv[(ci(-1, 3))](g)(x) >= 0) AND
-    (FORALL(x:(ci(-1, 3))): deriv[(ci(-1, 3))](g)(x) <= 8) AND
-    derivable?[(right_open(3))](g) AND
-    (FORALL(x:(right_open(3))): deriv[(right_open(3))](g)(x) >= 8) AND
+    derivable?[(left_open(0))](g) AND
+    (FORALL(x:(left_open(0))): deriv[(left_open(0))](g)(x) <= 0) AND
+    derivable?[(right_open(0))](g) AND
+    (FORALL(x:(right_open(0))): deriv[(right_open(0))](g)(x) >= 0) AND
     (((-x + xo + 2 >= 0) AND
      (-x + xo - 2 <= 0) AND
      (yo - g(x) + 1 >= 0) AND
@@ -466,75 +385,45 @@ full_domain_soundness_lemma_helper: LEMMA
      (yo - f1(g)(xo - 2) + 1 <= 0)) OR
     ((yo - f1(g)(xo + 2) + 1 >= 0) AND
      (yo - f1(g)(xo - 2) - 1 <= 0)) OR
-    ((yo - f2(g)(xo - 2) - 1 >= 0) AND
-     (yo - f2(g)(xo + 2) + 1 <= 0)) OR
-    ((yo - f2(g)(xo - 2) + 1 >= 0) AND
-     (yo - f2(g)(xo + 2) - 1 <= 0)) OR
-    ((yo - f2(g)(xo + 2) - 1 >= 0) AND
-     (yo - f2(g)(xo - 2) + 1 <= 0)) OR
-    ((yo - f2(g)(xo + 2) + 1 >= 0) AND
-     (yo - f2(g)(xo - 2) - 1 <= 0)) OR
-        ((xo + 3 >= 0) AND
-     (xo - 1 <= 0) AND
-     (yo - g(-1) + 1 >= 0) AND
-     (yo - g(-1) - 1 <= 0)) OR
-    (((xo - 1 >= 0) AND
-     (xo - 5 <= 0) AND
-     (yo - g(3) + 1 >= 0) AND
-     (yo - g(3) - 1 <= 0)) OR
-    ((xo + 3 >= 0) AND
-     (xo - 1 <= 0) AND
-     (yo - g(-1) + 1 >= 0) AND
-     (yo - g(-1) - 1 <= 0))) OR
-    ((xo - 1 >= 0) AND
-     (xo - 5 <= 0) AND
-     (yo - g(3) + 1 >= 0) AND
-     (yo - g(3) - 1 <= 0))
+        ((xo + 2 >= 0) AND
+     (xo - 2 <= 0) AND
+     (yo - g(0) + 1 >= 0) AND
+     (yo - g(0) - 1 <= 0)) OR
+    ((xo + 2 >= 0) AND
+     (xo - 2 <= 0) AND
+     (yo - g(0) + 1 >= 0) AND
+     (yo - g(0) - 1 <= 0))
 
 
 %|- full_domain_soundness_lemma_helper : PROOF
 %|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
-%|-  (SPREAD (CASE "x <= -1")
+%|-  (SPREAD (CASE "x<=0")
 %|-   ((THEN (LEMMA "le_lo_case_0") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "f0")
 %|-     (ASSERT)
 %|-     (SPREAD
 %|-      (CASE
-%|-          "restrict[real, (left_open(-1)), real](g) = (restrict[real, (left_open(-1)), real]
-%|-                 (LAMBDA(x:real): COND x <= -1 -> g(x), ELSE -> g(-1) ENDCOND))")
+%|-          "restrict[real, (left_open(0)), real](g) = (restrict[real, (left_open(0)), real]
+%|-                 (LAMBDA(x:real): COND x <= 0 -> g(x), ELSE -> g(0) ENDCOND))")
 %|-      ((SPREAD (SPLIT -2)
 %|-        ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (ASSERT) (ASSERT)
 %|-         (THEN (INST 1 "x") (ASSERT))))
 %|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE-ALL-BUT 1) (TYPEPRED "x!1")
 %|-        (GRIND)))))
-%|-    (SPREAD (CASE "x <= 3")
-%|-     ((THEN (LEMMA "ge_ci_case_1") (INST -1 "xo" "yo" "g") (ASSERT)
-%|-       (EXPAND "f1")
-%|-       (SPREAD
-%|-        (CASE
-%|-            "restrict[real, (ci(-1, 3)), real](g) = (restrict[real, (ci(-1, 3)), real](LAMBDA(x:real): COND x < -1 -> g(-1), x >= -1 AND x <= 3 -> g(x), ELSE -> g(3) ENDCOND))")
-%|-        ((SPREAD (SPLIT -2)
-%|-          ((ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT)
-%|-           (ASSERT) (ASSERT) (THEN (INST 1 "x") (ASSERT))))
-%|-         (THEN (ASSERT) (DECOMPOSE-EQUALITY 1) (HIDE-ALL-BUT 1) (TYPEPRED "x!1")
-%|-          (GRIND))
-%|-         (THEN (ASSERT) (HIDE-ALL-BUT 1) (GRIND)))))
-%|-      (THEN (LEMMA "ge_ro_case_2") (INST -1 "xo" "yo" "g") (ASSERT)
-%|-       (EXPAND "f2")
-%|-       (SPREAD
-%|-        (CASE
-%|-            "restrict[real, (right_open(3)), real](g) = (restrict[real, (right_open(3)), real](LAMBDA(x:real): COND x < 3 -> g(3), ELSE -> g(x) ENDCOND))")
-%|-        ((SPREAD (SPLIT -2)
-%|-          ((ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT)
-%|-           (THEN (ASSERT) (INST 1 "x") (ASSERT))))
-%|-         (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
-%|-          (GRIND))))))))))
+%|-    (THEN (LEMMA "ge_ro_case_1") (INST -1 "xo" "yo" "g") (ASSERT) (EXPAND "f1")
+%|-     (SPREAD
+%|-      (CASE "(restrict[real, (right_open(0)), real]
+%|-                     (LAMBDA(x:real): COND x < 0 -> g(0), ELSE -> g(x) ENDCOND)) = (restrict[real, (right_open(0)), real](g))")
+%|-      ((SPREAD (SPLIT -2)
+%|-        ((ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT) (ASSERT)
+%|-         (THEN (INST 1 "x") (ASSERT))))
+%|-       (THEN (HIDE-ALL-BUT 1) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (GRIND))))))))
 %|- QED full_domain_soundness_lemma_helper
-
 
 full_domain_soundness_lemma: LEMMA
     FORALL(x,xo,yo:real):
     LET
-        g = LAMBDA(x:real): COND x <= 3 -> x^2 + 2*x + 1, ELSE -> 8*x - 8 ENDCOND
+        g = LAMBDA(x:real): x^2
     IN
     (((-x + xo + 2 >= 0) AND
      (-x + xo - 2 <= 0) AND
@@ -558,93 +447,34 @@ full_domain_soundness_lemma: LEMMA
      (yo - f1(g)(xo - 2) + 1 <= 0)) OR
     ((yo - f1(g)(xo + 2) + 1 >= 0) AND
      (yo - f1(g)(xo - 2) - 1 <= 0)) OR
-((yo - f2(g)(xo - 2) - 1 >= 0) AND
-     (yo - f2(g)(xo + 2) + 1 <= 0)) OR
-    ((yo - f2(g)(xo - 2) + 1 >= 0) AND
-     (yo - f2(g)(xo + 2) - 1 <= 0)) OR
-    ((yo - f2(g)(xo + 2) - 1 >= 0) AND
-     (yo - f2(g)(xo - 2) + 1 <= 0)) OR
-    ((yo - f2(g)(xo + 2) + 1 >= 0) AND
-     (yo - f2(g)(xo - 2) - 1 <= 0)) OR
-    ((xo + 3 >= 0) AND
-     (xo - 1 <= 0) AND
-     (yo - g(-1) + 1 >= 0) AND
-     (yo - g(-1) - 1 <= 0)) OR
-    (((xo - 1 >= 0) AND
-     (xo - 5 <= 0) AND
-     (yo - g(3) + 1 >= 0) AND
-     (yo - g(3) - 1 <= 0)) OR
-    ((xo + 3 >= 0) AND
-     (xo - 1 <= 0) AND
-     (yo - g(-1) + 1 >= 0) AND
-     (yo - g(-1) - 1 <= 0))) OR
-    ((xo - 1 >= 0) AND
-     (xo - 5 <= 0) AND
-     (yo - g(3) + 1 >= 0) AND
-     (yo - g(3) - 1 <= 0))
+    ((xo + 2 >= 0) AND
+     (xo - 2 <= 0) AND
+     (yo - g(0) + 1 >= 0) AND
+     (yo - g(0) - 1 <= 0)) OR
+    ((xo + 2 >= 0) AND
+     (xo - 2 <= 0) AND
+     (yo - g(0) + 1 >= 0) AND
+     (yo - g(0) - 1 <= 0))
 
 
 %|- full_domain_soundness_lemma : PROOF
-%|- (THEN (SKEEP) (SKOLETIN 1) (FLATTEN) (LEMMA "full_domain_soundness_lemma_helper")
-%|-  (INST -1 "x" "xo" "yo" "g_1")
+%|- (THEN (SKEEP) (SKOLETIN*) (FLATTEN)
+%|-  (LEMMA "full_domain_soundness_lemma_helper") (INST -1 "x" "xo" "yo" "g_1")
 %|-  (SPREAD (SPLIT -1)
 %|-   ((PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
-%|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX)
-%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD (DERIVABLE)
-%|-      ((SPREAD
-%|-        (CASE "(LAMBDA(s: (left_open(-1))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (left_open(-1))): s^2 + 2*s + 1)")
-%|-        ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE) (LEMMA "left_open_dd")
-%|-          (INST -1 "-1"))
-%|-         (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
-%|-          (EXPAND "left_open" -1) (ASSERT))))
-%|-       (THEN (LEMMA "left_open_dd") (INST -1 "-1")))))
-%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "(LAMBDA(s: (left_open(-1))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (left_open(-1))): s^2 + 2*s + 1)")
-%|-      ((THEN (REPLACE -1) (HIDE -1) (SKEEP)
-%|-        (SPREAD (DERIV)
-%|-         ((THEN (TYPEPRED "x!1") (EXPAND "left_open" -1) (ASSERT))
-%|-          (THEN (LEMMA "left_open_dd") (INST -1 "-1")))))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
-%|-        (EXPAND "left_open" -1) (ASSERT)))))
-%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "(LAMBDA(s: (ci(-1, 3))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (ci(-1, 3))): s^2 + 2*s + 1)")
-%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "ci" -1) (FLATTEN)
-%|-        (ASSERT)))))
-%|-    (THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "restrict" 1) (EXPAND "g_1")
-%|-     (SPREAD
-%|-      (CASE "(LAMBDA(s: (ci(-1, 3))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (ci(-1, 3))): s^2 + 2*s + 1)")
-%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV) (TYPEPRED "x!1") (EXPAND "ci" -1)
-%|-        (PROPAX))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "ci" -1) (FLATTEN)
-%|-        (ASSERT)))))
-%|-    (THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "(LAMBDA(s: (ci(-1, 3))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (ci(-1, 3))): s^2 + 2*s + 1)")
-%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV) (TYPEPRED "x!1") (EXPAND "ci" -1)
-%|-        (PROPAX))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "ci" -1) (ASSERT)
-%|-        (FLATTEN) (ASSERT)))))
-%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "(LAMBDA(s: (right_open(3))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (right_open(3))): 8*s - 8)")
-%|-      ((THEN (REPLACE -1) (DERIVABLE))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "right_open" -1)
-%|-        (ASSERT) (HIDE 2)
-%|-        (SPREAD (CASE "x!1=3") ((THEN (ASSERT) (GRIND)) (ASSERT)))))))
-%|-    (THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict") (SKEEP)
-%|-     (SPREAD
-%|-      (CASE "(LAMBDA(s: (right_open(3))): COND s <= 3 -> s^2 + 2*s + 1, ELSE -> 8*s - 8 ENDCOND) = (LAMBDA (s: (right_open(3))): 8*s - 8)")
-%|-      ((THEN (REPLACE -1) (DERIV))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "right_open")
-%|-        (SPREAD (CASE "x!2=3")
-%|-         ((THEN (REPLACE -1) (ASSERT) (HIDE 2) (EVAL-EXPR 1) (ASSERT))
-%|-          (ASSERT)))))))
+%|-    (PROPAX) (PROPAX)
+%|-    (THEN (ASSERT) (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict")
+%|-     (WITH-TCCS (DERIVABLE 1)) (LEMMA "left_open_dd") (INST -1 "0"))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (SKEEP)
+%|-     (SPREAD (DERIV)
+%|-      ((THEN (TYPEPRED "x!1") (EXPAND "left_open") (ASSERT))
+%|-       (THEN (LEMMA "left_open_dd") (INST -1 "0")))))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (DERIVABLE))
+%|-    (THEN (HIDE-ALL-BUT (-7 1)) (REPLACE -1) (EXPAND "restrict") (SKEEP) (DERIV)
+%|-     (TYPEPRED "x!1") (EXPAND "right_open") (ASSERT))
 %|-    (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX) (PROPAX))))
 %|- QED full_domain_soundness_lemma
+
 
 
 %|- *TCC* : PROOF (THEN (ASSERT) (GRIND)) QED
@@ -663,12 +493,10 @@ full_domain_soundness_lemma: LEMMA
 
 %|- mvt_gen_ge_ci_TCC2 : PROOF (THEN (SKEEP) (LEMMA "ci_noe") (INST -1 "d1" "d2") (ASSERT) (GRIND)) QED
 
-%|- le_lo_case_0_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "-1") (LEMMA "left_open_noe") (INST -1 "-1") (ASSERT) (GRIND)) QED
+%|- le_lo_case_0_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "0") (LEMMA "left_open_noe") (INST -1 "0") (ASSERT) (GRIND)) QED
 
-%|- ge_ci_case_1_TCC* : PROOF (THEN (SKEEP) (LEMMA "ci_dd") (INST -1 "-1" "3") (LEMMA "ci_noe") (INST -1 "-1" "3") (ASSERT) (GRIND)) QED
+%|- ge_ro_case_1_TCC* : PROOF (THEN (SKEEP) (LEMMA "right_open_dd") (INST -1 "0") (LEMMA "right_open_noe") (INST -1 "0") (ASSERT) (GRIND)) QED
 
-%|- ge_ro_case_2_TCC* : PROOF (THEN (SKEEP) (LEMMA "right_open_dd") (INST -1 "3") (LEMMA "right_open_noe") (INST -1 "3") (ASSERT) (GRIND)) QED
-
-%|- full_domain_soundness_lemma_helper_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "-1") (LEMMA "left_open_noe") (INST -1 "-1") (LEMMA "ci_dd") (INST -1 "-1" "3") (LEMMA "ci_noe") (INST -1 "-1" "3") (LEMMA "right_open_dd") (INST -1 "3") (LEMMA "right_open_noe") (INST -1 "3") (ASSERT) (GRIND)) QED
+%|- full_domain_soundness_lemma_helper_TCC* : PROOF (THEN (SKEEP) (LEMMA "left_open_dd") (INST -1 "0") (LEMMA "left_open_noe") (INST -1 "0") (LEMMA "right_open_dd") (INST -1 "0") (LEMMA "right_open_noe") (INST -1 "0") (ASSERT) (GRIND)) QED
 
 end active_corner_certificate

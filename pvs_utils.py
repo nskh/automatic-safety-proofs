@@ -12,6 +12,7 @@ from sympy import (
     pi,
     oo,
     Interval,
+    nan,
 )
 from sympy.functions.elementary.piecewise import Piecewise
 import string
@@ -139,9 +140,11 @@ def piecewise_to_pvs(trajectory: Piecewise):
         if i == len(args) - 1:
             cond_parts.append(f"ELSE -> {expr_pvs}")
         else:
-            # Convert condition to PVS format
+            # Convert condition to PVS format and clean up newlines for COND structure
             cond_pvs = sympy_to_pvs(str(condition))
-            cond_parts.append(f"{cond_pvs} -> {expr_pvs}")
+            # Remove newlines and extra spaces for COND format
+            cond_pvs_clean = " ".join(cond_pvs.split())
+            cond_parts.append(f"{cond_pvs_clean} -> {expr_pvs}")
 
     # Join all conditions with commas and wrap in COND...ENDCOND
     return f"COND {', '.join(cond_parts)} ENDCOND"
@@ -360,8 +363,6 @@ def generate_unifying_lemma_helper(
             "f(", f"f{i}(g)("
         )
         conditions += explicit_condition + " OR\n    "
-
-    print(trajectory_statement)
 
     full_preamble = f"{deriv_premise} AND\n    {exists_clause}"
 
@@ -948,7 +949,6 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
     # Sort transitions by x coordinate and compute midpoints
     sorted_transitions = sorted(set_of_transitions, key=lambda point: point.x)
     func_var_transitions = [p.x for p in sorted_transitions]
-    print(f"func_var_transitions: {func_var_transitions}")
     if func_var_transitions:
         midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
     else:
@@ -972,7 +972,9 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             dydx_midpoints.append(deriv_val)
         except:
             # Handle cases where derivative evaluation fails
-            print(f"Derivative evaluation failed at {val}")
+            print(
+                f"WARNING: Derivative evaluation failed at x={val}; assuming deriv is 0 but proceed with caution."
+            )
             dydx_midpoints.append(0)  # Default to 0 if evaluation fails
     # subtract pi/2 to get angles in the range [-pi/2, pi/2]
     midpoint_angles = [atan2(d, 1) - pi / 2 for d in dydx_midpoints]
@@ -1001,11 +1003,9 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         all_transition_points.append(domain_max)
     elif domain_max == oo:
         all_transition_points.append(oo)
-    print(f"all_transition_points: {all_transition_points}")
 
     # Create intervals between all transition points
     var_intervals = list(zip(all_transition_points[:-1], all_transition_points[1:]))
-    print(f"var_intervals: {var_intervals}")
 
     proof_calls = []
     deriv_statements = []
@@ -1110,6 +1110,11 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             elif interval_end == domain_max:
                 endpoint = interval_start
             deriv_at_endpoint = deriv_traj.subs(x, endpoint)
+
+            if deriv_at_endpoint == nan or deriv_at_midpoint == nan:
+                raise ValueError(
+                    f"One derivative is NaN: {deriv_at_endpoint} or {deriv_at_midpoint}. Trajectory may not be defined over the domain."
+                )
 
             if deriv_at_midpoint > deriv_at_endpoint:
                 deriv_direction = ">="

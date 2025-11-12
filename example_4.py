@@ -37,7 +37,7 @@ def main():
     polygon = Polygon(*rect_points)
 
     # Trajectory function: should be a SymPy expression in terms of x only
-    trajectory_expr = -(x**2)
+    trajectory_expr = -(x**2) - 10 * x - 25
 
     # Domain
     domain = Interval(-oo, oo)

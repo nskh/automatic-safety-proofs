@@ -10,6 +10,7 @@ from pvs_utils import (
     generate_complete_proof_package,
     print_prooflite,
     log_proof_to_file,
+    piecewise_to_pvs,
 )
 
 
@@ -51,13 +52,21 @@ def main():
     # trajectory_expr = x
     # trajectory_expr = -x
     # trajectory_expr = x**2 + 2 * x + 1
+    trajectory_expr = x**2
     # trajectory_expr = -(x**2)
-    trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
+    # trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
     # trajectory_expr = Piecewise((x**2 + 2 * x + 1, x <= 3), (8 * x - 8, x > 3))
     # trajectory_expr = Piecewise((-(x**2), x <= 4), (-8 * x + 16, x > 4))
 
-    # Domain (infinite)
+    # Domain
+    # trajectory_expr = Piecewise(
+    #     (14.0 - 1.0 * x, (x >= 0) & (x < 4)),
+    #     (10.48 - 0.12 * x, (x >= 4) & (x < 21)),
+    #     (14.89 - 0.33 * x, (x >= 21) & (x <= 27)),
+    # )
+
     domain = Interval(-oo, oo)
+    # domain = Interval(0, 27)
     # domain = Interval(-oo, 10)
     # domain = Interval(-10, 10)
     # domain = Interval(0, 10)

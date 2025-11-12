@@ -4,9 +4,6 @@ import sympy
 from sympy import *
 from typing import Tuple, List, Dict, Set
 
-from mathematica_utils import *
-from plotting_utils import *
-
 init_printing(use_unicode=True)
 
 # global debug if printing
@@ -163,7 +160,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
         # parallel iff y1*x2 = x1*y2
         # use vectors <dfdx, dfdy> <cos(theta), sin(theta)>
         soln = solveset(Eq(df_dx * sin(angle), df_dy * cos(angle)), x, domain=domain)
-        print(f"solveset solution: {soln.doit()}")
+        # print(f"solveset solution: {soln.doit()}")
         if soln is S.EmptySet:
             soln = solveset(
                 Eq(df_dx * sin(angle), df_dy * cos(angle)), y, domain=domain
@@ -173,7 +170,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
                 soln = [{y: soln_elem} for soln_elem in list(soln)]
         else:
             # Pack into list of dict so it's clear which variable has been solved for
-            print(f"solution when finding transitions for angle {angle}: {soln}")
+            # print(f"solution when finding transitions for angle {angle}: {soln}")
             if type(soln) is FiniteSet:
                 soln = [{x: soln_elem} for soln_elem in list(soln)]
             elif type(soln) is Complement:
@@ -204,7 +201,7 @@ def find_transitions(trajectory, angles, x, y, domain=S.Complexes):
     traj_eqn = Eq(trajectory, 0)
     for angle, solns in transitions.items():
         for pair in solns:
-            print(f"pair used for transition point finding: {pair}")
+            # print(f"pair used for transition point finding: {pair}")
             # pair should always be a dictionary
             assert type(pair) == dict, "Solution element was not a dictionary!"
             # pair looks like {x: f(y)} or {y: f(x)}

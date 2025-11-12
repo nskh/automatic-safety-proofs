@@ -1,50 +1,54 @@
-# Active Corners Certification
+# Active Corners Certificate Generation
 
-Note that PVS caches theories and all active corner certificates are declared with the same theory name. To avoid this, move certificates into their own directory or remove PVS artifacts before checking another certificate.
+As described in the associated paper, this library automatically constructs proof certificates for instances of the active corner method. To run these examples, you will need to have Python, SymPy, PVS, and NASALib installed. A variety of examples (`example_1.py` through `example_7.py`) are included to illustrate key examples as described in our paper. Our case study is also included as a PVS file: `dl_case_study.pvs`.
 
-# Automated Geometric Safety Proofs
+Each example defines a polygon, trajectory function, and domain. A proof certificate is automatically generated and saved to a PVS file with the same name as the example; that is, `example_1.pvs`, `example_2.pvs`, and so on.
 
-## You can view our FMCAD paper by clicking on [this link](fmcad22paper.pdf).
+Running an example is simple: run the following command from the terminal where `N` is the number of the example you want to run.
 
-## FMCAD Evaluation Cases
+```
+$ python3 example_N.py
+```
 
-Examples used to generate our FMCAD results can be found in the Python files beginning with `acas_x_`, `adler_`, and `dubins_`, and correspond to the table of results in Section VI (Table I). There is a self-contained Mathematica file (separate installation required): `fmcad-paper-qe.nb` that contains our examples for the Mathematica CAD quantifier elimination results in our paper.
+This will generate a PVS file with the same name as the example, and print a message to the console indicating that the proof has been generated and saved to the file.
 
-## Installation and visual (numeric) examples
+You can check a certificate in two ways:
 
-This README walks through steps required to install this library and run examples. This library automatically constructs and visualizes a formulation of a "safe region": the set of obstacle locations where a collision _will not occur_ given an object and trajectory. Commands to run in the terminal begin with a $; do not actually include the "$" character in your terminal command.
+- From the terminal, run `proveit example_N.pvs` where `N` is the number of the example whose Python file you ran earlier. The example will run for a while (in our experience on an M1 MacBook Pro, 30 seconds or so), and print a proof summary to the console.
+- You can open the PVS file directly and install Prooflite scripts by placing your cursor over them, typing `M-x install-prooflite-script`. This is more tedious, but useful if you want to see the proofs as they progress.
 
-Open a terminal and `cd` to the library directory.
+Two potential errors you may encounter:
 
-Install dependencies
+- If `proveit` fails with path errors, you may need to move the certificate to a directory without spaces in its path and run `proveit` from there.
+- To avoid errors for duplicate theory names, move certificates into their own directory or remove PVS artifacts before checking another certificate. PVS caches theories and all active corner certificates are declared with the same theory name `active_corner_certificate`.
 
-`$ chmod +x install_pip_libraries.sh`
+Only one example is expected to not have all formulas successfully prove: `example_7`. This is due to a limitation of the PVS `deriv` command, which fails to reason about the non-expanded form of the quadratic function. Example 6 describes the same trajectory as Example 7, but the trajectory is expanded, so the last lemma succeeds since `deriv` works on that function. See below for example output from running `example_6.pvs` and `example_7.pvs`.
 
-`$ ./install_pip_libraries.sh`
+```
+Processing example_6.pvs. Writing output to file /path/to/certificate/example_6.summary
 
-Four examples are included. The first is a simple toy example to illustrate the functionality of our tool. The second and third are the applications included in our submitted paper. The last example is a piecewise function f(y) that is equivalent to a segment of the second trajectory. When you run the examples, they output three plots (the fourth outputs two plots) and two blocks of text.
+ Proof summary for theory active_corner_certificate
+    Theory totals: 48 formulas, 48 attempted, 48 succeeded (0.04 s)
 
-NOTE: in order to continue the example, you must close each plot once it has opened; plots block the continued execution of the example.
+Grand Totals: 48 proofs, 48 attempted, 48 succeeded (0.04 s)
+```
 
-The first plot is the polygon object used for unsafe region computation. The second plot is the trajectory of the object center, used to compute the unsafe region. After you close the second plot, a boolean formulation for the unsafe region will be printed to the console. Then there will be a small disclaimer that the next plot may take some time to generate, as in Sympy we cannot plot the boolean formula directly and must repeatedly plot a series of points in a grid to visualize the safe region. The third plot is this grid of points, where blue points are safe and red points are unsafe. Once the third plot is closed, the example concludes by printing Mathematica code that can plot a better visualization of the unsafe region.
+```
+Processing example_7.pvs. Writing output to file /path/to/certificate/example_7.summary
 
-- The first example is a square moving on a piecewise sinusoidal-then-linear path.
-- The second example is a rectangle moving on a piecewise parabolic-then-linear path, as in Jeannin 2015 [1].
-- The third example is a hexagon moving on a piecewise circular-then-linear path, as in Adler 2019 [2].
-- The fourth example is similar to the second, with a parabolic-then-linear path described as a piecewise function f(y). Due to limitations of Sympy, there is no plot of this trajectory in the example, though the computation of the unsafe region works the same way it does in the first three examples.
+ Proof summary for theory active_corner_certificate
+    full_domain_soundness_lemma...........unfinished          [SHOSTAK](0.02 s)
+    Theory totals: 48 formulas, 48 attempted, 47 succeeded (0.03 s)
 
-To run examples:
+Grand Totals: 48 proofs, 48 attempted, 47 succeeded (0.03 s)
+*** Warning: Missed 1 formula.
+```
 
-`$ python3 example_1.py`
+## Case Studies
 
-`$ python3 example_2.py`
+Our two case studies from the paper are included:
 
-`$ python3 example_3.py`
+- `dl_case_study.pvs`, along with associated proof and summary files.
+- `strategic.pvs`, along with associated proof and summary files.
 
-`$ python3 example_4.py`
-
-### Citations
-
-[1] Jean-Baptiste Jeannin, Khalil Ghorbal, Yanni Kouskoulas, Ryan Gardner, Aurora Schmidt, Erik Zawadzki, and Andre Platzer. A formally verified hybrid system for the next-generation airborne collision avoidance system. In International Conference on Tools and Algorithms for the Construction and Analysis of Systems, pages 21–36. Springer, 2015
-
-[2] Eytan Adler and Jean-Baptiste Jeannin. Formal verification of collision avoidance for turning maneuvers in UAVs. In AIAA Aviation 2019 Forum, page 2845, 2019.
+These can be run with `proveit` or explored in the PVS editor.
