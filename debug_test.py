@@ -5,13 +5,23 @@ Debug test for automatic proof generation with lemma generation.
 """
 
 import argparse
-from sympy import symbols, Point, Polygon, RegularPolygon, Interval, oo, Piecewise
+from sympy import (
+    symbols,
+    Point,
+    Polygon,
+    RegularPolygon,
+    Interval,
+    oo,
+    Piecewise,
+    Rational,
+)
 from pvs_utils import (
     generate_complete_proof_package,
     print_prooflite,
     log_proof_to_file,
     piecewise_to_pvs,
 )
+from plotting_utils import plot_polygon
 
 
 def main():
@@ -39,15 +49,30 @@ def main():
 
     # Create a rectangle polygon with width 4 (half-width 2)
     w = 1.0
-    rect_points = [
-        Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
-    ]
-    polygon = Polygon(*rect_points)
+    # rect_points = [
+    #     Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
+    # ]
+    # polygon = Polygon(*rect_points)
     # square_points = [Point(val) for val in [[w, w], [w, -w], [-w, -w], [-w, w]]]
     # polygon = Polygon(*square_points)
-    # diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
-    # polygon = Polygon(*diamond_points)
-    # polygon = RegularPolygon((0, 0), 1, n=6)  # hexagon
+    diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
+    polygon = Polygon(*diamond_points)
+
+    # A = (Rational(1), Rational(0))
+    # B = (Rational(1, 2), Rational(6, 7))
+    # C = (Rational(-1, 2), Rational(6, 7))
+    # D = (Rational(-1), Rational(0))
+    # E = (Rational(-1, 2), Rational(-6, 7))
+    # F = (Rational(1, 2), Rational(-6, 7))
+    A = (2, 0)
+    B = (1, 2)
+    C = (-1, 2)
+    D = (-2, 0)
+    E = (-1, -2)
+    F = (1, -2)
+
+    polygon = Polygon(A, B, C, D, E, F)  # hexagon
+    plot_polygon(polygon)
 
     # trajectory_expr = x
     # trajectory_expr = -x

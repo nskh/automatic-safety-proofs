@@ -498,7 +498,7 @@ def unbounded_one_side_proof_script(
 %|-      ((SPREAD (SPLIT -1)
 %|-        ((THEN (ASSERT) (LEMMA "{deriv_lemma}")
 %|-          (SPREAD (INST -1 "f" "{domain_bound}" "{deriv_bound}" "x" "{min_left_clipped}")
-%|-           ((THEN (EXPAND "f") (EXPAND "{domain_definition}") (SPREAD (SPLIT -1) ((ASSERT) (PROPAX))))
+%|-           ((THEN (EXPAND "f") (EXPAND "{domain_definition}") (SPREAD (SPLIT -1) ((ASSERT :FLUSH? T) (PROPAX))))
 %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT))
 %|-            (THEN (EXPAND "f") (EXPAND "{domain_definition}") (ASSERT)))))
 %|-         (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX)) (THEN (ASSERT) (PROPAX))))
@@ -578,6 +578,145 @@ def bounded_proof_script(
 %|-            (THEN (ASSERT) (EXPAND "ci") (PROPAX)))))
 %|-         (THEN (ASSERT)
 %|-          (SPREAD (CASE "{case_label4}") ((GRIND) (GRIND))))))))))))
+"""
+
+
+def double_deriv_bound_proof_script(
+    case_label1,
+    case_label2,
+    case_label3,
+    case_label4,
+    max_right,
+    min_left,
+    max_right_clipped,
+    min_left_clipped,
+    domain_start,
+    domain_end,
+    deriv_bound_lower,
+    deriv_bound_upper,
+    func_name="f",
+    domain_def="ci",
+    center_var="xo",
+    var_name="x",
+):
+    print(f"max_right_clipped: {max_right_clipped}")
+    print(f"min_left_clipped: {min_left_clipped}")
+    print(f"min_left: {min_left}")
+    print(f"max_right: {max_right}")
+
+    """These cases are for when we have both upper and lower derivative bounds."""
+    return f"""%|- (THEN (SKEEP*) (SKOLETIN*) (FLATTEN) (SKEEP)
+%|-  (SPREAD (CASE "{case_label1}")
+%|-   ((THEN (FLATTEN) (ASSERT))
+%|-    (SPREAD (CASE "{case_label2}")
+%|-     ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+%|-       (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{max_right}" "{var_name}")
+%|-        ((SPREAD (SPLIT -1)
+%|-          ((THEN (LEMMA "mvt_gen_ge_ci")
+%|-            (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{var_name}" "{min_left_clipped}")
+%|-             ((SPREAD (SPLIT -1)
+%|-               ((THEN (LEMMA "mvt_gen_le_ci")
+%|-                 (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{max_right}" "{var_name}")
+%|-                  ((SPREAD (SPLIT -1)
+%|-                    ((THEN (ASSERT) (LEMMA "mvt_gen_le_ci")
+%|-                      (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{var_name}" "{min_left_clipped}")
+%|-                       ((SPREAD (SPLIT -1)
+%|-                         ((THEN (EXPAND "{func_name}") (ASSERT :FLUSH? T))
+%|-                          (ASSERT :FLUSH? T) (PROPAX) (ASSERT :FLUSH? T)
+%|-                          (PROPAX)))
+%|-                        (THEN (EXPAND "{domain_def}") (PROPAX))
+%|-                        (THEN (EXPAND "{domain_def}") (PROPAX)))))
+%|-                     (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+%|-                   (THEN (EXPAND "{domain_def}") (ASSERT))
+%|-                   (THEN (EXPAND "{domain_def}") (ASSERT)))))
+%|-                (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+%|-              (THEN (EXPAND "{domain_def}") (PROPAX))
+%|-              (THEN (ASSERT) (EXPAND "{domain_def}") (PROPAX)))))
+%|-           (ASSERT) (PROPAX) (PROPAX) (PROPAX)))
+%|-         (THEN (EXPAND "{domain_def}") (ASSERT)) (THEN (EXPAND "{domain_def}") (ASSERT)))))
+%|-      (SPREAD (CASE "{case_label3}")
+%|-       ((THEN (FLATTEN) (LEMMA "mvt_gen_ge_ci")
+%|-         (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{max_right_clipped}" "{var_name}")
+%|-          ((SPREAD (SPLIT -1)
+%|-            ((THEN (LEMMA "mvt_gen_ge_ci")
+%|-              (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{var_name}" "{min_left}")
+%|-               ((SPREAD (SPLIT -1)
+%|-                 ((THEN (LEMMA "mvt_gen_le_ci")
+%|-                   (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{max_right_clipped}" "{var_name}")
+%|-                    ((SPREAD (SPLIT -1)
+%|-                      ((THEN (LEMMA "mvt_gen_le_ci")
+%|-                        (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{var_name}" "{min_left}")
+%|-                         ((SPREAD (SPLIT -1)
+%|-                           ((ASSERT) (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                          (THEN (EXPAND "{domain_def}") (ASSERT))
+%|-                          (THEN (EXPAND "{domain_def}") (ASSERT)))))
+%|-                       (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                     (THEN (EXPAND "{domain_def}") (ASSERT))
+%|-                     (THEN (EXPAND "{domain_def}") (PROPAX)))))
+%|-                  (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                (THEN (EXPAND "{domain_def}") (ASSERT)) (THEN (EXPAND "{domain_def}") (ASSERT)))))
+%|-             (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-           (THEN (EXPAND "{domain_def}") (ASSERT)) (THEN (EXPAND "{domain_def}") (PROPAX)))))
+%|-        (SPREAD (CASE "{case_label4}")
+%|-         ((SPREAD (CASE "{center_var}={var_name}")
+%|-           ((ASSERT)
+%|-            (SPREAD (CASE "{center_var}>{var_name}")
+%|-             ((THEN (ASSERT) (LEMMA "mvt_gen_ge_ci")
+%|-               (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{center_var}" "{var_name}")
+%|-                ((SPREAD (SPLIT -1)
+%|-                  ((THEN (LEMMA "mvt_gen_ge_ci")
+%|-                    (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{var_name}" "{min_left_clipped}")
+%|-                     ((SPREAD (SPLIT -1)
+%|-                       ((THEN (LEMMA "mvt_gen_le_ci")
+%|-                         (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{center_var}" "{var_name}")
+%|-                          ((SPREAD (SPLIT -1)
+%|-                            ((ASSERT)
+%|-                             (THEN (LEMMA "mvt_gen_le_ci")
+%|-                              (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{var_name}" "{min_left_clipped}")
+%|-                               ((SPREAD (SPLIT -1)
+%|-                                 ((THEN (EXPAND "{func_name}") (ASSERT :FLUSH? T))
+%|-                                  (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                                (THEN (EXPAND "{domain_def}" 1) (PROPAX))
+%|-                                (THEN (EXPAND "{domain_def}" 1) (PROPAX)))))
+%|-                             (PROPAX) (ASSERT) (PROPAX)))
+%|-                           (THEN (EXPAND "{domain_def}" 1) (PROPAX))
+%|-                           (THEN (EXPAND "{domain_def}" 1) (PROPAX)))))
+%|-                        (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                      (THEN (EXPAND "{domain_def}" 1) (PROPAX))
+%|-                      (THEN (ASSERT) (EXPAND "{domain_def}" 1) (PROPAX)))))
+%|-                   (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                 (THEN (EXPAND "{domain_def}" 1) (PROPAX))
+%|-                 (THEN (EXPAND "{domain_def}" 1) (PROPAX)))))
+%|-              (SPREAD (CASE "{center_var} < {var_name}")
+%|-               ((THEN (LEMMA "mvt_gen_ge_ci")
+%|-                 (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{var_name}" "{center_var}")
+%|-                  ((SPREAD (SPLIT -1)
+%|-                    ((THEN (LEMMA "mvt_gen_ge_ci")
+%|-                      (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_lower}" "{center_var}" "{min_left_clipped}")
+%|-                       ((SPREAD (SPLIT -1)
+%|-                         ((THEN (LEMMA "mvt_gen_le_ci")
+%|-                           (SPREAD (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{var_name}" "{center_var}")
+%|-                            ((SPREAD (SPLIT -1)
+%|-                              ((ASSERT)
+%|-                               (THEN (LEMMA "mvt_gen_le_ci")
+%|-                                (SPREAD
+%|-                                 (INST -1 "{func_name}" "{domain_start}" "{domain_end}" "{deriv_bound_upper}" "{center_var}" "{min_left_clipped}")
+%|-                                 ((SPREAD (SPLIT -1)
+%|-                                   ((THEN (EXPAND "{func_name}") (ASSERT :FLUSH? T))
+%|-                                    (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                                  (THEN (EXPAND "{domain_def}" 1) (PROPAX))
+%|-                                  (THEN (EXPAND "{domain_def}" 1) (ASSERT)))))
+%|-                               (PROPAX) (ASSERT) (PROPAX)))
+%|-                             (THEN (EXPAND "{domain_def}" 1) (ASSERT))
+%|-                             (THEN (EXPAND "{domain_def}" 1) (ASSERT)))))
+%|-                          (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                        (THEN (EXPAND "{domain_def}" 1) (PROPAX))
+%|-                        (THEN (EXPAND "{domain_def}" 1) (ASSERT)))))
+%|-                     (ASSERT) (PROPAX) (ASSERT) (PROPAX)))
+%|-                   (THEN (EXPAND "{domain_def}" 1) (ASSERT))
+%|-                   (THEN (EXPAND "{domain_def}" 1) (ASSERT)))))
+%|-                (ASSERT)))))))
+%|-          (THEN (HIDE-ALL-BUT (1 2 3 4)) (GRIND)))))))))))
 """
 
 
@@ -764,12 +903,19 @@ def generate_three_case_unifying_proof(
     """
 
     # TODO handle domain splits better!
+    # NOTE: fails for diamond somehow
 
     # only the piecewise splits here
     piecewise_splits = []
+    print("domain_splits:", domain_splits)
+    print("piecewise_split_bools:", piecewise_split_bools)
     for i in range(len(domain_splits)):
         if piecewise_split_bools[i]:
             piecewise_splits.append(domain_splits[i])
+    # TODO fix this for diamond somehow
+    if not piecewise_splits:
+        print("No piecewise splits found, skipping unifying lemma proof")
+        return "% skipping unifying lemma proof."
 
     domain_type_1 = domain_1.split("(")[0]
     domain_type_2 = domain_2.split("(")[0]
@@ -1539,20 +1685,36 @@ def generate_proof_scripts_from_calls(proof_calls):
     for call_params in proof_calls:
         if call_params["domain_definition"].startswith("ci"):
             assert len(call_params["case_labels"]) == 4
-            script = bounded_proof_script(
-                case_label1=call_params["case_labels"][0],
-                case_label2=call_params["case_labels"][1],
-                case_label3=call_params["case_labels"][2],
-                case_label4=call_params["case_labels"][3],
-                deriv_lemma=call_params["deriv_lemma"],
-                max_right=call_params["max_right"],
-                min_left=call_params["min_left"],
-                max_right_clipped=call_params["max_right_clipped"],
-                min_left_clipped=call_params["min_left_clipped"],
-                domain_start=call_params["domain_start"],
-                domain_end=call_params["domain_end"],
-                deriv_bound=call_params["deriv_bound1"],
-            )
+            if call_params["deriv_bound2"] is not None:
+                script = double_deriv_bound_proof_script(
+                    case_label1=call_params["case_labels"][0],
+                    case_label2=call_params["case_labels"][1],
+                    case_label3=call_params["case_labels"][2],
+                    case_label4=call_params["case_labels"][3],
+                    max_right=call_params["max_right"],
+                    min_left=call_params["min_left"],
+                    max_right_clipped=call_params["max_right_clipped"],
+                    min_left_clipped=call_params["min_left_clipped"],
+                    domain_start=call_params["domain_start"],
+                    domain_end=call_params["domain_end"],
+                    deriv_bound_lower=call_params["deriv_bound1"],
+                    deriv_bound_upper=call_params["deriv_bound2"],
+                )
+            else:
+                script = bounded_proof_script(
+                    case_label1=call_params["case_labels"][0],
+                    case_label2=call_params["case_labels"][1],
+                    case_label3=call_params["case_labels"][2],
+                    case_label4=call_params["case_labels"][3],
+                    deriv_lemma=call_params["deriv_lemma"],
+                    max_right=call_params["max_right"],
+                    min_left=call_params["min_left"],
+                    max_right_clipped=call_params["max_right_clipped"],
+                    min_left_clipped=call_params["min_left_clipped"],
+                    domain_start=call_params["domain_start"],
+                    domain_end=call_params["domain_end"],
+                    deriv_bound=call_params["deriv_bound1"],
+                )
         else:
             assert len(call_params["case_labels"]) == 1
 
