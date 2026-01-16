@@ -1175,7 +1175,9 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
     # Create intervals between all transition points
     var_intervals = list(zip(all_transition_points[:-1], all_transition_points[1:]))
     # Also track piecewise info for interval boundaries
-    var_intervals_is_piecewise = list(zip(all_transition_is_piecewise[:-1], all_transition_is_piecewise[1:]))
+    var_intervals_is_piecewise = list(
+        zip(all_transition_is_piecewise[:-1], all_transition_is_piecewise[1:])
+    )
 
     proof_calls = []
     deriv_statements = []
@@ -1508,31 +1510,113 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             + "\n\n"
             + unifying_proof
         )
-    elif num_cases == 3:
-        unifying_helper_proof = generate_three_case_unifying_lemma_helper(
-            domain_splits[0],
-            domain_splits[1],
-            proof_calls[0]["lemma_name"],
-            proof_calls[1]["lemma_name"],
-            proof_calls[2]["lemma_name"],
-            proof_calls[0]["domain_definition"],
-            proof_calls[1]["domain_definition"],
-            proof_calls[2]["domain_definition"],
-            trajectories[0],
-            trajectories[1],
-            trajectories[2],
+        # elif num_cases == 3:
+        #     unifying_helper_proof = generate_three_case_unifying_lemma_helper(
+        #         domain_splits[0],
+        #         domain_splits[1],
+        #         proof_calls[0]["lemma_name"],
+        #         proof_calls[1]["lemma_name"],
+        #         proof_calls[2]["lemma_name"],
+        #         proof_calls[0]["domain_definition"],
+        #         proof_calls[1]["domain_definition"],
+        #         proof_calls[2]["domain_definition"],
+        #         trajectories[0],
+        #         trajectories[1],
+        #         trajectories[2],
+        #     )
+        #     unifying_proof = generate_three_case_unifying_proof(
+        #         proof_calls[0]["domain_definition"],
+        #         proof_calls[1]["domain_definition"],
+        #         proof_calls[2]["domain_definition"],
+        #         proof_calls[0]["traj_piece"],
+        #         proof_calls[1]["traj_piece"],
+        #         proof_calls[2]["traj_piece"],
+        #         proof_calls[0]["full_traj"],
+        #         piecewise_split_bools,
+        #         domain_splits,
+        #     )
+        #     unifying_lemma_and_proof = (
+        #         unifying_lemma_helper_statement
+        #         + "\n\n"
+        #         + unifying_helper_proof
+        #         + "\n\n"
+        #         + unifying_lemma_statement
+        #         + "\n\n"
+        #         + unifying_proof
+        #     )
+        # else:
+        #     print(
+        #         "Only 1-3 cases handle unifying proof generation, returning just proof statement."
+        #     )
+        #     # Combine with the unifying lemma helper statement (which includes trajectory_statement with f0, f1, f2, f3)
+        #     # and the helper proof, matching the pattern for 2-3 cases
+        #     unifying_lemma_and_proof = (
+        #         unifying_lemma_helper_statement + "\n\n" + unifying_lemma_statement
+        #     )
+
+        # For 4+ cases, use the modular unifying_utils function
+        # Convert proof_calls to the format expected by generate_unifying_proof and generate_unifying_lemma_helper
+        cases = []
+        helper_cases = []
+        for i, proof_call in enumerate(proof_calls):
+            domain = proof_call["domain_definition"]
+            domain_type = domain.split("(")[0]
+            # First domain uses domain_splits[0] if available
+            domain_split = (
+                domain_splits[0] if (i == 0 and len(domain_splits) > 0) else ""
+            )
+
+            case = {
+                "domain": domain,
+                "trajectory": proof_call["traj_piece"],
+                "domain_type": domain_type,
+                "domain_split": domain_split,
+            }
+            cases.append(case)
+
+            # Build helper cases for generate_unifying_lemma_helper
+            helper_case = {
+                "lemma_name": proof_call["lemma_name"],
+                "domain": domain,
+                "trajectory": (
+                    trajectories[i]
+                    if i < len(trajectories)
+                    else proof_call["traj_piece"]
+                ),
+                "case_index": i,
+            }
+            helper_cases.append(helper_case)
+
+        # Build piecewise_splits_map from piecewise_split_bools and domain_splits
+        # Collect piecewise splits and map them to the last domain (for backward compatibility)
+        piecewise_splits = []
+        for i in range(len(domain_splits)):
+            if i < len(piecewise_split_bools) and piecewise_split_bools[i]:
+                piecewise_splits.append(domain_splits[i])
+
+        piecewise_splits_map = {}
+        if piecewise_splits and len(cases) > 0:
+            # Map piecewise splits to the last domain (index len(cases) - 1)
+            piecewise_splits_map[len(cases) - 1] = piecewise_splits
+
+        # Get full trajectory from first proof_call (all should have the same full_traj)
+        full_traj = proof_calls[0]["full_traj"] if proof_calls else ""
+
+        # Convert domain_splits to strings for generate_unifying_lemma_helper
+        domain_splits_str = [str(ds) for ds in domain_splits]
+
+        # Generate the helper proof using the modular function from unifying_utils
+        unifying_helper_proof = generate_unifying_lemma_helper_proof(
+            helper_cases, domain_splits_str
         )
-        unifying_proof = generate_three_case_unifying_proof(
-            proof_calls[0]["domain_definition"],
-            proof_calls[1]["domain_definition"],
-            proof_calls[2]["domain_definition"],
-            proof_calls[0]["traj_piece"],
-            proof_calls[1]["traj_piece"],
-            proof_calls[2]["traj_piece"],
-            proof_calls[0]["full_traj"],
-            piecewise_split_bools,
-            domain_splits,
+
+        # Generate the unifying proof using the modular function
+        unifying_proof = generate_unifying_proof(
+            cases, full_traj, piecewise_splits_map, use_case_statements=True
         )
+
+        # Combine with the unifying lemma helper statement (which includes trajectory_statement with f0, f1, f2, f3)
+        # and the helper proof, matching the pattern for 2-3 cases
         unifying_lemma_and_proof = (
             unifying_lemma_helper_statement
             + "\n\n"
@@ -1542,88 +1626,6 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             + "\n\n"
             + unifying_proof
         )
-    else:
-        print(
-            "Only 1-3 cases handle unifying proof generation, returning just proof statement."
-        )
-        # Combine with the unifying lemma helper statement (which includes trajectory_statement with f0, f1, f2, f3)
-        # and the helper proof, matching the pattern for 2-3 cases
-        unifying_lemma_and_proof = (
-            unifying_lemma_helper_statement + "\n\n" + unifying_lemma_statement
-        )
-
-        # # For 4+ cases, use the modular unifying_utils function
-        # # Convert proof_calls to the format expected by generate_unifying_proof and generate_unifying_lemma_helper
-        # cases = []
-        # helper_cases = []
-        # for i, proof_call in enumerate(proof_calls):
-        #     domain = proof_call["domain_definition"]
-        #     domain_type = domain.split("(")[0]
-        #     # First domain uses domain_splits[0] if available
-        #     domain_split = (
-        #         domain_splits[0] if (i == 0 and len(domain_splits) > 0) else ""
-        #     )
-
-        #     case = {
-        #         "domain": domain,
-        #         "trajectory": proof_call["traj_piece"],
-        #         "domain_type": domain_type,
-        #         "domain_split": domain_split,
-        #     }
-        #     cases.append(case)
-
-        #     # Build helper cases for generate_unifying_lemma_helper
-        #     helper_case = {
-        #         "lemma_name": proof_call["lemma_name"],
-        #         "domain": domain,
-        #         "trajectory": (
-        #             trajectories[i]
-        #             if i < len(trajectories)
-        #             else proof_call["traj_piece"]
-        #         ),
-        #         "case_index": i,
-        #     }
-        #     helper_cases.append(helper_case)
-
-        # # Build piecewise_splits_map from piecewise_split_bools and domain_splits
-        # # Collect piecewise splits and map them to the last domain (for backward compatibility)
-        # piecewise_splits = []
-        # for i in range(len(domain_splits)):
-        #     if i < len(piecewise_split_bools) and piecewise_split_bools[i]:
-        #         piecewise_splits.append(domain_splits[i])
-
-        # piecewise_splits_map = {}
-        # if piecewise_splits and len(cases) > 0:
-        #     # Map piecewise splits to the last domain (index len(cases) - 1)
-        #     piecewise_splits_map[len(cases) - 1] = piecewise_splits
-
-        # # Get full trajectory from first proof_call (all should have the same full_traj)
-        # full_traj = proof_calls[0]["full_traj"] if proof_calls else ""
-
-        # # Convert domain_splits to strings for generate_unifying_lemma_helper
-        # domain_splits_str = [str(ds) for ds in domain_splits]
-
-        # # Generate the helper proof using the modular function from unifying_utils
-        # unifying_helper_proof = generate_unifying_lemma_helper_proof(
-        #     helper_cases, domain_splits_str
-        # )
-
-        # # Generate the unifying proof using the modular function
-        # unifying_proof = generate_unifying_proof(
-        #     cases, full_traj, piecewise_splits_map, use_case_statements=True
-        # )
-
-        # # Combine with the unifying lemma helper statement (which includes trajectory_statement with f0, f1, f2, f3)
-        # # and the helper proof, matching the pattern for 2-3 cases
-        # unifying_lemma_and_proof = (
-        #     unifying_lemma_helper_statement
-        #     + "\n\n"
-        #     + unifying_helper_proof
-        #     + "\n\n"
-        #     + unifying_lemma_statement
-        #     + "\n\n"
-        #     + unifying_proof
-        # )
 
     return proof_calls, unifying_lemma_and_proof
 
