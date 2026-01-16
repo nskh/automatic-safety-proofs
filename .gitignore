@@ -8,3 +8,6 @@ tikz/*.log
 tikz/*.aux
 tikz/*.fls
 tikz/*.fdb_latexmk
+pvs-examples/temp*/
+*.summary
+*.log

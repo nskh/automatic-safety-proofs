@@ -48,30 +48,28 @@ def main():
     x = symbols("x")
 
     # Create a rectangle polygon with width 4 (half-width 2)
-    w = 1.0
+    # w = 1.0
     # rect_points = [
     #     Point(val) for val in [[2 * w, -w], [2 * w, w], [-2 * w, w], [-2 * w, -w]]
     # ]
     # polygon = Polygon(*rect_points)
     # square_points = [Point(val) for val in [[w, w], [w, -w], [-w, -w], [-w, w]]]
     # polygon = Polygon(*square_points)
-    diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
+    # rotated square diamond:
+    # diamond_points = [Point(val) for val in [[0, 1], [1, 0], [0, -1], [-1, 0]]]
+    # asymmetric diamond/kite:
+    diamond_points = [Point(val) for val in [[0, 2], [2, 0], [0, -2], [-1, 0]]]
     polygon = Polygon(*diamond_points)
 
-    # A = (Rational(1), Rational(0))
-    # B = (Rational(1, 2), Rational(6, 7))
-    # C = (Rational(-1, 2), Rational(6, 7))
-    # D = (Rational(-1), Rational(0))
-    # E = (Rational(-1, 2), Rational(-6, 7))
-    # F = (Rational(1, 2), Rational(-6, 7))
-    A = (2, 0)
-    B = (1, 2)
-    C = (-1, 2)
-    D = (-2, 0)
-    E = (-1, -2)
-    F = (1, -2)
+    # integer valued hexagon
+    # A = (2, 0)
+    # B = (1, 2)
+    # C = (-1, 2)
+    # D = (-2, 0)
+    # E = (-1, -2)
+    # F = (1, -2)
+    # polygon = Polygon(A, B, C, D, E, F)
 
-    polygon = Polygon(A, B, C, D, E, F)  # hexagon
     plot_polygon(polygon)
 
     # trajectory_expr = x
@@ -80,6 +78,11 @@ def main():
     trajectory_expr = x**2
     # trajectory_expr = -(x**2)
     # trajectory_expr = Piecewise((x**2, x <= 4), (8 * x - 16, x > 4))
+    # trajectory_expr = Piecewise(
+    #     (x**2, x <= 4),
+    #     (8 * x - 16, (x > 4) & (x <= 6)),
+    #     (x**2 - 4 * x + 20, x > 6),
+    # )
     # trajectory_expr = Piecewise((x**2 + 2 * x + 1, x <= 3), (8 * x - 8, x > 3))
     # trajectory_expr = Piecewise((-(x**2), x <= 4), (-8 * x + 16, x > 4))
 

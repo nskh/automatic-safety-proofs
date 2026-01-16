@@ -21,6 +21,10 @@ from safe_region_utils import (
     find_transitions,
     compute_corners_to_angles,
 )
+from unifying_utils import (
+    generate_unifying_proof,
+    generate_unifying_lemma_helper as generate_unifying_lemma_helper_proof,
+)
 
 
 # =============================================================================
@@ -1056,7 +1060,9 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
 
     # Get polygon angles and find transitions
     angles, _ = compute_polygon_angles(poly)
-    set_of_transitions = set()
+    # Dict mapping transition points to whether they come from a piecewise bound
+    # Key: Point, Value: True if from piecewise bound, False if from find_transitions
+    set_of_transitions = {}
 
     if isinstance(trajectory_expr, Piecewise):
         # Handle piecewise trajectories
@@ -1070,12 +1076,16 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             left_bound = Point(subdomain.inf, subtraj.subs(func_var, subdomain.inf))
             right_bound = Point(subdomain.sup, subtraj.subs(func_var, subdomain.sup))
 
-            set_of_transitions.update(subset_of_transitions)
+            # Add transitions from find_transitions (not piecewise bounds)
+            for pt in subset_of_transitions:
+                if pt not in set_of_transitions:
+                    set_of_transitions[pt] = False
 
+            # Add piecewise bounds
             if left_bound.x.is_finite and left_bound.y.is_finite:
-                set_of_transitions.add(left_bound)
+                set_of_transitions[left_bound] = True
             if right_bound.x.is_finite and right_bound.y.is_finite:
-                set_of_transitions.add(right_bound)
+                set_of_transitions[right_bound] = True
     else:
         # Handle single trajectory (y = f(x))
         _, subset_of_transitions = find_transitions(
@@ -1085,16 +1095,22 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         left_bound = Point(domain.inf, trajectory_expr.subs(func_var, domain.inf))
         right_bound = Point(domain.sup, trajectory_expr.subs(func_var, domain.sup))
 
-        set_of_transitions.update(subset_of_transitions)
-        # only add if finite
+        # Add transitions from find_transitions (not piecewise bounds)
+        for pt in subset_of_transitions:
+            if pt not in set_of_transitions:
+                set_of_transitions[pt] = False
+        # only add if finite (these are domain bounds, not piecewise bounds, so mark as False)
         if left_bound.x.is_finite and left_bound.y.is_finite:
-            set_of_transitions.add(left_bound)
+            if left_bound not in set_of_transitions:
+                set_of_transitions[left_bound] = False
         if right_bound.x.is_finite and right_bound.y.is_finite:
-            set_of_transitions.add(right_bound)
+            if right_bound not in set_of_transitions:
+                set_of_transitions[right_bound] = False
 
     # Sort transitions by x coordinate and compute midpoints
-    sorted_transitions = sorted(set_of_transitions, key=lambda point: point.x)
-    func_var_transitions = [p.x for p in sorted_transitions]
+    # sorted_transitions is a list of (Point, is_piecewise_bound) tuples
+    sorted_transitions = sorted(set_of_transitions.items(), key=lambda item: item[0].x)
+    func_var_transitions = [p.x for p, _ in sorted_transitions]
     if func_var_transitions:
         midpoints = np.convolve(func_var_transitions, [1, 1], "valid") / 2
     else:
@@ -1141,17 +1157,25 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
     # Add domain boundaries to transition points
     # TODO maybe we add duplicates here? but maybe it doesn't matter.
     all_transition_points = func_var_transitions.copy()
+    # Track whether each transition point is from a piecewise bound
+    all_transition_is_piecewise = [is_pw for _, is_pw in sorted_transitions]
     if domain_min.is_finite:
         all_transition_points.insert(0, domain_min)
+        all_transition_is_piecewise.insert(0, False)  # domain boundary, not piecewise
     elif domain_min == -oo:
         all_transition_points.insert(0, -oo)
+        all_transition_is_piecewise.insert(0, False)
     if domain_max.is_finite:
         all_transition_points.append(domain_max)
+        all_transition_is_piecewise.append(False)  # domain boundary, not piecewise
     elif domain_max == oo:
         all_transition_points.append(oo)
+        all_transition_is_piecewise.append(False)
 
     # Create intervals between all transition points
     var_intervals = list(zip(all_transition_points[:-1], all_transition_points[1:]))
+    # Also track piecewise info for interval boundaries
+    var_intervals_is_piecewise = list(zip(all_transition_is_piecewise[:-1], all_transition_is_piecewise[1:]))
 
     proof_calls = []
     deriv_statements = []
@@ -1161,6 +1185,7 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
 
     for i, var_interval in enumerate(var_intervals):
         interval_start, interval_end = var_interval
+        start_is_piecewise, end_is_piecewise = var_intervals_is_piecewise[i]
 
         # Skip if this interval is outside the domain
         if interval_end <= domain_min or interval_start >= domain_max:
@@ -1290,10 +1315,33 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
                     deriv_direction_1 = ">="
             deriv_sign = "ge" if deriv_direction_1 == ">=" else "le"
             deriv_direction_2 = "<=" if deriv_direction_1 == ">=" else ">="
-            deriv_clause1 = f"{deriv_direction_1} {deriv_at_beginning}"
-            deriv_clause2 = f"{deriv_direction_2} {deriv_at_end}"
-            deriv_bound1 = deriv_at_beginning
-            deriv_bound2 = deriv_at_end
+
+            # Determine deriv_bound1/2 based on whether boundaries are from piecewise bounds
+            # Only set deriv_bound2 if both boundaries are NOT from piecewise bounds
+            if not start_is_piecewise and not end_is_piecewise:
+                # Both are non-piecewise: use both bounds
+                deriv_clause1 = f"{deriv_direction_1} {deriv_at_beginning}"
+                deriv_clause2 = f"{deriv_direction_2} {deriv_at_end}"
+                deriv_bound1 = deriv_at_beginning
+                deriv_bound2 = deriv_at_end
+            elif start_is_piecewise and not end_is_piecewise:
+                # Start is piecewise, end is not: use end for deriv_bound1
+                deriv_clause1 = f"{deriv_direction_2} {deriv_at_end}"
+                deriv_clause2 = None
+                deriv_bound1 = deriv_at_end
+                deriv_bound2 = None
+            elif not start_is_piecewise and end_is_piecewise:
+                # End is piecewise, start is not: use start for deriv_bound1
+                deriv_clause1 = f"{deriv_direction_1} {deriv_at_beginning}"
+                deriv_clause2 = None
+                deriv_bound1 = deriv_at_beginning
+                deriv_bound2 = None
+            else:
+                # Both are piecewise: use start for deriv_bound1
+                deriv_clause1 = f"{deriv_direction_1} {deriv_at_beginning}"
+                deriv_clause2 = None
+                deriv_bound1 = deriv_at_beginning
+                deriv_bound2 = None
 
         # Determine derivative lemma based on derivative sign at midpoint
         # For left_unbounded domains: use left_open lemmas
@@ -1495,7 +1543,87 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             + unifying_proof
         )
     else:
-        unifying_lemma_and_proof = unifying_lemma_statement
+        print(
+            "Only 1-3 cases handle unifying proof generation, returning just proof statement."
+        )
+        # Combine with the unifying lemma helper statement (which includes trajectory_statement with f0, f1, f2, f3)
+        # and the helper proof, matching the pattern for 2-3 cases
+        unifying_lemma_and_proof = (
+            unifying_lemma_helper_statement + "\n\n" + unifying_lemma_statement
+        )
+
+        # # For 4+ cases, use the modular unifying_utils function
+        # # Convert proof_calls to the format expected by generate_unifying_proof and generate_unifying_lemma_helper
+        # cases = []
+        # helper_cases = []
+        # for i, proof_call in enumerate(proof_calls):
+        #     domain = proof_call["domain_definition"]
+        #     domain_type = domain.split("(")[0]
+        #     # First domain uses domain_splits[0] if available
+        #     domain_split = (
+        #         domain_splits[0] if (i == 0 and len(domain_splits) > 0) else ""
+        #     )
+
+        #     case = {
+        #         "domain": domain,
+        #         "trajectory": proof_call["traj_piece"],
+        #         "domain_type": domain_type,
+        #         "domain_split": domain_split,
+        #     }
+        #     cases.append(case)
+
+        #     # Build helper cases for generate_unifying_lemma_helper
+        #     helper_case = {
+        #         "lemma_name": proof_call["lemma_name"],
+        #         "domain": domain,
+        #         "trajectory": (
+        #             trajectories[i]
+        #             if i < len(trajectories)
+        #             else proof_call["traj_piece"]
+        #         ),
+        #         "case_index": i,
+        #     }
+        #     helper_cases.append(helper_case)
+
+        # # Build piecewise_splits_map from piecewise_split_bools and domain_splits
+        # # Collect piecewise splits and map them to the last domain (for backward compatibility)
+        # piecewise_splits = []
+        # for i in range(len(domain_splits)):
+        #     if i < len(piecewise_split_bools) and piecewise_split_bools[i]:
+        #         piecewise_splits.append(domain_splits[i])
+
+        # piecewise_splits_map = {}
+        # if piecewise_splits and len(cases) > 0:
+        #     # Map piecewise splits to the last domain (index len(cases) - 1)
+        #     piecewise_splits_map[len(cases) - 1] = piecewise_splits
+
+        # # Get full trajectory from first proof_call (all should have the same full_traj)
+        # full_traj = proof_calls[0]["full_traj"] if proof_calls else ""
+
+        # # Convert domain_splits to strings for generate_unifying_lemma_helper
+        # domain_splits_str = [str(ds) for ds in domain_splits]
+
+        # # Generate the helper proof using the modular function from unifying_utils
+        # unifying_helper_proof = generate_unifying_lemma_helper_proof(
+        #     helper_cases, domain_splits_str
+        # )
+
+        # # Generate the unifying proof using the modular function
+        # unifying_proof = generate_unifying_proof(
+        #     cases, full_traj, piecewise_splits_map, use_case_statements=True
+        # )
+
+        # # Combine with the unifying lemma helper statement (which includes trajectory_statement with f0, f1, f2, f3)
+        # # and the helper proof, matching the pattern for 2-3 cases
+        # unifying_lemma_and_proof = (
+        #     unifying_lemma_helper_statement
+        #     + "\n\n"
+        #     + unifying_helper_proof
+        #     + "\n\n"
+        #     + unifying_lemma_statement
+        #     + "\n\n"
+        #     + unifying_proof
+        # )
 
     return proof_calls, unifying_lemma_and_proof
 
