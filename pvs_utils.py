@@ -13,6 +13,10 @@ from sympy import (
     oo,
     Interval,
     nan,
+    Le,
+    Lt,
+    StrictLessThan,
+    LessThan,
 )
 from sympy.functions.elementary.piecewise import Piecewise
 import string
@@ -127,15 +131,64 @@ def sympy_to_pvs(clause: str):
     )
 
 
+def extract_upper_bound(condition, var):
+    """Extract the upper bound value from a SymPy condition.
+
+    For conditions like `x <= -10`, returns `-10`.
+    For conditions like `x < 5`, returns `5`.
+    Handles both Le (<=) and Lt (<) conditions.
+
+    Returns None if no upper bound can be extracted.
+    """
+    # Handle Le (<=) and Lt (<) conditions
+    if isinstance(condition, (Le, LessThan)):
+        # condition is var <= bound
+        if condition.lhs == var:
+            return condition.rhs
+    elif isinstance(condition, (Lt, StrictLessThan)):
+        # condition is var < bound
+        if condition.lhs == var:
+            return condition.rhs
+
+    # For other condition types (And, Or, etc.), try to find a Le/Lt
+    # by checking the condition's args if it has them
+    if hasattr(condition, 'args'):
+        for arg in condition.args:
+            result = extract_upper_bound(arg, var)
+            if result is not None:
+                return result
+
+    return None
+
+
 def piecewise_to_pvs(trajectory: Piecewise):
-    """Convert piecewise trajectory to PVS format."""
-    # Get the original conditions and expressions from Piecewise.args
+    """Convert piecewise trajectory to PVS format with mutually exclusive conditions.
+
+    PVS COND requires mutually exclusive branches. SymPy Piecewise uses cumulative
+    conditions (assuming earlier branches are already false), so we need to make
+    them explicit. For example:
+
+    SymPy:  COND x <= -10 -> ..., x <= 0 -> ..., ELSE -> ... ENDCOND
+    PVS:    COND x <= -10 -> ..., x > -10 AND x <= 0 -> ..., ELSE -> ... ENDCOND
+    """
     args = trajectory.args
 
     if not args:
         return ""
 
+    # Get the free variable from the trajectory
+    free_vars = trajectory.free_symbols
+    var = None
+    for v in free_vars:
+        if str(v) == 'x':
+            var = v
+            break
+    if var is None and free_vars:
+        var = list(free_vars)[0]
+
     cond_parts = []
+    prev_bound = None
+
     for i, (expr, condition) in enumerate(args):
         # Convert expression to PVS format
         expr_pvs = sympy_to_pvs(str(expr))
@@ -143,12 +196,29 @@ def piecewise_to_pvs(trajectory: Piecewise):
         # For the last condition, use ELSE
         if i == len(args) - 1:
             cond_parts.append(f"ELSE -> {expr_pvs}")
-        else:
-            # Convert condition to PVS format and clean up newlines for COND structure
+        elif i == 0:
+            # First condition: use as-is
             cond_pvs = sympy_to_pvs(str(condition))
-            # Remove newlines and extra spaces for COND format
             cond_pvs_clean = " ".join(cond_pvs.split())
             cond_parts.append(f"{cond_pvs_clean} -> {expr_pvs}")
+            # Extract the upper bound for the next iteration
+            prev_bound = extract_upper_bound(condition, var)
+        else:
+            # Middle conditions: add lower bound exclusion to make mutually exclusive
+            cond_pvs = sympy_to_pvs(str(condition))
+            cond_pvs_clean = " ".join(cond_pvs.split())
+
+            if prev_bound is not None:
+                # Prepend the lower bound exclusion
+                prev_bound_pvs = sympy_to_pvs(str(prev_bound))
+                exclusive_cond = f"x > {prev_bound_pvs} AND {cond_pvs_clean}"
+                cond_parts.append(f"{exclusive_cond} -> {expr_pvs}")
+            else:
+                # If we couldn't extract a bound, use the original condition
+                cond_parts.append(f"{cond_pvs_clean} -> {expr_pvs}")
+
+            # Extract the upper bound for the next iteration
+            prev_bound = extract_upper_bound(condition, var)
 
     # Join all conditions with commas and wrap in COND...ENDCOND
     return f"COND {', '.join(cond_parts)} ENDCOND"
