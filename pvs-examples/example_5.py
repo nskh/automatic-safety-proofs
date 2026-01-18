@@ -18,7 +18,7 @@ def main():
         description="Example for automatic proof generation"
     )
     parser.add_argument(
-        "--output_filename",
+        "output_filename",
         nargs="?",
         default="example_5.pvs",
         help="Output filename for the proof (default: example_5.pvs)",

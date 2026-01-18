@@ -574,6 +574,22 @@ def generate_unifying_lemma_helper(
         # Single case doesn't need a helper lemma
         return "% Single case - no helper lemma needed"
 
+    # For 3 cases, use the hardcoded version that matches the original exactly
+    if num_cases == 3 and len(domain_splits) >= 2:
+        return generate_three_case_unifying_lemma_helper(
+            domain_split_1=domain_splits[0],
+            domain_split_2=domain_splits[1],
+            lemma_1=cases[0]["lemma_name"],
+            lemma_2=cases[1]["lemma_name"],
+            lemma_3=cases[2]["lemma_name"],
+            domain_type_1=cases[0]["domain"],
+            domain_type_2=cases[1]["domain"],
+            domain_type_3=cases[2]["domain"],
+            trajectory_function_1=cases[0]["trajectory"],
+            trajectory_function_2=cases[1]["trajectory"],
+            trajectory_function_3=cases[2]["trajectory"],
+        )
+
     def generate_case_branch(case_idx: int) -> str:
         """Generate the proof branch for a single case."""
         case = cases[case_idx]
@@ -750,18 +766,18 @@ def generate_unifying_lemma_helper(
             case_1_stripped = case_1_stripped[1:]  # Remove extra opening paren
         case_2_stripped = case_branches_raw[2].lstrip()
         # Build structure matching original exactly
-        # case_2 ends with ))) (3 closes: GRIND's THEN, CASE list, SPREAD list)
-        # After case_2, we need to close:
-        #   - inner SPREAD list: )
-        #   - inner SPREAD: )
-        #   - outer SPREAD list: )
-        #   - outer SPREAD: )
-        #   - outer CASE: )
-        #   - outer THEN: )
-        # Total: 3 (case_2) + 6 (structure) = 9 closes after GRIND
-        nested_structure = f"""   (({case_0_stripped}
+        # The structure is:
+        #   (SPREAD (CASE "x <= split_1")
+        #    ((THEN case_0 ...)))
+        #    (SPREAD (CASE "x <= split_2")
+        #     ((THEN case_1 ...)))
+        #     (THEN case_2 ...))))))
+        #
+        # case_0_stripped already starts with (THEN, so we only add one ( before it
+        # case_1_stripped already starts with (THEN, so we only add one ( before it
+        nested_structure = f"""   ({case_0_stripped}
     (SPREAD (CASE "x <= {domain_splits[1]}")
-     (({case_1_stripped}
+     ({case_1_stripped}
       {case_2_stripped}))))))"""
     else:
         # Four or more cases: build nested structure iteratively

@@ -1,6 +1,6 @@
 # Active Corners Certificate Generation
 
-As described in the associated paper, this library automatically constructs proof certificates for instances of the active corner method. To run these examples, you will need to have Python, SymPy, PVS, and NASALib installed. A variety of examples (`example_1.py` through `example_7.py`) are included to illustrate key examples as described in our paper. Our case study is also included as a PVS file: `dl_case_study.pvs`.
+As described in the associated paper, this library automatically constructs proof certificates for instances of the active corner method. To run these examples, you will need to have Python, SymPy, PVS 8 (PVS 7 may not work), and NASALib installed. A variety of examples (`example_1.py` through `example_7.py`) are included to illustrate key examples as described in our paper. Our case study is also included as a PVS file: `dl_case_study.pvs`.
 
 Each example defines a polygon, trajectory function, and domain. A proof certificate is automatically generated and saved to a PVS file with the same name as the example; that is, `example_1.pvs`, `example_2.pvs`, and so on.
 
