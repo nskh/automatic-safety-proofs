@@ -17,6 +17,7 @@ from sympy import (
     Lt,
     StrictLessThan,
     LessThan,
+    limit,
 )
 from sympy.functions.elementary.piecewise import Piecewise
 import string
@@ -1346,13 +1347,22 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
         ):
             if left_unbounded:
                 endpoint = interval_end
+                if end_is_piecewise:
+                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, '-')
+                else:
+                    deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif right_unbounded:
                 endpoint = interval_start
+                if start_is_piecewise:
+                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, '+')
+                else:
+                    deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif interval_start == domain_min:
                 endpoint = interval_end
+                deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif interval_end == domain_max:
                 endpoint = interval_start
-            deriv_at_endpoint = deriv_traj.subs(x, endpoint)
+                deriv_at_endpoint = deriv_traj.subs(x, endpoint)
 
             if deriv_at_endpoint == nan or deriv_at_midpoint == nan:
                 raise ValueError(
