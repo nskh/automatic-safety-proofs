@@ -812,13 +812,11 @@ class UnifyingProofBuilder:
             return UnifyingProofBuilder._single_domain_proof(domains[0])
 
         # Calculate PROPAX count
-        # Pattern: 10 for 2 cases, 16 for 3 cases, ~4*n + 2 for n cases
+        # Pattern: 10 for 2 cases, 16 for 3 cases, 6*n - 2 for n >= 3 cases
         if num_cases == 2:
             num_propax = 10
-        elif num_cases == 3:
-            num_propax = 16
-        else:
-            num_propax = 4 * num_cases + 2
+        elif num_cases >= 3:
+            num_propax = 6 * num_cases - 2
 
         # Format PROPAX calls
         propax_lines = UnifyingProofBuilder._format_propax(num_propax)
@@ -922,26 +920,29 @@ class UnifyingProofBuilder:
     ) -> List[str]:
         """Generate branches for first domain."""
         bound = bounds[0] if bounds else ""
+        # traj_eq is like "(LAMBDA...full_piecewise...) = (LAMBDA...simplified...)"
+        # We need to change it to "restrict[real, (domain), real](g_1) = (LAMBDA...simplified...)"
+        # Extract the simplified RHS from traj_eq
+        rhs = traj_eq.split(" = ")[1] if " = " in traj_eq else traj_eq
+        restrict_eq = f"restrict[real, ({domain_pvs}), real](g_1) = {rhs}"
 
-        derivable = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD (DERIVABLE)
-%|-      ((SPREAD
-%|-        (CASE "{traj_eq}")
-%|-        ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE) (LEMMA "{type_name}_dd")
-%|-          (INST -1 "{bound}"))
-%|-         (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
-%|-          (EXPAND "{type_name}" -1) (ASSERT))))
-%|-       (THEN (LEMMA "{type_name}_dd") (INST -1 "{bound}")))))"""
-
-        deriv = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
+        derivable = f"""(THEN (HIDE-ALL-BUT 1)
 %|-     (SPREAD
-%|-      (CASE "{traj_eq}")
-%|-      ((THEN (REPLACE -1) (HIDE -1) (SKEEP)
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE) (LEMMA "{type_name}_dd")
+%|-        (INST -1 "{bound}"))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (EXPAND "g_1") (GRIND)))))"""
+
+        deriv = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
+%|-     (SPREAD
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1)
 %|-        (SPREAD (DERIV)
 %|-         ((THEN (TYPEPRED "x!1") (EXPAND "{type_name}" -1) (ASSERT))
 %|-          (THEN (LEMMA "{type_name}_dd") (INST -1 "{bound}")))))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (HIDE 2) (TYPEPRED "x!1")
-%|-        (EXPAND "{type_name}" -1) (ASSERT)))))"""
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2")
+%|-        (EXPAND "g_1") (GRIND)))))"""
 
         return [derivable, deriv]
 
@@ -950,25 +951,27 @@ class UnifyingProofBuilder:
         domain_pvs: str, type_name: str, bounds: List[str], traj_eq: str
     ) -> List[str]:
         """Generate branches for middle domain."""
-        # For middle domains (closed intervals typically)
-        derivable = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "{traj_eq}")
-%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIVABLE))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "{type_name}" -1) (FLATTEN)
-%|-        (ASSERT)))))"""
+        # Extract the simplified RHS from traj_eq
+        rhs = traj_eq.split(" = ")[1] if " = " in traj_eq else traj_eq
+        restrict_eq = f"restrict[real, ({domain_pvs}), real](g_1) = {rhs}"
 
-        deriv1 = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP) (EXPAND "restrict" 1) (EXPAND "g_1")
+        derivable = f"""(THEN (HIDE-ALL-BUT 1)
 %|-     (SPREAD
-%|-      (CASE "{traj_eq}")
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (DERIVABLE 1))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (EXPAND "g_1") (GRIND)))))"""
+
+        # For middle domains (ci), DERIV produces one subgoal, not multiple
+        # So we use DERIV followed by tactics directly, not SPREAD
+        deriv1 = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
+%|-     (SPREAD
+%|-      (CASE "{restrict_eq}")
 %|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV) (TYPEPRED "x!1") (EXPAND "{type_name}" -1)
 %|-        (PROPAX))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "{type_name}" -1) (FLATTEN)
-%|-        (ASSERT)))))"""
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2")
+%|-        (EXPAND "g_1") (GRIND)))))"""
 
-        # Note: Middle domains typically have only 1 DERIV condition in practice
-        # The helper lemma structure shows: derivable? AND FORALL deriv >= c
-        # So we only need 2 branches, not 3
         return [derivable, deriv1]
 
     @staticmethod
@@ -976,19 +979,25 @@ class UnifyingProofBuilder:
         domain_pvs: str, type_name: str, bounds: List[str], traj_eq: str
     ) -> List[str]:
         """Generate branches for last domain without piecewise handling."""
-        derivable = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "{traj_eq}")
-%|-      ((THEN (REPLACE -1) (DERIVABLE))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "{type_name}" -1)
-%|-        (ASSERT)))))"""
+        # Extract the simplified RHS from traj_eq
+        rhs = traj_eq.split(" = ")[1] if " = " in traj_eq else traj_eq
+        restrict_eq = f"restrict[real, ({domain_pvs}), real](g_1) = {rhs}"
 
-        deriv = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict") (SKEEP)
+        derivable = f"""(THEN (HIDE-ALL-BUT 1)
 %|-     (SPREAD
-%|-      (CASE "{traj_eq}")
-%|-      ((THEN (REPLACE -1) (DERIV))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "{type_name}")
-%|-        (ASSERT)))))"""
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (DERIVABLE))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (EXPAND "g_1") (GRIND)))))"""
+
+        # For last domain (right_open), DERIV produces one subgoal
+        # So we use DERIV followed by nothing else (or just HIDE -1)
+        deriv = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
+%|-     (SPREAD
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2")
+%|-        (EXPAND "g_1") (GRIND)))))"""
 
         return [derivable, deriv]
 
@@ -997,22 +1006,24 @@ class UnifyingProofBuilder:
         domain_pvs: str, type_name: str, bounds: List[str], traj_eq: str, split_val: str
     ) -> List[str]:
         """Generate branches for last domain with piecewise handling."""
-        derivable = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict")
-%|-     (SPREAD
-%|-      (CASE "{traj_eq}")
-%|-      ((THEN (REPLACE -1) (DERIVABLE))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1") (EXPAND "{type_name}" -1)
-%|-        (ASSERT) (HIDE 2)
-%|-        (SPREAD (CASE "x!1={split_val}") ((THEN (ASSERT) (GRIND)) (ASSERT)))))))"""
+        # Extract the simplified RHS from traj_eq
+        rhs = traj_eq.split(" = ")[1] if " = " in traj_eq else traj_eq
+        restrict_eq = f"restrict[real, ({domain_pvs}), real](g_1) = {rhs}"
 
-        deriv = f"""(THEN (HIDE-ALL-BUT 1) (EXPAND "g_1") (EXPAND "restrict") (SKEEP)
+        derivable = f"""(THEN (HIDE-ALL-BUT 1)
 %|-     (SPREAD
-%|-      (CASE "{traj_eq}")
-%|-      ((THEN (REPLACE -1) (DERIV))
-%|-       (THEN (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2") (EXPAND "{type_name}")
-%|-        (SPREAD (CASE "x!2={split_val}")
-%|-         ((THEN (REPLACE -1) (ASSERT) (HIDE 2) (EVAL-EXPR 1) (ASSERT))
-%|-          (ASSERT)))))))"""
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (DERIVABLE))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
+%|-        (EXPAND "g_1") (GRIND)))))"""
+
+        # For last domain (right_open), DERIV produces one subgoal
+        deriv = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
+%|-     (SPREAD
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (HIDE -1) (DERIV))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2")
+%|-        (EXPAND "g_1") (GRIND)))))"""
 
         return [derivable, deriv]
 
