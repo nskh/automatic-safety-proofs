@@ -1,0 +1,1866 @@
+(|jsdl|
+ (|fly_st_ex1_TCC1| 0
+  (|fly_st_ex1_TCC1-1| NIL 3965142067
+   ("" (EVAL-EXPR 1) (("" (ASSERT) NIL NIL)) NIL)
+   ((|null_MapExprInj| NAME-JUDGEMENT "MapExprInj" |hp_def| |dL|)
+    (|dLVar| TYPE-DECL NIL |hp_def| |dL|)
+    (|Environment| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|RealExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|MapExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|list| TYPE-DECL NIL |list_adt| NIL)
+    (|mapexpr_inj| CONST-DECL "bool" |hp_def| |dL|)
+    (|cons?| ADT-RECOGNIZER-DECL "[list -> boolean]" |list_adt| NIL)
+    (|cons| ADT-CONSTRUCTOR-DECL "[[T, list] -> (cons?)]" |list_adt| NIL)
+    (|cnst| CONST-DECL "real" |hp_def| |dL|)
+    (|bijective?| CONST-DECL "bool" |functions| NIL))
+   NIL
+   (|fly_st_ex1| SUBTYPE
+    "(: (jsdl.r, (real_fun_ops[Environment].-)(hp_def.cnst(10))), (jsdl.h, hp_def.cnst(10)) :)"
+    "ODEs" (25 14 25 47))))
+ (|fly_st_ex1| 0
+  (|fly_st_ex1-1| NIL 3965142119
+   ("" (SKOLETIN*)
+    (("" (FLATTEN)
+      (("" (LABEL "exp_frm" (-1 1 2 3 4 5))
+        (("" (HIDE "exp_frm")
+          (("" (DL-SOLVE)
+            (("1" (DL-HIDE -2)
+              (("1" (EVAL-EXPR "dlvar_index(r) = dlvar_index(h)")
+                (("1" (ASSERT)
+                  (("1" (HIDE 1)
+                    (("1" (GRIND)
+                      (("1" (LEMMA "ge_ro_case_1")
+                        (("1" (INST -1 "ro" "ho" "LAMBDA(x:real): x")
+                          (("1" (BETA)
+                            (("1"
+                              (CASE " (restrict[real, (right_open(0)), real]
+                (LAMBDA (x_1: real):
+                   COND x_1 < 0 -> 0, ELSE -> x_1 ENDCOND)) = (LAMBDA(x_1:(right_open(0))): x_1)")
+                              (("1" (SPLIT -2)
+                                (("1" (REVEAL "exp_frm")
+                                  (("1" (EXPAND "f") (("1" (ASSERT) NIL NIL))
+                                    NIL))
+                                  NIL)
+                                 ("2" (REVEAL "exp_frm")
+                                  (("2" (EXPAND "f") (("2" (ASSERT) NIL NIL))
+                                    NIL))
+                                  NIL)
+                                 ("3" (REVEAL "exp_frm")
+                                  (("3" (EXPAND "f") (("3" (ASSERT) NIL NIL))
+                                    NIL))
+                                  NIL)
+                                 ("4" (REVEAL "exp_frm")
+                                  (("4" (EXPAND "f") (("4" (ASSERT) NIL NIL))
+                                    NIL))
+                                  NIL)
+                                 ("5" (REVEAL "exp_frm")
+                                  (("5" (EXPAND "f") (("5" (ASSERT) NIL NIL))
+                                    NIL))
+                                  NIL)
+                                 ("6" (REPLACE -1)
+                                  (("6" (HIDE -1)
+                                    (("6"
+                                      (LEMMA
+                                       "id_derivable_fun[(right_open(0))]")
+                                      (("1" (PROPAX) NIL NIL)
+                                       ("2" (HIDE 2)
+                                        (("2" (LEMMA "right_open_noe")
+                                          (("2" (INST -1 "0")
+                                            (("2"
+                                              (EXPAND "not_one_element?" -1)
+                                              (("2" (ASSERT) NIL NIL)) NIL))
+                                            NIL))
+                                          NIL))
+                                        NIL)
+                                       ("3" (HIDE 2)
+                                        (("3" (LEMMA "right_open_dd")
+                                          (("3" (INST -1 "0")
+                                            (("3" (EXPAND "deriv_domain?" -1)
+                                              (("3" (ASSERT) NIL NIL)) NIL))
+                                            NIL))
+                                          NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL)
+                                 ("7" (REPLACE -1)
+                                  (("7" (LEMMA "deriv_I_fun[(right_open(0))]")
+                                    (("1" (SKEEP)
+                                      (("1" (EXPAND "I" -1)
+                                        (("1" (REPLACE -1)
+                                          (("1" (ASSERT) NIL NIL)) NIL))
+                                        NIL))
+                                      NIL)
+                                     ("2" (LEMMA "right_open_noe")
+                                      (("2" (INST -1 "0")
+                                        (("2" (EXPAND "not_one_element?" -1)
+                                          (("2" (ASSERT) NIL NIL)) NIL))
+                                        NIL))
+                                      NIL)
+                                     ("3" (HIDE 2)
+                                      (("3" (LEMMA "right_open_dd")
+                                        (("3" (INST -1 "0")
+                                          (("3" (EXPAND "deriv_domain?" -1)
+                                            (("3" (ASSERT) NIL NIL)) NIL))
+                                          NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL)
+                                 ("8" (INST 1 "10*t") (("8" (ASSERT) NIL NIL))
+                                  NIL))
+                                NIL)
+                               ("2" (HIDE -)
+                                (("2" (DECOMPOSE-EQUALITY 1)
+                                  (("2" (TYPEPRED "x!1")
+                                    (("2" (EXPAND "right_open" -1)
+                                      (("2" (ASSERT) NIL NIL)) NIL))
+                                    NIL))
+                                  NIL))
+                                NIL))
+                              NIL))
+                            NIL))
+                          NIL))
+                        NIL))
+                      NIL))
+                    NIL))
+                  NIL))
+                NIL))
+              NIL)
+             ("2" (INST 1 "-10")
+              (("2" (HIDE 2)
+                (("2" (DECOMPOSE-EQUALITY 1) (("2" (GRIND) NIL NIL)) NIL))
+                NIL))
+              NIL))
+            NIL))
+          NIL))
+        NIL))
+      NIL))
+    NIL)
+   ((|dl_hideL| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|for_it| DEF-DECL
+     "{t: T | t = for_def(i, upto, a, ext2int(upfrom, upto, f))}" |for_iterate|
+     |structures|)
+    (|for| CONST-DECL "T" |for_iterate| |structures|)
+    (|iterate_left| CONST-DECL "T" |for_iterate| |structures|)
+    (|right_open| CONST-DECL "bool" |active_corner_certificate| NIL)
+    (|deriv_I_fun| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|id_derivable_fun| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|right_open_noe| FORMULA-DECL NIL |active_corner_certificate| NIL)
+    (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+    (|right_open_dd| FORMULA-DECL NIL |active_corner_certificate| NIL)
+    (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+    (|SUB_MapVar| DEF-DECL
+     "{re: RealExpr | FORALL (env: Environment): re(env) = SUB_Re(l)(val(v))(env)}"
+     |substitution| |dL|)
+    (|Substitution| TYPE-EQ-DECL NIL |substitution| |dL|)
+    (|dl_sub_not| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_and| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_ge| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_const| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_plus| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_val| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_le| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_neg| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_bool_restricted| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_assignb_restricted| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|dl_assignb| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|dl_impliesR| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|dl_andL| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|dl_moveL| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|move_to_head| CONST-DECL "Formulas" |dynamic_logic| |dL|)
+    (|is_dlfnum| CONST-DECL "bool" |dynamic_logic| |dL|)
+    (|move_to_head_rec| DEF-DECL "Formulas" |dynamic_logic| |dL|)
+    (|null| ADT-CONSTRUCTOR-DECL "(null?)" |list_adt| NIL)
+    (|null?| ADT-RECOGNIZER-DECL "[list -> boolean]" |list_adt| NIL)
+    (|dl_forallR| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (DLIMPLIES CONST-DECL "bool" |bool_expr| |dL|)
+    (|is_cnst?| CONST-DECL "bool" |dl_solution| |dL|)
+    (|is_val_not_in_map?| CONST-DECL "bool" |dl_solution| |dL|)
+    (|in_map| CONST-DECL "bool" |hp_def| |dL|)
+    (|dlvar_index| ADT-ACCESSOR-DECL "[dLVar -> nat]" |hp_def| |dL|)
+    (|dlvar?| ADT-RECOGNIZER-DECL "[dLVar -> boolean]" |hp_def| |dL|)
+    (|dlvar| ADT-CONSTRUCTOR-DECL "[nat -> (dlvar?)]" |hp_def| |dL|)
+    (|env_nat_shift| CONST-DECL "real" |dl_solution| |dL|)
+    (|env_c| CONST-DECL "real" |dl_solution| |dL|)
+    (|init_zip_sol| DEF-DECL "{a: MapExprInj |
+   length(a) = length(ode) AND
+    FORALL (i: below(length(a))): nth(a, i) = (nth(ode, i)`1, y(i)(t))}"
+     |dl_solution| |dL|)
+    (|zs| CONST-DECL "MapExprInj" |dl_solution| |dL|)
+    (|Y_sol_ex| CONST-DECL "[Environment -> real]" |dl_solution| |dL|)
+    (ASSIGN ADT-CONSTRUCTOR-DECL "[Assigns -> (assign?)]" |HP_adt| |dL|)
+    (|Assigns| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (UPTO CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (QHP TYPE-EQ-DECL NIL |bool_expr| |dL|)
+    (DLFORALL CONST-DECL "bool" |bool_expr| |dL|)
+    (|QBoolExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|assign?| ADT-RECOGNIZER-DECL "[HP -> boolean]" |HP_adt| |dL|)
+    (|length_singleton| FORMULA-DECL NIL |more_list_props| |structures|)
+    (|cnst_lins?| CONST-DECL "bool" |dl_solution| |dL|)
+    (|MapExprInj| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|solution_domain_ax_cnst_imp_zip| FORMULA-DECL NIL |dl_solution| |dL|)
+    (|null_MapExprInj| NAME-JUDGEMENT "MapExprInj" |hp_def| |dL|)
+    (|BoolExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|Formulas| TYPE-EQ-DECL NIL |bool_expr| |dL|)
+    (|\|-| CONST-DECL "bool" |dynamic_logic| |dL|)
+    (DLAND CONST-DECL "bool" |bool_expr| |dL|)
+    (= CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (|val| CONST-DECL "real" |hp_def| |dL|) (HP TYPE-DECL NIL |HP_adt| |dL|)
+    (ALLRUNS CONST-DECL "bool" |bool_expr| |dL|)
+    (|ODEs| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|diff?| ADT-RECOGNIZER-DECL "[HP -> boolean]" |HP_adt| |dL|)
+    (DIFF ADT-CONSTRUCTOR-DECL "[[ODEs, BoolExpr] -> (diff?)]" |HP_adt| |dL|)
+    (DLBOOL CONST-DECL "bool" |bool_expr| |dL|)
+    (DLNOT CONST-DECL "bool" |bool_expr| |dL|)
+    (>= CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (<= CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (|bijective?| CONST-DECL "bool" |functions| NIL)
+    (|cnst| CONST-DECL "real" |hp_def| |dL|)
+    (|cons| ADT-CONSTRUCTOR-DECL "[[T, list] -> (cons?)]" |list_adt| NIL)
+    (|cons?| ADT-RECOGNIZER-DECL "[list -> boolean]" |list_adt| NIL)
+    (|mapexpr_inj| CONST-DECL "bool" |hp_def| |dL|)
+    (|list| TYPE-DECL NIL |list_adt| NIL)
+    (|MapExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|RealExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|Environment| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|dLVar| TYPE-DECL NIL |hp_def| |dL|))
+   SHOSTAK))
+ (|fly_st_ex2_TCC1| 0
+  (|fly_st_ex2_TCC1-1| NIL 3965916316 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex2| SUBTYPE "(: (jsdl.a, hp_def.cnst(0)) :)" "Assigns"
+    (44 30 44 47))))
+ (|fly_st_ex2_TCC2| 0
+  (|fly_st_ex2_TCC2-1| NIL 3965917103 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex2| SUBTYPE "(: (jsdl.a, hp_def.cnst(jsdl.alo)) :)" "Assigns"
+    (44 56 44 75))))
+ (|fly_st_ex2_TCC3| 0
+  (|fly_st_ex2_TCC3-1| NIL 3965917103 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex2| SUBTYPE
+    "(: (jsdl.r, (real_fun_ops[Environment].-)(hp_def.cnst(jsdl.rv))), (jsdl.h, (real_fun_ops[Environment].-)(hp_def.val(jsdl.v))), (jsdl.v, hp_def.val(jsdl.a)) :)"
+    "ODEs" (44 85 44 129))))
+ (|fly_st_ex2| 0
+  (|fly_st_ex2-1| NIL 3965916480
+   ("" (DL-LOOP "DLOR(val(r) > cnst(rp), val(h) > cnst(hp))")
+    (("1" (DL-FLATTEN)
+      (("1" (DL-HIDE -1 -2)
+        (("1" (DL-HIDE -1 -2)
+          (("1" (DL-HIDE -1)
+            (("1" (DL-HIDE -1 -2) (("1" (DL-ASSERT) NIL NIL)) NIL)) NIL))
+          NIL))
+        NIL))
+      NIL)
+     ("2" (DL-AXIOM) NIL NIL)
+     ("3" (DL-COMPOSEB)
+      (("3" (DL-CHOICEB)
+        (("3" (DL-FLATTEN)
+          (("3" (DL-ANDR)
+            (("1" (DL-ASSIGNB)
+              (("1" (LEMMA "dl_subf")
+                (("1" (INST?)
+                  (("1" (ASSERT)
+                    (("1" (HIDE 2)
+                      (("1" (DL-PP)
+                        (("1"
+                          (CASE
+                              " ((: DLAND(val(a) = cnst(0), DLOR(val(r) > cnst(rp), val(h) > cnst(hp))) :)
+        |-
+        (: ALLRUNS(DIFF((: (r, -cnst(rv)), (h, -val(v)), (v, val(a)) :),
+                        DLOR(DLAND(val(v) = cnst(vlo), val(a) = cnst(0)),
+                             DLAND(val(a) = cnst(alo),
+                                   val(v) <= cnst(vlo)))),
+                   DLOR(val(r) > cnst(rp), val(h) > cnst(hp))) :))")
+                          (("1" (REWRITE "dlSequent_equiv")
+                            (("1" (REWRITE "dlSequent_equiv")
+                              (("1" (EXPAND "dlSequent")
+                                (("1" (SKEEP)
+                                  (("1" (INST -1 "env")
+                                    (("1" (SPLIT -1)
+                                      (("1" (PROPAX) NIL NIL)
+                                       ("2" (HIDE 2)
+                                        (("2" (SKEEP)
+                                          (("2" (TYPEPRED "i")
+                                            (("2" (EXPAND "length" -1)
+                                              (("2" (EXPAND "length" -1)
+                                                (("2" (EXPAND "nth" 1)
+                                                  (("2" (ASSERT)
+                                                    (("2" (INST-CP -2 "0")
+                                                      (("1" (INST -2 "1")
+                                                        (("1" (EXPAND "nth")
+                                                          (("1" (EXPAND "nth")
+                                                            (("1" (GRIND) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL)
+                                                         ("2"
+                                                          (EXPAND "length" 1)
+                                                          (("2"
+                                                            (EXPAND "length" 1)
+                                                            (("2"
+                                                              (EXPAND "length"
+                                                                      1)
+                                                              (("2" (ASSERT)
+                                                                NIL NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("2" (ASSERT)
+                                                        (("2"
+                                                          (EXPAND "length" 1)
+                                                          (("2"
+                                                            (EXPAND "length" 1)
+                                                            (("2" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL))
+                                              NIL))
+                                            NIL))
+                                          NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL))
+                                NIL))
+                              NIL))
+                            NIL)
+                           ("2" (HIDE 2)
+                            (("2" (LEMMA " solution_domain_ax_cnst_imp_zip")
+                              (("2" (INST?)
+                                (("1" (ASSERT)
+                                  (("1" (ASSERT)
+                                    (("1" (HIDE 2)
+                                      (("1" (DL-SKOLEM)
+                                        (("1" (EXPAND "zs" 1)
+                                          (("1" (EXPAND "init_zip_sol" 1)
+                                            (("1" (EXPAND "length" 1 1)
+                                              (("1" (EXPAND "length" 1 1)
+                                                (("1" (EXPAND "length" 1 1)
+                                                  (("1" (EXPAND "length" 1 1)
+                                                    (("1" (ASSERT)
+                                                      (("1"
+                                                        (EXPAND "length" 1 1)
+                                                        (("1" (ASSERT)
+                                                          (("1"
+                                                            (EXPAND
+                                                             "init_zip_sol" 1)
+                                                            (("1"
+                                                              (EXPAND "length")
+                                                              (("1" (ASSERT)
+                                                                (("1"
+                                                                  (EXPAND
+                                                                   "length")
+                                                                  (("1"
+                                                                    (EXPAND
+                                                                     "length")
+                                                                    (("1"
+                                                                      (EXPAND
+                                                                       "length")
+                                                                      (("1"
+                                                                        (EXPAND
+                                                                         "nth"
+                                                                         1)
+                                                                        (("1"
+                                                                          (EXPAND
+                                                                           "nth"
+                                                                           1)
+                                                                          (("1"
+                                                                            (EXPAND
+                                                                             "nth"
+                                                                             1)
+                                                                            (("1"
+                                                                              (EXPAND
+                                                                               "init_zip_sol"
+                                                                               1)
+                                                                              (("1"
+                                                                                (EXPAND
+                                                                                 "length")
+                                                                                (("1"
+                                                                                  (EXPAND
+                                                                                   "length")
+                                                                                  (("1"
+                                                                                    (EXPAND
+                                                                                     "length")
+                                                                                    (("1"
+                                                                                      (EXPAND
+                                                                                       "length")
+                                                                                      (("1"
+                                                                                        (EXPAND
+                                                                                         "init_zip_sol"
+                                                                                         1)
+                                                                                        (("1"
+                                                                                          (EXPAND
+                                                                                           "length")
+                                                                                          (("1"
+                                                                                            (EXPAND
+                                                                                             "length")
+                                                                                            (("1"
+                                                                                              (EXPAND
+                                                                                               "length")
+                                                                                              (("1"
+                                                                                                (EXPAND
+                                                                                                 "nth"
+                                                                                                 1)
+                                                                                                (("1"
+                                                                                                  (NAME
+                                                                                                   "Ys"
+                                                                                                   "Y_sol_ex((: (r, -cnst(rv)), (h, -val(v)),
+                                           (v, val(a)) :))
+                                       (0)")
+                                                                                                  (("1"
+                                                                                                    (REPLACE
+                                                                                                     -1)
+                                                                                                    (("1"
+                                                                                                      (NAME
+                                                                                                       "Y1"
+                                                                                                       "Y_sol_ex((: (r, -cnst(rv)),
+                                                (h, -val(v)),
+                                                (v, val(a)) :))
+                                            (1)")
+                                                                                                      (("1"
+                                                                                                        (REPLACE
+                                                                                                         -1)
+                                                                                                        (("1"
+                                                                                                          (NAME
+                                                                                                           "Y2"
+                                                                                                           "Y_sol_ex((: (r, -cnst(rv)),
+                                                     (h, -val(v)),
+                                                     (v, val(a)) :))
+                                                 (2)")
+                                                                                                          (("1"
+                                                                                                            (REPLACE
+                                                                                                             -1)
+                                                                                                            (("1"
+                                                                                                              (EXPAND
+                                                                                                               "Y_sol_ex"
+                                                                                                               -3)
+                                                                                                              (("1"
+                                                                                                                (CASE
+                                                                                                                    "is_cnst?((: (r, -cnst(rv)), (h, -val(v)), (v, val(a)) :))(0)")
+                                                                                                                (("1"
+                                                                                                                  (ASSERT)
+                                                                                                                  (("1"
+                                                                                                                    (EXPAND
+                                                                                                                     "nth"
+                                                                                                                     -4)
+                                                                                                                    (("1"
+                                                                                                                      (EXPAND
+                                                                                                                       "Y_sol_ex"
+                                                                                                                       -3)
+                                                                                                                      (("1"
+                                                                                                                        (CASE
+                                                                                                                            "NOT (is_cnst?((: (r, -cnst(rv)), (h, -val(v)), (v, val(a)) :))(1) OR
+             is_val_not_in_map?((: (r, -cnst(rv)), (h, -val(v)),
+                                   (v, val(a)) :))
+                               (1))")
+                                                                                                                        (("1"
+                                                                                                                          (ASSERT)
+                                                                                                                          (("1"
+                                                                                                                            (FLATTEN)
+                                                                                                                            (("1"
+                                                                                                                              (ASSERT)
+                                                                                                                              (("1"
+                                                                                                                                (EXPAND
+                                                                                                                                 "env_c"
+                                                                                                                                 -3)
+                                                                                                                                (("1"
+                                                                                                                                  (POSTPONE)
+                                                                                                                                  NIL
+                                                                                                                                  NIL))
+                                                                                                                                NIL))
+                                                                                                                              NIL))
+                                                                                                                            NIL))
+                                                                                                                          NIL)
+                                                                                                                         ("2"
+                                                                                                                          (POSTPONE)
+                                                                                                                          NIL
+                                                                                                                          NIL)
+                                                                                                                         ("3"
+                                                                                                                          (POSTPONE)
+                                                                                                                          NIL
+                                                                                                                          NIL))
+                                                                                                                        NIL))
+                                                                                                                      NIL))
+                                                                                                                    NIL))
+                                                                                                                  NIL)
+                                                                                                                 ("2"
+                                                                                                                  (POSTPONE)
+                                                                                                                  NIL
+                                                                                                                  NIL))
+                                                                                                                NIL))
+                                                                                                              NIL))
+                                                                                                            NIL)
+                                                                                                           ("2"
+                                                                                                            (POSTPONE)
+                                                                                                            NIL
+                                                                                                            NIL))
+                                                                                                          NIL))
+                                                                                                        NIL)
+                                                                                                       ("2"
+                                                                                                        (POSTPONE)
+                                                                                                        NIL
+                                                                                                        NIL))
+                                                                                                      NIL))
+                                                                                                    NIL)
+                                                                                                   ("2"
+                                                                                                    (POSTPONE)
+                                                                                                    NIL
+                                                                                                    NIL)
+                                                                                                   ("3"
+                                                                                                    (POSTPONE)
+                                                                                                    NIL
+                                                                                                    NIL))
+                                                                                                  NIL))
+                                                                                                NIL))
+                                                                                              NIL))
+                                                                                            NIL))
+                                                                                          NIL))
+                                                                                        NIL))
+                                                                                      NIL))
+                                                                                    NIL))
+                                                                                  NIL))
+                                                                                NIL))
+                                                                              NIL))
+                                                                            NIL))
+                                                                          NIL))
+                                                                        NIL))
+                                                                      NIL))
+                                                                    NIL))
+                                                                  NIL))
+                                                                NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL))
+                                              NIL))
+                                            NIL))
+                                          NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL)
+                                 ("2" (POSTPONE) NIL NIL))
+                                NIL))
+                              NIL))
+                            NIL))
+                          NIL))
+                        NIL))
+                      NIL))
+                    NIL)
+                   ("2" (HIDE 2)
+                    (("2" (LEMMA "fresh_re_cnst")
+                      (("2" (INST?)
+                        (("2" (ASSERT)
+                          (("2" (EXPAND "fresh?" 1 2)
+                            (("2" (EXPAND "fresh?" 1)
+                              (("2" (EXPAND "fresh?" 1)
+                                (("2" (SKEEP)
+                                  (("2" (EXPAND "DLOR" 1)
+                                    (("2" (ASSERT)
+                                      (("2" (HIDE -1) (("2" (GRIND) NIL NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL))
+                                NIL))
+                              NIL))
+                            NIL))
+                          NIL))
+                        NIL))
+                      NIL))
+                    NIL))
+                  NIL))
+                NIL))
+              NIL)
+             ("2" (DL-ASSIGNB)
+              (("2" (LEMMA "dl_subf")
+                (("2" (INST?)
+                  (("1" (ASSERT)
+                    (("1" (HIDE 2)
+                      (("1" (DL-PP)
+                        (("1"
+                          (CASE
+                              "((: DLAND(val(a) = cnst(alo), DLOR(val(r) > cnst(rp), val(h) > cnst(hp))) :)
+        |-
+        (: ALLRUNS(DIFF((: (r, -cnst(rv)), (h, -val(v)), (v, val(a)) :),
+                        DLOR(DLAND(val(v) = cnst(vlo), val(a) = cnst(0)),
+                             DLAND(val(a) = cnst(alo),
+                                   val(v) <= cnst(vlo)))),
+                   DLOR(val(r) > cnst(rp), val(h) > cnst(hp))) :))")
+                          (("1" (REWRITE "dlSequent_equiv")
+                            (("1" (REWRITE "dlSequent_equiv")
+                              (("1" (EXPAND "dlSequent")
+                                (("1" (SKEEP)
+                                  (("1" (INST -1 "env")
+                                    (("1" (SPLIT -1)
+                                      (("1" (PROPAX) NIL NIL)
+                                       ("2" (HIDE 2)
+                                        (("2" (SKEEP)
+                                          (("2" (INST-CP -1 "0")
+                                            (("1" (INST -1 "1")
+                                              (("1" (TYPEPRED "i")
+                                                (("1" (EXPAND "length")
+                                                  (("1" (EXPAND "length")
+                                                    (("1" (EXPAND "nth")
+                                                      (("1" (EXPAND "nth")
+                                                        (("1" (ASSERT)
+                                                          (("1" (GRIND) NIL
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL)
+                                               ("2" (EXPAND "length" 1)
+                                                (("2" (EXPAND "length" 1)
+                                                  (("2" (EXPAND "length" 1)
+                                                    (("2" (ASSERT) NIL NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL))
+                                              NIL)
+                                             ("2" (ASSERT)
+                                              (("2" (EXPAND "length" 1)
+                                                (("2" (EXPAND "length" 1)
+                                                  (("2" (EXPAND "length" 1)
+                                                    (("2" (ASSERT) NIL NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL))
+                                              NIL))
+                                            NIL))
+                                          NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL))
+                                NIL))
+                              NIL))
+                            NIL)
+                           ("2" (HIDE 2) (("2" (POSTPONE) NIL NIL)) NIL))
+                          NIL))
+                        NIL))
+                      NIL))
+                    NIL)
+                   ("2" (HIDE 2) (("2" (GRIND) NIL NIL)) NIL))
+                  NIL))
+                NIL))
+              NIL))
+            NIL))
+          NIL))
+        NIL))
+      NIL))
+    NIL)
+   NIL SHOSTAK))
+ (|ge_ro_case_1_TCC1| 0
+  (|ge_ro_case_1_TCC1-1| NIL 3966520695 ("" (ASSUMING-TCC) NIL NIL) NIL NIL
+   (|ge_ro_case_1| ASSUMING
+    "analysis@derivatives[(active_corner_certificate.right_open(0))].derivatives"
+    "deriv_domain: ASSUMPTION deriv_domain_def[T].deriv_domain?"
+    (83 4 83 31))))
+ (|ge_ro_case_1_TCC2| 0
+  (|ge_ro_case_1_TCC2-1| NIL 3966520695 ("" (ASSUMING-TCC) NIL NIL) NIL NIL
+   (|ge_ro_case_1| ASSUMING
+    "analysis@derivatives[(active_corner_certificate.right_open(0))].derivatives"
+    "not_one_element: ASSUMPTION deriv_domain_def[T].not_one_element?"
+    (83 4 83 31))))
+ (|fly_st_ex3_TCC1| 0
+  (|fly_st_ex3_TCC1-1| NIL 3966520695 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex3| SUBTYPE "2"
+    "{i: integers.int | booleans.OR(jsdl.rv /= 0, reals.>=(i, 0))}"
+    (109 52 109 53))))
+ (|fly_st_ex3_TCC2| 0
+  (|fly_st_ex3_TCC2-1| NIL 3966520695 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex3| SUBTYPE "(number_fields.*(2, exponentiation.^(jsdl.rv, 2)))"
+    "nznum" (109 43 109 53))))
+ (|fly_st_ex3_TCC3| 0
+  (|fly_st_ex3_TCC3-1| NIL 3966520695 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex3| SUBTYPE "2"
+    "{i: integers.int | booleans.OR(jsdl.x_1 /= 0, reals.>=(i, 0))}"
+    (110 37 110 38))))
+ (|fly_st_ex3_TCC4| 0
+  (|fly_st_ex3_TCC4-1| NIL 3966520695 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex3| SUBTYPE "2"
+    "{i: integers.int | booleans.OR(jsdl.rv /= 0, reals.>=(i, 0))}"
+    (110 51 110 52))))
+ (|fly_st_ex3_TCC5| 0
+  (|fly_st_ex3_TCC5-1| NIL 3966520695 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex3| SUBTYPE "(number_fields.*(2, exponentiation.^(jsdl.rv, 2)))"
+    "nznum" (110 42 110 52))))
+ (|fly_st_ex3_TCC6| 0
+  (|fly_st_ex3_TCC1-1| NIL 3966515311 ("" (SUBTYPE-TCC) NIL NIL) NIL NIL
+   (|fly_st_ex3| SUBTYPE
+    "(: (jsdl.r, hp_def.cnst(jsdl.rv)), (jsdl.h, hp_def.val(jsdl.v)), (jsdl.v, hp_def.cnst(jsdl.A)) :)"
+    "ODEs" (122 14 122 58))))
+ (|fly_st_ex3| 0
+  (|fly_st_ex3-1| NIL 3966515315
+   ("" (BETA)
+    (("" (FLATTEN)
+      (("" (LABEL "goodstuff" (1 2 3 4 5))
+        (("" (HIDE "goodstuff")
+          (("" (DL-SOLVE)
+            (("1"
+              (EVAL-EXPR " dlvar_index(r)
+                                                               =
+                                                               dlvar_index(v)")
+              (("1" (ASSERT)
+                (("1"
+                  (EVAL-EXPR "dlvar_index(h)
+                                                                =
+                                                                dlvar_index(v)")
+                  (("1" (ASSERT)
+                    (("1" (EVAL-EXPR " dlvar_index(r) = dlvar_index(h)")
+                      (("1" (EXPAND "nth" 3)
+                        (("1" (EXPAND "nth" 3)
+                          (("1" (ASSERT)
+                            (("1" (EXPAND "nth")
+                              (("1" (ASSERT)
+                                (("1" (HIDE 1 2 3)
+                                  (("1" (DL-HIDE -6)
+                                    (("1" (GRIND)
+                                      (("1" (LEMMA "ge_ro_case_2_test")
+                                        (("1"
+                                          (INST -1 "ro" "ho"
+                                           "LAMBDA(x:real): A* x^2 / (2* rv^2)")
+                                          (("1" (BETA)
+                                            (("1" (SPLIT -1)
+                                              (("1" (ASSERT)
+                                                (("1" (ASSERT)
+                                                  (("1" (REVEAL "goodstuff")
+                                                    (("1" (ASSERT)
+                                                      (("1" (FLATTEN)
+                                                        (("1" (ASSERT)
+                                                          (("1" (SPLIT 1)
+                                                            (("1" (PROPAX) NIL
+                                                              NIL)
+                                                             ("2" (PROPAX) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL)
+                                               ("2" (REVEAL "goodstuff")
+                                                (("2" (PROPAX) NIL NIL)) NIL)
+                                               ("3" (REVEAL "goodstuff")
+                                                (("3" (PROPAX) NIL NIL)) NIL)
+                                               ("4" (REVEAL "goodstuff")
+                                                (("4" (PROPAX) NIL NIL)) NIL)
+                                               ("5" (EXPAND "restrict" 1)
+                                                (("5"
+                                                  (CASE
+                                                      "(LAMBDA (s: (right_open(0))):
+             COND s < 0 -> A * 0 ^ 2 / (2 * rv ^ 2),
+                  ELSE -> A * s ^ 2 / (2 * rv ^ 2)
+             ENDCOND) = LAMBDA (s: (right_open(0))):
+             (A/(2*rv*rv))*s^2")
+                                                  (("1" (REPLACE -1)
+                                                    (("1" (DERIVABLE 1)
+                                                      (("1" (HIDE -)
+                                                        (("1"
+                                                          (LEMMA
+                                                           "right_open_dd")
+                                                          (("1"
+                                                            (LEMMA
+                                                             "right_open_noe")
+                                                            (("1" (INST -1 "0")
+                                                              (("1"
+                                                                (INST -2 "0")
+                                                                (("1"
+                                                                  (LEMMA
+                                                                   "id_derivable_fun[(right_open(0))]")
+                                                                  (("1"
+                                                                    (LEMMA
+                                                                     "prod_derivable_fun[(right_open(0))]")
+                                                                    (("1"
+                                                                      (INST -1
+                                                                       "LAMBDA (x: (right_open(0))): x"
+                                                                       "LAMBDA (x: (right_open(0))): x")
+                                                                      (("1"
+                                                                        (ASSERT)
+                                                                        (("1"
+                                                                          (SPLIT
+                                                                           -1)
+                                                                          (("1"
+                                                                            (SKEEP)
+                                                                            (("1"
+                                                                              (INST
+                                                                               -1
+                                                                               "x")
+                                                                              (("1"
+                                                                                (EXPAND
+                                                                                 "*"
+                                                                                 -1)
+                                                                                (("1"
+                                                                                  (PROPAX)
+                                                                                  NIL
+                                                                                  NIL))
+                                                                                NIL))
+                                                                              NIL))
+                                                                            NIL)
+                                                                           ("2"
+                                                                            (PROPAX)
+                                                                            NIL
+                                                                            NIL)
+                                                                           ("3"
+                                                                            (PROPAX)
+                                                                            NIL
+                                                                            NIL))
+                                                                          NIL))
+                                                                        NIL))
+                                                                      NIL)
+                                                                     ("2"
+                                                                      (EXPAND
+                                                                       "not_one_element?"
+                                                                       -2)
+                                                                      (("2"
+                                                                        (ASSERT)
+                                                                        NIL
+                                                                        NIL))
+                                                                      NIL)
+                                                                     ("3"
+                                                                      (EXPAND
+                                                                       "deriv_domain?"
+                                                                       -3)
+                                                                      (("3"
+                                                                        (ASSERT)
+                                                                        NIL
+                                                                        NIL))
+                                                                      NIL))
+                                                                    NIL)
+                                                                   ("2"
+                                                                    (ASSERT)
+                                                                    NIL NIL)
+                                                                   ("3"
+                                                                    (ASSERT)
+                                                                    NIL NIL))
+                                                                  NIL))
+                                                                NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("2" (DIV-BY -1 "2")
+                                                        (("2" (ASSERT)
+                                                          (("2"
+                                                            (DIV-BY -1 "rv")
+                                                            (("2" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("3" (HIDE -)
+                                                        (("3"
+                                                          (LEMMA
+                                                           "right_open_dd")
+                                                          (("3" (INST -1 "0")
+                                                            (("3"
+                                                              (LEMMA
+                                                               "right_open_noe")
+                                                              (("3"
+                                                                (INST -1 "0")
+                                                                (("3"
+                                                                  (EXPAND
+                                                                   "deriv_domain?"
+                                                                   -2)
+                                                                  (("3"
+                                                                    (EXPAND
+                                                                     "not_one_element?"
+                                                                     -1)
+                                                                    (("3"
+                                                                      (ASSERT)
+                                                                      (("3"
+                                                                        (SPLIT
+                                                                         1)
+                                                                        (("1"
+                                                                          (PROPAX)
+                                                                          NIL
+                                                                          NIL)
+                                                                         ("2"
+                                                                          (PROPAX)
+                                                                          NIL
+                                                                          NIL))
+                                                                        NIL))
+                                                                      NIL))
+                                                                    NIL))
+                                                                  NIL))
+                                                                NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("4"
+                                                        (LEMMA
+                                                         "right_open_noe")
+                                                        (("4" (INST -1 "0") NIL
+                                                          NIL))
+                                                        NIL)
+                                                       ("5"
+                                                        (LEMMA "right_open_dd")
+                                                        (("5" (INST -1 "0") NIL
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL)
+                                                   ("2" (HIDE 2)
+                                                    (("2"
+                                                      (DECOMPOSE-EQUALITY 1)
+                                                      (("1" (LIFT-IF 1)
+                                                        (("1" (TYPEPRED "x!1")
+                                                          (("1"
+                                                            (EXPAND
+                                                             "right_open" -1)
+                                                            (("1" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("2" (SKEEP)
+                                                        (("2" (DIV-BY -1 "2")
+                                                          (("2"
+                                                            (DIV-BY -1 "rv")
+                                                            (("2" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("3" (SKEEP) NIL NIL)
+                                                       ("4" (SKEEP)
+                                                        (("4" (DIV-BY -1 "2")
+                                                          (("4" (ASSERT)
+                                                            (("4"
+                                                              (DIV-BY -1 "rv")
+                                                              (("4" (ASSERT)
+                                                                NIL NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("5" (SKEEP)
+                                                        (("5" (DIV-BY -2 "2")
+                                                          (("5"
+                                                            (DIV-BY -2 "rv")
+                                                            (("5" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL)
+                                                   ("3" (SKEEP)
+                                                    (("3" (DIV-BY -1 "2")
+                                                      (("3" (DIV-BY -1 "rv")
+                                                        (("3" (ASSERT) NIL
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL)
+                                                   ("4" (SKEEP) NIL NIL)
+                                                   ("5" (SKEEP)
+                                                    (("5" (DIV-BY -1 "2")
+                                                      (("5" (ASSERT)
+                                                        (("1" (HIDE +)
+                                                          (("1"
+                                                            (DIV-BY -1 "rv")
+                                                            (("1" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL)
+                                                         ("2" (DIV-BY -1 "rv")
+                                                          (("2" (ASSERT) NIL
+                                                            NIL))
+                                                          NIL)
+                                                         ("3" (DIV-BY -1 "rv")
+                                                          (("3" (ASSERT) NIL
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL)
+                                                   ("6" (SKEEP)
+                                                    (("6" (DIV-BY -2 "2")
+                                                      (("6" (DIV-BY -2 "rv")
+                                                        (("6" (ASSERT) NIL
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL)
+                                               ("6" (SKEEP)
+                                                (("6" (EXPAND "restrict" 1)
+                                                  (("6"
+                                                    (CASE
+                                                        "(LAMBDA (s: (right_open(0))):
+             COND s < 0 -> A * 0 ^ 2 / (2 * rv ^ 2),
+                  ELSE -> A * s ^ 2 / (2 * rv ^ 2)
+             ENDCOND) = LAMBDA (s: (right_open(0))):
+             (A/(2*rv*rv))*s^2")
+                                                    (("1" (REPLACE -1)
+                                                      (("1" (HIDE -1)
+                                                        (("1"
+                                                          (LEMMA
+                                                           "right_open_noe")
+                                                          (("1"
+                                                            (LEMMA
+                                                             "right_open_dd")
+                                                            (("1" (INST -1 "0")
+                                                              (("1"
+                                                                (INST -2 "0")
+                                                                (("1"
+                                                                  (LEMMA
+                                                                   "id_derivable_fun[(right_open(0))]")
+                                                                  (("1"
+                                                                    (LEMMA
+                                                                     "prod_derivable_fun[(right_open(0))]")
+                                                                    (("1"
+                                                                      (INST -1
+                                                                       "LAMBDA (x: (right_open(0))): x"
+                                                                       "LAMBDA (x: (right_open(0))): x")
+                                                                      (("1"
+                                                                        (SPLIT
+                                                                         -1)
+                                                                        (("1"
+                                                                          (LEMMA
+                                                                           "scal_derivable_fun[(right_open(0))]")
+                                                                          (("1"
+                                                                            (EXPAND
+                                                                             "*"
+                                                                             -2)
+                                                                            (("1"
+                                                                              (INST
+                                                                               -1
+                                                                               "A / (2 * rv * rv)"
+                                                                               "LAMBDA (x_1: (right_open(0))) -> real: x_1 * x_1")
+                                                                              (("1"
+                                                                                (SPLIT
+                                                                                 -1)
+                                                                                (("1"
+                                                                                  (EXPAND
+                                                                                   "*"
+                                                                                   -1)
+                                                                                  (("1"
+                                                                                    (LEMMA
+                                                                                     "deriv_scal_fun[(right_open(0))]")
+                                                                                    (("1"
+                                                                                      (INST
+                                                                                       -1
+                                                                                       "A / (2 * rv * rv)"
+                                                                                       "LAMBDA (x_1: (right_open(0))) -> real: x_1 * x_1")
+                                                                                      (("1"
+                                                                                        (EXPAND
+                                                                                         "*"
+                                                                                         -1
+                                                                                         3)
+                                                                                        (("1"
+                                                                                          (EXPAND
+                                                                                           "^"
+                                                                                           1)
+                                                                                          (("1"
+                                                                                            (EXPAND
+                                                                                             "expt"
+                                                                                             1)
+                                                                                            (("1"
+                                                                                              (EXPAND
+                                                                                               "expt"
+                                                                                               1)
+                                                                                              (("1"
+                                                                                                (EXPAND
+                                                                                                 "expt"
+                                                                                                 1)
+                                                                                                (("1"
+                                                                                                  (REPLACE
+                                                                                                   -1)
+                                                                                                  (("1"
+                                                                                                    (LEMMA
+                                                                                                     "deriv_x_n[(right_open(0))]")
+                                                                                                    (("1"
+                                                                                                      (INST
+                                                                                                       -1
+                                                                                                       "LAMBDA (x_1: (right_open(0))) -> real: x_1 * x_1"
+                                                                                                       "2")
+                                                                                                      (("1"
+                                                                                                        (SPLIT
+                                                                                                         -1)
+                                                                                                        (("1"
+                                                                                                          (FLATTEN)
+                                                                                                          (("1"
+                                                                                                            (REPLACE
+                                                                                                             -2)
+                                                                                                            (("1"
+                                                                                                              (EXPAND
+                                                                                                               "*"
+                                                                                                               1)
+                                                                                                              (("1"
+                                                                                                                (EXPAND
+                                                                                                                 "^"
+                                                                                                                 1)
+                                                                                                                (("1"
+                                                                                                                  (EXPAND
+                                                                                                                   "expt"
+                                                                                                                   1)
+                                                                                                                  (("1"
+                                                                                                                    (EXPAND
+                                                                                                                     "expt"
+                                                                                                                     1)
+                                                                                                                    (("1"
+                                                                                                                      (DIV-BY
+                                                                                                                       1
+                                                                                                                       "2")
+                                                                                                                      (("1"
+                                                                                                                        (HIDE
+                                                                                                                         -1
+                                                                                                                         -2
+                                                                                                                         -3
+                                                                                                                         -4
+                                                                                                                         -5
+                                                                                                                         -6
+                                                                                                                         -7
+                                                                                                                         -8)
+                                                                                                                        (("1"
+                                                                                                                          (CASE
+                                                                                                                              "x=0")
+                                                                                                                          (("1"
+                                                                                                                            (ASSERT)
+                                                                                                                            NIL
+                                                                                                                            NIL)
+                                                                                                                           ("2"
+                                                                                                                            (TYPEPRED
+                                                                                                                             "x")
+                                                                                                                            (("2"
+                                                                                                                              (EXPAND
+                                                                                                                               "right_open"
+                                                                                                                               -1)
+                                                                                                                              (("2"
+                                                                                                                                (GRIND-REALS)
+                                                                                                                                NIL
+                                                                                                                                NIL))
+                                                                                                                              NIL))
+                                                                                                                            NIL))
+                                                                                                                          NIL))
+                                                                                                                        NIL))
+                                                                                                                      NIL))
+                                                                                                                    NIL))
+                                                                                                                  NIL))
+                                                                                                                NIL))
+                                                                                                              NIL))
+                                                                                                            NIL))
+                                                                                                          NIL)
+                                                                                                         ("2"
+                                                                                                          (HIDE-ALL-BUT
+                                                                                                           1)
+                                                                                                          (("2"
+                                                                                                            (ASSERT)
+                                                                                                            NIL
+                                                                                                            NIL))
+                                                                                                          NIL)
+                                                                                                         ("3"
+                                                                                                          (HIDE-ALL-BUT
+                                                                                                           1)
+                                                                                                          (("3"
+                                                                                                            (DECOMPOSE-EQUALITY
+                                                                                                             1)
+                                                                                                            NIL
+                                                                                                            NIL))
+                                                                                                          NIL))
+                                                                                                        NIL))
+                                                                                                      NIL)
+                                                                                                     ("2"
+                                                                                                      (EXPAND
+                                                                                                       "not_one_element?")
+                                                                                                      (("2"
+                                                                                                        (ASSERT)
+                                                                                                        NIL
+                                                                                                        NIL))
+                                                                                                      NIL)
+                                                                                                     ("3"
+                                                                                                      (EXPAND
+                                                                                                       "deriv_domain?")
+                                                                                                      (("3"
+                                                                                                        (ASSERT)
+                                                                                                        NIL
+                                                                                                        NIL))
+                                                                                                      NIL))
+                                                                                                    NIL))
+                                                                                                  NIL))
+                                                                                                NIL))
+                                                                                              NIL))
+                                                                                            NIL))
+                                                                                          NIL))
+                                                                                        NIL)
+                                                                                       ("2"
+                                                                                        (HIDE-ALL-BUT
+                                                                                         (-2
+                                                                                          1))
+                                                                                        (("2"
+                                                                                          (EXPAND
+                                                                                           "derivable?"
+                                                                                           -1)
+                                                                                          (("2"
+                                                                                            (SKEEP)
+                                                                                            (("2"
+                                                                                              (INST
+                                                                                               -1
+                                                                                               "x!1")
+                                                                                              (("2"
+                                                                                                (EXPAND
+                                                                                                 "derivable?"
+                                                                                                 -1)
+                                                                                                (("2"
+                                                                                                  (EXPAND
+                                                                                                   "convergent?"
+                                                                                                   -1)
+                                                                                                  (("2"
+                                                                                                    (EXPAND
+                                                                                                     "convergence"
+                                                                                                     -1)
+                                                                                                    (("2"
+                                                                                                      (EXPAND
+                                                                                                       "convergence"
+                                                                                                       -1)
+                                                                                                      (("2"
+                                                                                                        (EXPAND
+                                                                                                         "adh"
+                                                                                                         -1)
+                                                                                                        (("2"
+                                                                                                          (EXPAND
+                                                                                                           "fullset"
+                                                                                                           -1)
+                                                                                                          (("2"
+                                                                                                            (EXPAND
+                                                                                                             "NQ"
+                                                                                                             -1)
+                                                                                                            (("2"
+                                                                                                              (EXPAND
+                                                                                                               "abs"
+                                                                                                               -1)
+                                                                                                              (("2"
+                                                                                                                (SKEEP)
+                                                                                                                (("2"
+                                                                                                                  (INST
+                                                                                                                   1
+                                                                                                                   "l")
+                                                                                                                  (("2"
+                                                                                                                    (SPLIT
+                                                                                                                     1)
+                                                                                                                    (("1"
+                                                                                                                      (PROPAX)
+                                                                                                                      NIL
+                                                                                                                      NIL)
+                                                                                                                     ("2"
+                                                                                                                      (SKEEP)
+                                                                                                                      (("2"
+                                                                                                                        (INST
+                                                                                                                         -2
+                                                                                                                         "epsilon")
+                                                                                                                        (("2"
+                                                                                                                          (SKEEP)
+                                                                                                                          (("2"
+                                                                                                                            (INST
+                                                                                                                             1
+                                                                                                                             "delta")
+                                                                                                                            (("2"
+                                                                                                                              (SKEEP)
+                                                                                                                              (("2"
+                                                                                                                                (INST
+                                                                                                                                 -3
+                                                                                                                                 "x2")
+                                                                                                                                (("2"
+                                                                                                                                  (GRIND)
+                                                                                                                                  NIL
+                                                                                                                                  NIL))
+                                                                                                                                NIL))
+                                                                                                                              NIL))
+                                                                                                                            NIL))
+                                                                                                                          NIL))
+                                                                                                                        NIL))
+                                                                                                                      NIL))
+                                                                                                                    NIL))
+                                                                                                                  NIL))
+                                                                                                                NIL))
+                                                                                                              NIL))
+                                                                                                            NIL))
+                                                                                                          NIL))
+                                                                                                        NIL))
+                                                                                                      NIL))
+                                                                                                    NIL))
+                                                                                                  NIL))
+                                                                                                NIL))
+                                                                                              NIL))
+                                                                                            NIL))
+                                                                                          NIL))
+                                                                                        NIL)
+                                                                                       ("3"
+                                                                                        (DIV-BY
+                                                                                         -1
+                                                                                         "2")
+                                                                                        (("3"
+                                                                                          (DIV-BY
+                                                                                           -1
+                                                                                           "rv")
+                                                                                          (("3"
+                                                                                            (HIDE-ALL-BUT
+                                                                                             (-1
+                                                                                              -7))
+                                                                                            (("3"
+                                                                                              (ASSERT)
+                                                                                              NIL
+                                                                                              NIL))
+                                                                                            NIL))
+                                                                                          NIL))
+                                                                                        NIL))
+                                                                                      NIL)
+                                                                                     ("2"
+                                                                                      (HIDE
+                                                                                       2)
+                                                                                      (("2"
+                                                                                        (EXPAND
+                                                                                         "not_one_element?")
+                                                                                        (("2"
+                                                                                          (ASSERT)
+                                                                                          NIL
+                                                                                          NIL))
+                                                                                        NIL))
+                                                                                      NIL)
+                                                                                     ("3"
+                                                                                      (EXPAND
+                                                                                       "deriv_domain?")
+                                                                                      (("3"
+                                                                                        (ASSERT)
+                                                                                        NIL
+                                                                                        NIL))
+                                                                                      NIL))
+                                                                                    NIL))
+                                                                                  NIL)
+                                                                                 ("2"
+                                                                                  (PROPAX)
+                                                                                  NIL
+                                                                                  NIL))
+                                                                                NIL)
+                                                                               ("2"
+                                                                                (DIV-BY
+                                                                                 -1
+                                                                                 "2")
+                                                                                (("2"
+                                                                                  (DIV-BY
+                                                                                   -1
+                                                                                   "rv")
+                                                                                  (("2"
+                                                                                    (ASSERT)
+                                                                                    NIL
+                                                                                    NIL))
+                                                                                  NIL))
+                                                                                NIL))
+                                                                              NIL))
+                                                                            NIL)
+                                                                           ("2"
+                                                                            (EXPAND
+                                                                             "not_one_element?")
+                                                                            (("2"
+                                                                              (ASSERT)
+                                                                              NIL
+                                                                              NIL))
+                                                                            NIL)
+                                                                           ("3"
+                                                                            (EXPAND
+                                                                             "deriv_domain?")
+                                                                            (("3"
+                                                                              (ASSERT)
+                                                                              NIL
+                                                                              NIL))
+                                                                            NIL))
+                                                                          NIL)
+                                                                         ("2"
+                                                                          (PROPAX)
+                                                                          NIL
+                                                                          NIL)
+                                                                         ("3"
+                                                                          (PROPAX)
+                                                                          NIL
+                                                                          NIL))
+                                                                        NIL))
+                                                                      NIL)
+                                                                     ("2"
+                                                                      (EXPAND
+                                                                       "not_one_element?")
+                                                                      (("2"
+                                                                        (ASSERT)
+                                                                        NIL
+                                                                        NIL))
+                                                                      NIL)
+                                                                     ("3"
+                                                                      (EXPAND
+                                                                       "deriv_domain?")
+                                                                      (("3"
+                                                                        (ASSERT)
+                                                                        NIL
+                                                                        NIL))
+                                                                      NIL))
+                                                                    NIL)
+                                                                   ("2"
+                                                                    (EXPAND
+                                                                     "not_one_element?")
+                                                                    (("2"
+                                                                      (ASSERT)
+                                                                      NIL NIL))
+                                                                    NIL)
+                                                                   ("3"
+                                                                    (EXPAND
+                                                                     "deriv_domain?")
+                                                                    (("3"
+                                                                      (ASSERT)
+                                                                      NIL NIL))
+                                                                    NIL))
+                                                                  NIL))
+                                                                NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL)
+                                                     ("2" (HIDE 2)
+                                                      (("2"
+                                                        (DECOMPOSE-EQUALITY 1)
+                                                        (("1" (TYPEPRED "x!1")
+                                                          (("1"
+                                                            (EXPAND
+                                                             "right_open" -1)
+                                                            (("1" (ASSERT) NIL
+                                                              NIL))
+                                                            NIL))
+                                                          NIL)
+                                                         ("2" (HIDE 2)
+                                                          (("2" (SKEEP)
+                                                            (("2"
+                                                              (DIV-BY -1 "2")
+                                                              (("2"
+                                                                (DIV-BY -1
+                                                                 "rv")
+                                                                (("2" (ASSERT)
+                                                                  NIL NIL))
+                                                                NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL)
+                                                         ("3" (SKEEP) NIL NIL)
+                                                         ("4" (SKEEP)
+                                                          (("4" (DIV-BY -1 "2")
+                                                            (("4"
+                                                              (DIV-BY -1 "rv")
+                                                              (("4" (ASSERT)
+                                                                NIL NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL)
+                                                         ("5" (SKEEP)
+                                                          (("5" (DIV-BY -2 "2")
+                                                            (("5"
+                                                              (DIV-BY -2 "rv")
+                                                              (("5" (ASSERT)
+                                                                NIL NIL))
+                                                              NIL))
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL)
+                                                     ("3" (SKEEP)
+                                                      (("3" (DIV-BY -1 "2")
+                                                        (("3" (DIV-BY -1 "rv")
+                                                          (("3" (ASSERT) NIL
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL)
+                                                     ("4" (SKEEP) NIL NIL)
+                                                     ("5" (SKEEP)
+                                                      (("5" (DIV-BY -1 "2")
+                                                        (("5" (DIV-BY -1 "rv")
+                                                          (("5" (ASSERT) NIL
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL)
+                                                     ("6" (SKEEP)
+                                                      (("6" (DIV-BY -2 "2")
+                                                        (("6" (DIV-BY -2 "rv")
+                                                          (("6" (ASSERT) NIL
+                                                            NIL))
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL)
+                                               ("7" (INST 1 "rv*t")
+                                                (("7" (ASSERT)
+                                                  (("7" (LIFT-IF 1)
+                                                    (("7" (SPLIT 1)
+                                                      (("1" (FLATTEN)
+                                                        (("1" (DIV-BY -1 "rv")
+                                                          (("1" (ASSERT) NIL
+                                                            NIL))
+                                                          NIL))
+                                                        NIL)
+                                                       ("2" (FLATTEN)
+                                                        (("2" (ASSERT) NIL
+                                                          NIL))
+                                                        NIL))
+                                                      NIL))
+                                                    NIL))
+                                                  NIL))
+                                                NIL))
+                                              NIL))
+                                            NIL)
+                                           ("2" (DIV-BY -1 "rv*rv")
+                                            (("1" (ASSERT) NIL NIL)
+                                             ("2" (DIV-BY -1 "rv")
+                                              (("2" (ASSERT) NIL NIL)) NIL))
+                                            NIL))
+                                          NIL))
+                                        NIL))
+                                      NIL))
+                                    NIL))
+                                  NIL))
+                                NIL))
+                              NIL))
+                            NIL))
+                          NIL))
+                        NIL))
+                      NIL))
+                    NIL))
+                  NIL))
+                NIL))
+              NIL)
+             ("2" (HIDE 3)
+              (("2" (ASSERT)
+                (("2" (EXPAND "length" 2)
+                  (("2" (EXPAND "length" 2)
+                    (("2" (EXPAND "length" 2)
+                      (("2" (EXPAND "length" 2)
+                        (("2" (EVAL-EXPR "dlvar_index(h) = dlvar_index(v)")
+                          (("2" (ASSERT) NIL NIL)) NIL))
+                        NIL))
+                      NIL))
+                    NIL))
+                  NIL))
+                NIL))
+              NIL)
+             ("3" (HIDE 3) (("3" (EVAL-EXPR 2) (("3" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("4" (HIDE 3) (("4" (EVAL-EXPR 2) (("4" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("5" (HIDE 3) (("5" (EVAL-EXPR 2) (("5" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("6" (HIDE 3) (("6" (EVAL-EXPR 2) (("6" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("7" (HIDE 3) (("7" (EVAL-EXPR 2) (("7" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("8" (HIDE 3) (("8" (EVAL-EXPR 2) (("8" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("9" (HIDE 3) (("9" (EVAL-EXPR 2) (("9" (ASSERT) NIL NIL)) NIL))
+              NIL)
+             ("10" (HIDE 3)
+              (("10" (EVAL-EXPR 2) (("10" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("11" (HIDE 3)
+              (("11" (EVAL-EXPR 2) (("11" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("12" (HIDE 3)
+              (("12" (EVAL-EXPR 2) (("12" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("13" (HIDE 3)
+              (("13" (EVAL-EXPR 2) (("13" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("14" (HIDE 3)
+              (("14" (EVAL-EXPR 2) (("14" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("15" (HIDE 3)
+              (("15" (EVAL-EXPR 2) (("15" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("16" (HIDE 3)
+              (("16" (EVAL-EXPR 2) (("16" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("17" (HIDE 3)
+              (("17" (EVAL-EXPR 2) (("17" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("18" (HIDE 3)
+              (("18" (EVAL-EXPR 2) (("18" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("19" (HIDE 3)
+              (("19" (EVAL-EXPR 2) (("19" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("20" (HIDE 3)
+              (("20" (EVAL-EXPR 2) (("20" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("21" (HIDE 3)
+              (("21" (EVAL-EXPR 2) (("21" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("22" (HIDE 3)
+              (("22" (EVAL-EXPR 2) (("22" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("23" (HIDE 3)
+              (("23" (EVAL-EXPR 2) (("23" (ASSERT) NIL NIL)) NIL)) NIL)
+             ("24" (REVEAL +)
+              (("24" (HIDE-ALL-BUT 1)
+                (("24" (INST 1 "A")
+                  (("24" (EVAL-EXPR "dlvar_index(h) = dlvar_index(v)")
+                    (("24" (EVAL-EXPR "dlvar_index(r) = dlvar_index(v)")
+                      (("24" (ASSERT)
+                        (("24" (EXPAND "nth" 3)
+                          (("24" (EXPAND "nth" 3)
+                            (("24" (EXPAND "nth" 3) (("24" (PROPAX) NIL NIL))
+                              NIL))
+                            NIL))
+                          NIL))
+                        NIL))
+                      NIL))
+                    NIL))
+                  NIL))
+                NIL))
+              NIL))
+            NIL))
+          NIL))
+        NIL))
+      NIL))
+    NIL)
+   ((|solution_domain_ax_cnst_imp_zip| FORMULA-DECL NIL |dl_solution| |dL|)
+    (|dLVar| TYPE-DECL NIL |hp_def| |dL|)
+    (|number| NONEMPTY-TYPE-DECL NIL |numbers| NIL)
+    (|boolean| NONEMPTY-TYPE-DECL NIL |booleans| NIL)
+    (|number_field_pred| CONST-DECL "[number -> boolean]" |number_fields| NIL)
+    (|number_field| NONEMPTY-TYPE-FROM-DECL NIL |number_fields| NIL)
+    (|real_pred| CONST-DECL "[number_field -> boolean]" |reals| NIL)
+    (|real| NONEMPTY-TYPE-FROM-DECL NIL |reals| NIL)
+    (|rational_pred| CONST-DECL "[real -> boolean]" |rationals| NIL)
+    (|rational| NONEMPTY-TYPE-FROM-DECL NIL |rationals| NIL)
+    (|integer_pred| CONST-DECL "[rational -> boolean]" |integers| NIL)
+    (|int| NONEMPTY-TYPE-EQ-DECL NIL |integers| NIL)
+    (|bool| NONEMPTY-TYPE-EQ-DECL NIL |booleans| NIL)
+    (>= CONST-DECL "bool" |reals| NIL)
+    (|nat| NONEMPTY-TYPE-EQ-DECL NIL |naturalnumbers| NIL)
+    (|Environment| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|RealExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|MapExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|list| TYPE-DECL NIL |list_adt| NIL)
+    (|mapexpr_inj| CONST-DECL "bool" |hp_def| |dL|)
+    (|MapExprInj| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|cnst_lins?| CONST-DECL "bool" |dl_solution| |dL|)
+    (|cons?| ADT-RECOGNIZER-DECL "[list -> boolean]" |list_adt| NIL)
+    (|cons| ADT-CONSTRUCTOR-DECL "[[T, list] -> (cons?)]" |list_adt| NIL)
+    (|r| CONST-DECL "dLVar" |jsdl| NIL)
+    (|cnst| CONST-DECL "real" |hp_def| |dL|)
+    (|rv| CONST-DECL "real" |jsdl| NIL) (|h| CONST-DECL "dLVar" |jsdl| NIL)
+    (|val| CONST-DECL "real" |hp_def| |dL|) (|v| CONST-DECL "dLVar" |jsdl| NIL)
+    (A CONST-DECL "real" |jsdl| NIL) (> CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (= CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (TRUE CONST-DECL "bool" |booleans| NIL)
+    (DLBOOL CONST-DECL "bool" |bool_expr| |dL|)
+    (|ho| CONST-DECL "real" |jsdl| NIL)
+    (- CONST-DECL "[T -> real]" |real_fun_ops| |reals|)
+    (<= CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (|ro| CONST-DECL "real" |jsdl| NIL)
+    (- CONST-DECL "[numfield -> numfield]" |number_fields| NIL)
+    (|numfield| NONEMPTY-TYPE-EQ-DECL NIL |number_fields| NIL)
+    (+ CONST-DECL "[T -> real]" |real_fun_ops| |reals|)
+    (>= CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (DLAND CONST-DECL "bool" |bool_expr| |dL|)
+    (DLNOT CONST-DECL "bool" |bool_expr| |dL|)
+    (|BoolExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (|null_MapExprInj| NAME-JUDGEMENT "MapExprInj" |hp_def| |dL|)
+    (|minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
+    (|quad_cnst?| CONST-DECL "bool" |dl_solution| |dL|)
+    (|get_index| DEF-DECL
+     "{n: below(length(l)) | dlvar_index(nth(l, n)`1) = j}" |dl_solution| |dL|)
+    (|cnst_val_0| FORMULA-DECL NIL |dl_solution| |dL|)
+    (|length_singleton| FORMULA-DECL NIL |more_list_props| |structures|)
+    (|minus_nzint_is_nzint| APPLICATION-JUDGEMENT "nzint" |integers| NIL)
+    (|nth| DEF-DECL "T" |list_props| NIL)
+    (|below| TYPE-EQ-DECL NIL |nat_types| NIL)
+    (|posint_plus_nnint_is_posint| APPLICATION-JUDGEMENT "posint" |integers|
+     NIL)
+    (NOT CONST-DECL "[bool -> bool]" |booleans| NIL)
+    (OR CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
+    (= CONST-DECL "[T, T -> boolean]" |equalities| NIL)
+    (< CONST-DECL "bool" |reals| NIL)
+    (|length| DEF-DECL "nat" |list_props| NIL)
+    (|below| TYPE-EQ-DECL NIL |naturalnumbers| NIL)
+    (|real_lt_is_strict_total_order| NAME-JUDGEMENT
+     "(strict_total_order?[real])" |real_props| NIL)
+    (|id| CONST-DECL "(bijective?[T, T])" |identity| NIL)
+    (|bijective?| CONST-DECL "bool" |functions| NIL)
+    (HP TYPE-DECL NIL |HP_adt| |dL|)
+    (|assign?| ADT-RECOGNIZER-DECL "[HP -> boolean]" |HP_adt| |dL|)
+    (IMPLIES CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
+    (|Formulas| TYPE-EQ-DECL NIL |bool_expr| |dL|)
+    (|\|-| CONST-DECL "bool" |dynamic_logic| |dL|)
+    (|QBoolExpr| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (DLFORALL CONST-DECL "bool" |bool_expr| |dL|)
+    (QHP TYPE-EQ-DECL NIL |bool_expr| |dL|)
+    (UPTO CONST-DECL "BoolExpr" |bool_expr| |dL|)
+    (ALLRUNS CONST-DECL "bool" |bool_expr| |dL|)
+    (|diff?| ADT-RECOGNIZER-DECL "[HP -> boolean]" |HP_adt| |dL|)
+    (DIFF ADT-CONSTRUCTOR-DECL "[[ODEs, BoolExpr] -> (diff?)]" |HP_adt| |dL|)
+    (|Assigns| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (ASSIGN ADT-CONSTRUCTOR-DECL "[Assigns -> (assign?)]" |HP_adt| |dL|)
+    (|Y_sol_ex| CONST-DECL "[Environment -> real]" |dl_solution| |dL|)
+    (|zs| CONST-DECL "MapExprInj" |dl_solution| |dL|)
+    (|ODEs| TYPE-EQ-DECL NIL |hp_def| |dL|)
+    (IFF CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
+    (|init_zip_sol| DEF-DECL "{a: MapExprInj |
+   length(a) = length(ode) AND
+    FORALL (i: below(length(a))): nth(a, i) = (nth(ode, i)`1, y(i)(t))}"
+     |dl_solution| |dL|)
+    (IF CONST-DECL
+        "[boolean, T, T -> T]"
+        |if_def|
+        NIL)
+    (|uint8| TYPE-EQ-DECL NIL |integertypes| NIL)
+    (|exp2| DEF-DECL "posnat" |exp2| NIL)
+    (|posnat| NONEMPTY-TYPE-EQ-DECL NIL |integers| NIL)
+    (> CONST-DECL "bool" |reals| NIL)
+    (|nonneg_int| NONEMPTY-TYPE-EQ-DECL NIL |integers| NIL)
+    (+ CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
+    (|plus_u8_u8| APPLICATION-JUDGEMENT "uint16" |integertypes| NIL)
+    (ODE_329 SKOLEM-CONST-DECL "(cons?[[dLVar, [Environment -> real]]])" |jsdl|
+     NIL)
+    (|env_c_val| FORMULA-DECL NIL |dl_solution| |dL|)
+    (|get_val_cnst_id_ex| CONST-DECL "{vc: [below(length(l)), real] |
+   vc`1 /= i AND
+    nth(l, i)`2 = cnst(vc`2) + val(nth(l, vc`1)`1) AND
+     (FORALL (c: real, m: below(length(l))):
+        nth(l, i)`2 = cnst(c) + val(nth(l, m)`1) IMPLIES
+         (m = vc`1 AND vc`2 = c))}"
+     |dl_solution| |dL|)
+    (|in_map_ex| DEF-DECL "bool" |dl_solution| |dL|)
+    (|env_c| CONST-DECL "real" |dl_solution| |dL|)
+    (|env_nat_shift| CONST-DECL "real" |dl_solution| |dL|)
+    (- CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
+    (|real_minus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
+    (|dlvar| ADT-CONSTRUCTOR-DECL "[nat -> (dlvar?)]" |hp_def| |dL|)
+    (|dlvar?| ADT-RECOGNIZER-DECL "[dLVar -> boolean]" |hp_def| |dL|)
+    (|dlvar_index| ADT-ACCESSOR-DECL "[dLVar -> nat]" |hp_def| |dL|)
+    (/= CONST-DECL "boolean" |notequal| NIL)
+    (|in_map| CONST-DECL "bool" |hp_def| |dL|)
+    (|is_val_not_in_map?| CONST-DECL "bool" |dl_solution| |dL|)
+    (|is_cnst?| CONST-DECL "bool" |dl_solution| |dL|)
+    (NIL APPLICATION-JUDGEMENT "above(n)" |exp2| NIL)
+    (AND CONST-DECL "[bool, bool -> bool]" |booleans| NIL)
+    (DELTA__334 SKOLEM-CONST-DECL "(null?[BoolExpr])" |jsdl| NIL)
+    (GAMMA__333 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (DLIMPLIES CONST-DECL "bool" |bool_expr| |dL|)
+    (|dl_forallR| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|null?| ADT-RECOGNIZER-DECL "[list -> boolean]" |list_adt| NIL)
+    (|null| ADT-CONSTRUCTOR-DECL "(null?)" |list_adt| NIL)
+    (GAMMA__345 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (DELTA__346 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (GAMMA__343 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (DELTA__344 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (GAMMA__341 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (DELTA__342 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (GAMMA__339 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (DELTA__340 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (|append| DEF-DECL "list[T]" |list_props| NIL)
+    (|move_to_head_rec| DEF-DECL "Formulas" |dynamic_logic| |dL|)
+    (|real_gt_is_strict_total_order| NAME-JUDGEMENT
+     "(strict_total_order?[real])" |real_props| NIL)
+    (|is_dlfnum| CONST-DECL "bool" |dynamic_logic| |dL|)
+    (|move_to_head| CONST-DECL "Formulas" |dynamic_logic| |dL|)
+    (|dl_moveL| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (GAMMA__337 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (|dl_andL| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (DELTA__338 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (|dl_impliesR| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (GAMMA__335 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (DELTA__336 SKOLEM-CONST-DECL "(null?[BoolExpr])" |jsdl| NIL)
+    (|dl_assignb| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|dl_assignb_restricted| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (|dl_sub_bool_restricted| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_neg| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_le| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_val| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_plus| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_subre_const| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_ge| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_and| FORMULA-DECL NIL |substitution| |dL|)
+    (|dl_sub_not| FORMULA-DECL NIL |substitution| |dL|)
+    (|Substitution| TYPE-EQ-DECL NIL |substitution| |dL|)
+    (* CONST-DECL "[T -> real]" |real_fun_ops| |reals|)
+    (|div_safe_re| CONST-DECL "real" |hp_def| |dL|)
+    (^ CONST-DECL "[T -> real]" |real_fun_ops| |reals|)
+    (|SUB_MapVar| DEF-DECL
+     "{re: RealExpr | FORALL (env: Environment): re(env) = SUB_Re(l)(val(v))(env)}"
+     |substitution| |dL|)
+    (GAMMA__349 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (|dl_hideL| FORMULA-DECL NIL |dynamic_logic| |dL|)
+    (DELTA__350 SKOLEM-CONST-DECL "(cons?[BoolExpr])" |jsdl| NIL)
+    (|ge_ro_case_2_test| FORMULA-DECL NIL |active_corner_certificate| NIL)
+    (|times_div_cancel2| FORMULA-DECL NIL |extra_real_props| NIL)
+    (|both_sides_div_pos_lt1| FORMULA-DECL NIL |real_props| NIL)
+    (|deriv_scal_fun| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|minus_nzreal_is_nzreal| APPLICATION-JUDGEMENT "nzreal" |real_types| NIL)
+    (|deriv_x_n| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|times_div2| FORMULA-DECL NIL |real_props| NIL)
+    (|neg_times_le| FORMULA-DECL NIL |real_props| NIL)
+    (|pos_times_gt| FORMULA-DECL NIL |real_props| NIL)
+    (|pos_times_ge| FORMULA-DECL NIL |real_props| NIL)
+    (|div_mult_pos_ge1| FORMULA-DECL NIL |real_props| NIL)
+    (|both_sides_div_pos_ge1| FORMULA-DECL NIL |real_props| NIL)
+    (|deriv| CONST-DECL "[T -> real]" |derivatives| |analysis|)
+    (|deriv| CONST-DECL "real" |derivatives_def| |analysis|)
+    (|nzreal_div_nzreal_is_nzreal| APPLICATION-JUDGEMENT "nzreal" |real_types|
+     NIL)
+    (* CONST-DECL "[T -> real]" |real_fun_ops| |reals|)
+    (|scal_derivable_fun| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|restrict| CONST-DECL "R" |restrict| NIL)
+    (<= CONST-DECL "bool" |reals| NIL)
+    (|nzreal_times_nzreal_is_nzreal| APPLICATION-JUDGEMENT "nzreal"
+     |real_types| NIL)
+    (|convergence| CONST-DECL "bool" |lim_of_functions| |analysis|)
+    (|convergence| CONST-DECL "bool" |convergence_functions| |analysis|)
+    (|unary_minus_dist| FORMULA-DECL NIL |continuous_linear| |analysis|)
+    (|adh| CONST-DECL "setof[real]" |convergence_functions| |analysis|)
+    (|fullset| CONST-DECL "set" |sets| NIL)
+    (|both_sides_div1| FORMULA-DECL NIL |real_props| NIL)
+    (|nonzero_real| NONEMPTY-TYPE-EQ-DECL NIL |reals| NIL)
+    (|times_div_cancel1| FORMULA-DECL NIL |extra_real_props| NIL)
+    (|nnrat_div_posrat_is_nnrat| APPLICATION-JUDGEMENT "nonneg_rat" |rationals|
+     NIL)
+    (|right_open_noe| FORMULA-DECL NIL |active_corner_certificate| NIL)
+    (|prod_derivable_fun| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|id_derivable_fun| FORMULA-DECL NIL |derivatives| |analysis|)
+    (|right_open_dd| FORMULA-DECL NIL |active_corner_certificate| NIL)
+    (|deriv_fun| TYPE-EQ-DECL NIL |derivatives| |analysis|)
+    (|derivable_scal1_lam| FORMULA-DECL NIL |derivatives_lam| |analysis|)
+    (|posreal| NONEMPTY-TYPE-EQ-DECL NIL |real_types| NIL)
+    (|nonneg_real| NONEMPTY-TYPE-EQ-DECL NIL |real_types| NIL)
+    (NQ CONST-DECL "real" |derivatives_def| |analysis|)
+    (|convergent?| CONST-DECL "bool" |lim_of_functions| |analysis|)
+    (A CONST-DECL "setof[nzreal]" |derivatives_def| |analysis|)
+    (|setof| TYPE-EQ-DECL NIL |defined_types| NIL)
+    (|nzreal| NONEMPTY-TYPE-EQ-DECL NIL |reals| NIL)
+    (|derivable?| CONST-DECL "bool" |derivatives| |analysis|)
+    (|derivable?| CONST-DECL "bool" |derivatives_def| |analysis|)
+    (|abs| CONST-DECL "{n: nonneg_real | n >= m AND n >= -m}" |real_defs| NIL)
+    (|deriv_domain?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+    (|not_one_element?| CONST-DECL "bool" |deriv_domain_def| |analysis|)
+    (|right_open| CONST-DECL "bool" |active_corner_certificate| NIL)
+    (/ CONST-DECL "[numfield, nznum -> numfield]" |number_fields| NIL)
+    (|nznum| NONEMPTY-TYPE-EQ-DECL NIL |number_fields| NIL)
+    (* CONST-DECL "[numfield, numfield -> numfield]" |number_fields| NIL)
+    (|real_le_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
+     |real_props| NIL)
+    (|real_ge_is_total_order| NAME-JUDGEMENT "(total_order?[real])"
+     |real_props| NIL)
+    (|real_div_nzreal_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
+    (|real_times_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
+    (|real_plus_real_is_real| APPLICATION-JUDGEMENT "real" |reals| NIL)
+    (|div_safe| CONST-DECL "real" |reals_safe_ops| |reals|)
+    (^ CONST-DECL "real" |exponentiation| NIL)
+    (|expt| DEF-DECL "real" |exponentiation| NIL)
+    (|iterate_left| CONST-DECL "T" |for_iterate| |structures|)
+    (|for| CONST-DECL "T" |for_iterate| |structures|)
+    (|for_it| DEF-DECL
+     "{t: T | t = for_def(i, upto, a, ext2int(upfrom, upto, f))}" |for_iterate|
+     |structures|)
+    (FALSE CONST-DECL "bool" |booleans| NIL))
+   SHOSTAK)))
+

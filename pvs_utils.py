@@ -26,11 +26,6 @@ from safe_region_utils import (
     find_transitions,
     compute_corners_to_angles,
 )
-from unifying_utils import (
-    generate_unifying_proof,
-    generate_unifying_lemma_helper as generate_unifying_lemma_helper_proof,
-)
-
 
 # =============================================================================
 # PLOTTING AND VISUALIZATION UTILITIES
@@ -132,34 +127,86 @@ def sympy_to_pvs(clause: str):
     )
 
 
-def extract_upper_bound(condition, var):
-    """Extract the upper bound value from a SymPy condition.
+def piecewise_limit(expr, var, point, direction):
+    """Compute one-sided limit of a Piecewise function at a boundary point.
 
-    For conditions like `x <= -10`, returns `-10`.
-    For conditions like `x < 5`, returns `5`.
+    Sympy's limit() function can incorrectly evaluate Piecewise functions at
+    boundaries because it may evaluate the condition AT the boundary rather than
+    approaching from the specified direction.
+
+    For example, with Piecewise((73, x < 4), (81, x >= 4)):
+    - limit(expr, x, 4, '-') should return 73 (approaching from left)
+    - But sympy may return 81 (evaluating at x=4 where x >= 4 is True)
+
+    This function correctly finds the piece that applies when approaching
+    from the specified direction.
+
+    Args:
+        expr: SymPy expression (may or may not be Piecewise)
+        var: The variable symbol
+        point: The boundary point
+        direction: '-' for left limit, '+' for right limit
+
+    Returns:
+        The correct one-sided limit value
+    """
+    if not isinstance(expr, Piecewise):
+        # For non-Piecewise, use standard limit
+        return limit(expr, var, point, direction)
+
+    # For Piecewise, find the correct piece by testing which condition
+    # is satisfied when approaching from the specified direction
+    from sympy import Rational
+
+    # Use a small epsilon to test which piece applies
+    epsilon = Rational(1, 1000000)  # Use exact rational to avoid float issues
+    test_point = point - epsilon if direction == "-" else point + epsilon
+
+    # Find the piece whose condition is satisfied at the test point
+    for piece_expr, condition in expr.args:
+        # The last piece has condition=True (the "otherwise" case)
+        if condition == True or condition.subs(var, test_point):
+            # This is the piece that applies - return the limit of its expression
+            return limit(piece_expr, var, point, direction)
+
+    # Fallback to standard limit if no piece matched
+    return limit(expr, var, point, direction)
+
+
+def extract_upper_bound(condition, var):
+    """Extract the upper bound value and strictness from a SymPy condition.
+
+    For conditions like `x <= -10`, returns `(-10, False)` (non-strict).
+    For conditions like `x < 5`, returns `(5, True)` (strict).
     Handles both Le (<=) and Lt (<) conditions.
 
-    Returns None if no upper bound can be extracted.
+    Returns (None, None) if no upper bound can be extracted.
+
+    The strictness is used to determine the correct comparator for the
+    complement condition:
+    - If previous was strict `x < 4`, complement should be `x >= 4`
+    - If previous was non-strict `x <= 4`, complement should be `x > 4`
     """
-    # Handle Le (<=) and Lt (<) conditions
+    # Handle Le (<=) conditions - non-strict
     if isinstance(condition, (Le, LessThan)):
         # condition is var <= bound
         if condition.lhs == var:
-            return condition.rhs
+            return (condition.rhs, False)  # Non-strict
+    # Handle Lt (<) conditions - strict
     elif isinstance(condition, (Lt, StrictLessThan)):
         # condition is var < bound
         if condition.lhs == var:
-            return condition.rhs
+            return (condition.rhs, True)  # Strict
 
     # For other condition types (And, Or, etc.), try to find a Le/Lt
     # by checking the condition's args if it has them
     if hasattr(condition, "args"):
         for arg in condition.args:
             result = extract_upper_bound(arg, var)
-            if result is not None:
+            if result[0] is not None:
                 return result
 
-    return None
+    return (None, None)
 
 
 def piecewise_to_pvs(trajectory: Piecewise):
@@ -188,7 +235,7 @@ def piecewise_to_pvs(trajectory: Piecewise):
         var = list(free_vars)[0]
 
     cond_parts = []
-    prev_bound = None
+    prev_bound, prev_is_strict = None, None
 
     for i, (expr, condition) in enumerate(args):
         # Convert expression to PVS format
@@ -203,7 +250,7 @@ def piecewise_to_pvs(trajectory: Piecewise):
             cond_pvs_clean = " ".join(cond_pvs.split())
             cond_parts.append(f"{cond_pvs_clean} -> {expr_pvs}")
             # Extract the upper bound for the next iteration
-            prev_bound = extract_upper_bound(condition, var)
+            prev_bound, prev_is_strict = extract_upper_bound(condition, var)
         else:
             # Middle conditions: add lower bound exclusion to make mutually exclusive
             cond_pvs = sympy_to_pvs(str(condition))
@@ -211,15 +258,17 @@ def piecewise_to_pvs(trajectory: Piecewise):
 
             if prev_bound is not None:
                 # Prepend the lower bound exclusion
+                # Use >= if previous condition was strict (<), else use >
+                comparator = ">=" if prev_is_strict else ">"
                 prev_bound_pvs = sympy_to_pvs(str(prev_bound))
-                exclusive_cond = f"x > {prev_bound_pvs} AND {cond_pvs_clean}"
+                exclusive_cond = f"x {comparator} {prev_bound_pvs} AND {cond_pvs_clean}"
                 cond_parts.append(f"{exclusive_cond} -> {expr_pvs}")
             else:
                 # If we couldn't extract a bound, use the original condition
                 cond_parts.append(f"{cond_pvs_clean} -> {expr_pvs}")
 
             # Extract the upper bound for the next iteration
-            prev_bound = extract_upper_bound(condition, var)
+            prev_bound, prev_is_strict = extract_upper_bound(condition, var)
 
     # Join all conditions with commas and wrap in COND...ENDCOND
     return f"COND {', '.join(cond_parts)} ENDCOND"
@@ -1348,13 +1397,13 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             if left_unbounded:
                 endpoint = interval_end
                 if end_is_piecewise:
-                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, "-")
+                    deriv_at_endpoint = piecewise_limit(deriv_traj, x, endpoint, "-")
                 else:
                     deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif right_unbounded:
                 endpoint = interval_start
                 if start_is_piecewise:
-                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, "+")
+                    deriv_at_endpoint = piecewise_limit(deriv_traj, x, endpoint, "+")
                 else:
                     deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif interval_start == domain_min:
@@ -1385,11 +1434,11 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             deriv_bound2 = None
         else:
             if start_is_piecewise:
-                deriv_at_beginning = limit(deriv_traj, x, interval_start, "+")
+                deriv_at_beginning = piecewise_limit(deriv_traj, x, interval_start, "+")
             else:
                 deriv_at_beginning = deriv_traj.subs(x, interval_start)
             if end_is_piecewise:
-                deriv_at_end = limit(deriv_traj, x, interval_end, "-")
+                deriv_at_end = piecewise_limit(deriv_traj, x, interval_end, "-")
             else:
                 deriv_at_end = deriv_traj.subs(x, interval_end)
             if deriv_at_beginning < deriv_at_midpoint:
