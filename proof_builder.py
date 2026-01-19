@@ -15,6 +15,7 @@ Architecture:
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 from enum import Enum, auto
+from sympy import symbols, diff, sympify
 
 
 # =============================================================================
@@ -270,6 +271,40 @@ def HIDE(num: int) -> ProofNode:
 
 def REPLACE(num: int) -> ProofNode:
     return ProofNode("REPLACE", arg=str(num))
+
+
+# =============================================================================
+# DERIVATIVE ANALYSIS HELPERS
+# =============================================================================
+
+
+def _is_constant_derivative(simplified_expr_str: str) -> bool:
+    """
+    Check if the derivative of an expression w.r.t. x is constant.
+
+    This is used to determine the correct proof tactics for domain branches.
+    Quadratic functions (x^2) have non-constant derivatives (2x), while
+    linear functions (-10x - 25) have constant derivatives (-10).
+
+    Args:
+        simplified_expr_str: The simplified trajectory expression as a string,
+                            e.g., "x^2 + 2*x + 1" or "-10*x - 25"
+
+    Returns:
+        True if the derivative is constant (doesn't depend on x),
+        False otherwise.
+    """
+    try:
+        x = symbols('x')
+        # Convert PVS-style exponentiation to Python style
+        expr_str = simplified_expr_str.replace('^', '**')
+        expr = sympify(expr_str)
+        deriv = diff(expr, x)
+        # Check if derivative contains x (non-constant) or not (constant)
+        return not deriv.has(x)
+    except Exception:
+        # If parsing fails, assume non-constant (safer - uses SPREAD pattern)
+        return False
 
 
 # =============================================================================
@@ -894,9 +929,9 @@ class UnifyingProofBuilder:
         has_piecewise = is_last and piecewise_boundaries and len(piecewise_boundaries) > 0
 
         if index == 0:
-            # First domain
+            # First domain - pass simplified expression for derivative detection
             return UnifyingProofBuilder._first_domain_branches(
-                domain_pvs, type_name, bounds, traj_eq
+                domain_pvs, type_name, bounds, traj_eq, simplified
             )
         elif is_last:
             # Last domain - may have piecewise handling
@@ -916,9 +951,20 @@ class UnifyingProofBuilder:
 
     @staticmethod
     def _first_domain_branches(
-        domain_pvs: str, type_name: str, bounds: List[str], traj_eq: str
+        domain_pvs: str, type_name: str, bounds: List[str], traj_eq: str,
+        simplified_expr: Optional[str] = None
     ) -> List[str]:
-        """Generate branches for first domain."""
+        """
+        Generate branches for first domain.
+
+        Args:
+            domain_pvs: The PVS domain string, e.g., "left_open(-5)"
+            type_name: The interval type name, e.g., "left_open"
+            bounds: The boundary values
+            traj_eq: The trajectory equation string
+            simplified_expr: The simplified trajectory expression for this domain,
+                           used to detect if derivative is constant
+        """
         bound = bounds[0] if bounds else ""
         # traj_eq is like "(LAMBDA...full_piecewise...) = (LAMBDA...simplified...)"
         # We need to change it to "restrict[real, (domain), real](g_1) = (LAMBDA...simplified...)"
@@ -934,7 +980,29 @@ class UnifyingProofBuilder:
 %|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!1")
 %|-        (EXPAND "g_1") (GRIND)))))"""
 
-        deriv = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
+        # Check if the derivative is constant (linear first piece)
+        # vs non-constant (quadratic/polynomial first piece)
+        is_constant = False
+        if simplified_expr:
+            is_constant = _is_constant_derivative(simplified_expr)
+
+        if is_constant:
+            # For constant derivative (linear functions like -6*x - 72),
+            # DERIV produces a single sequent with both deriv_domain? and the
+            # inequality in the succedent (not 2 separate subgoals).
+            # Use sequential steps: DERIV, then LEMMA to discharge deriv_domain?,
+            # then prove the inequality.
+            deriv = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
+%|-     (SPREAD
+%|-      (CASE "{restrict_eq}")
+%|-      ((THEN (REPLACE -1) (DERIV) (LEMMA "{type_name}_dd") (INST -1 "{bound}")
+%|-        (TYPEPRED "x!1") (EXPAND "{type_name}" -1) (ASSERT))
+%|-       (THEN (HIDE 2) (DECOMPOSE-EQUALITY 1) (TYPEPRED "x!2")
+%|-        (EXPAND "g_1") (GRIND)))))"""
+        else:
+            # For non-constant derivative (quadratic/polynomial functions),
+            # DERIV produces 2 subgoals, so use SPREAD pattern
+            deriv = f"""(THEN (HIDE-ALL-BUT 1) (SKEEP)
 %|-     (SPREAD
 %|-      (CASE "{restrict_eq}")
 %|-      ((THEN (REPLACE -1)
@@ -1038,18 +1106,26 @@ class UnifyingProofBuilder:
         branches_str = "\n%|-    ".join(domain_branches)
 
         # Trailing PROPAX for 3+ cases
+        # Note: trailing includes one extra ) to close the outer THEN
         trailing = ""
         if num_cases >= 3:
             trailing = "\n%|-    " + " ".join(["(PROPAX)"] * 6) + ")"
 
-        skoletin_arg = "1" if num_cases >= 3 else "*"
+        # Use SKOLETIN* (no space) for all cases, or SKOLETIN 1 for specific
+        # For 2 cases, use (SKOLETIN*), for 3+ use (SKOLETIN 1)
+        skoletin_tactic = "(SKOLETIN*)" if num_cases < 3 else "(SKOLETIN 1)"
+
+        # Closing parens: )) closes branch-list and SPREAD
+        # For 2 cases, we need an extra ) to close the outer THEN
+        # For 3+ cases, the trailing already has one )
+        close_parens = ")))" if num_cases < 3 else "))"
 
         return f"""%|- full_domain_soundness_lemma : PROOF
-%|- (THEN (SKEEP) (SKOLETIN {skoletin_arg}) (FLATTEN) (LEMMA "full_domain_soundness_lemma_helper")
+%|- (THEN (SKEEP) {skoletin_tactic} (FLATTEN) (LEMMA "full_domain_soundness_lemma_helper")
 %|-  (INST -1 "x" "xo" "yo" "g_1")
 %|-  (SPREAD (SPLIT -1)
 %|-   ({propax_lines}
-%|-    {branches_str}{trailing}))
+%|-    {branches_str}{trailing}{close_parens}
 %|- QED full_domain_soundness_lemma"""
 
 

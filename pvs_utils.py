@@ -153,7 +153,7 @@ def extract_upper_bound(condition, var):
 
     # For other condition types (And, Or, etc.), try to find a Le/Lt
     # by checking the condition's args if it has them
-    if hasattr(condition, 'args'):
+    if hasattr(condition, "args"):
         for arg in condition.args:
             result = extract_upper_bound(arg, var)
             if result is not None:
@@ -181,7 +181,7 @@ def piecewise_to_pvs(trajectory: Piecewise):
     free_vars = trajectory.free_symbols
     var = None
     for v in free_vars:
-        if str(v) == 'x':
+        if str(v) == "x":
             var = v
             break
     if var is None and free_vars:
@@ -1348,13 +1348,13 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             if left_unbounded:
                 endpoint = interval_end
                 if end_is_piecewise:
-                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, '-')
+                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, "-")
                 else:
                     deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif right_unbounded:
                 endpoint = interval_start
                 if start_is_piecewise:
-                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, '+')
+                    deriv_at_endpoint = limit(deriv_traj, x, endpoint, "+")
                 else:
                     deriv_at_endpoint = deriv_traj.subs(x, endpoint)
             elif interval_start == domain_min:
@@ -1384,8 +1384,14 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             deriv_bound1 = deriv_at_endpoint
             deriv_bound2 = None
         else:
-            deriv_at_beginning = deriv_traj.subs(x, interval_start)
-            deriv_at_end = deriv_traj.subs(x, interval_end)
+            if start_is_piecewise:
+                deriv_at_beginning = limit(deriv_traj, x, interval_start, "+")
+            else:
+                deriv_at_beginning = deriv_traj.subs(x, interval_start)
+            if end_is_piecewise:
+                deriv_at_end = limit(deriv_traj, x, interval_end, "-")
+            else:
+                deriv_at_end = deriv_traj.subs(x, interval_end)
             if deriv_at_beginning < deriv_at_midpoint:
                 deriv_direction_1 = ">="
             elif deriv_at_beginning > deriv_at_midpoint:
@@ -1561,7 +1567,7 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             proof_calls[0]["lemma_name"],
         )
         unifying_lemma_and_proof = unifying_lemma_statement + "\n\n" + unifying_proof
-    elif num_cases == 2:
+    elif num_cases == 2:  # DISABLED - use proof_builder instead
         unifying_helper_proof = generate_two_case_unifying_lemma_helper(
             domain_splits[0],
             proof_calls[0]["lemma_name"],
@@ -1577,42 +1583,6 @@ def generate_proof_calls(trajectory_expr, poly, domain, x=symbols("x"), y=symbol
             proof_calls[1]["domain_definition"],
             proof_calls[0]["traj_piece"],
             proof_calls[1]["traj_piece"],
-            proof_calls[0]["full_traj"],
-            piecewise_split_bools,
-            domain_splits,
-        )
-
-        unifying_lemma_and_proof = (
-            unifying_lemma_helper_statement
-            + "\n\n"
-            + unifying_helper_proof
-            + "\n\n"
-            + unifying_lemma_statement
-            + "\n\n"
-            + unifying_proof
-        )
-    elif num_cases == 3 and False:  # DISABLED - use proof_builder instead
-        unifying_helper_proof = generate_three_case_unifying_lemma_helper(
-            domain_splits[0],
-            domain_splits[1],
-            proof_calls[0]["lemma_name"],
-            proof_calls[1]["lemma_name"],
-            proof_calls[2]["lemma_name"],
-            proof_calls[0]["domain_definition"],
-            proof_calls[1]["domain_definition"],
-            proof_calls[2]["domain_definition"],
-            trajectories[0],
-            trajectories[1],
-            trajectories[2],
-        )
-
-        unifying_proof = generate_three_case_unifying_proof(
-            proof_calls[0]["domain_definition"],
-            proof_calls[1]["domain_definition"],
-            proof_calls[2]["domain_definition"],
-            proof_calls[0]["traj_piece"],
-            proof_calls[1]["traj_piece"],
-            proof_calls[2]["traj_piece"],
             proof_calls[0]["full_traj"],
             piecewise_split_bools,
             domain_splits,
